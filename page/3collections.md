@@ -40,12 +40,3 @@ type: page
     论文集: ICCV 2017 没找见
 
     Note: 两年一次
-
-## 博客收集
-
-
-
-## 编程语言
-
-
-[其他链接](https://github.com/Jarvis73/jarvis73.github.io/blob/master/_drafts/backup.md)
