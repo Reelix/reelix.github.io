@@ -18,7 +18,9 @@ Deep Learning, Machine Learning & Medical Image Analysis, PhD, State Key Lab of 
 
 ### 兴趣
 
-`小提琴` ` 中国古典文学&诗词` `心理学` `历史` `哲学`  `旅游` `摄影`
+
+
+`小提琴``中国古典文学&诗词``心理学``历史``哲学``旅游``摄影`
 
 ## 联系我
 
