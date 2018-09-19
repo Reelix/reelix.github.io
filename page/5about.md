@@ -12,7 +12,7 @@ type: page
 
 ### 教育经历
 
-Mathematic & Statistic, Bachelor, Zhejiang University (2014-2018)
+Mathematics & Statistics, Bachelor, Zhejiang University (2014-2018)
 
 Deep Learning, Machine Learning & Medical Image Analysis, PhD, State Key Lab of CAD & CG, Zhejiang University (2018-)
 
