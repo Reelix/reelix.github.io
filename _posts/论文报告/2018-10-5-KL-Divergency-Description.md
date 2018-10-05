@@ -161,7 +161,7 @@ $$
 那么
 
 $$
-D(P_1\vert \vert P_2)=\frac{1}{2}[log(\frac{det\Sigma_2}{det\Sigma_1})+tr(\Sigma_2^{-1}\Sigma_1)+(u_1-u_2)^T\Sigma_2^{-1}(u_1-u_2)-n]
+D(P_1\vert \vert P_2)=\frac{1}{2}[log(\frac{det\Sigma_2}{det\Sigma_1})+\\tr(\Sigma_2^{-1}\Sigma_1)+(u_1-u_2)^T\Sigma_2^{-1}(u_1-u_2)-n]
 $$
 
 证明:
@@ -187,5 +187,5 @@ $$
 带入$(3)$我们有:
 
 $$
-D(P_1\vert \vert P_2)=\frac{1}{2}[log(\frac{det\Sigma_2}{det\Sigma_1})+tr(\Sigma_2^{-1}\Sigma_1)+(u_1-u_2)^T\Sigma_2^{-1}(u_1-u_2)-n]
+D(P_1\vert \vert P_2)=\frac{1}{2}[log(\frac{det\Sigma_2}{det\Sigma_1})+\\tr(\Sigma_2^{-1}\Sigma_1)+(u_1-u_2)^T\Sigma_2^{-1}(u_1-u_2)-n]
 $$
