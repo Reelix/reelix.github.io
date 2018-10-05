@@ -93,7 +93,7 @@ $$
 L^{n+1}(c\vert Q)=L^{n}(c\vert Q)\times \frac{n+1}{c_j +1}q_j
 $$
 
-注意到$\frac{c_j+1}{n+1}$服从伯努利大数定律并收敛到随机变量$\xi$取值为$j$的真实概率,如果$\frac{c_j+1}{n+1}\rightarrow q_j$,那么L会收敛,其它情况可能会发散.
+注意到$\frac{c_j+1}{n+1}$服从伯努利大数定律并收敛到随机变量$\xi$取值为$j$的真实概率,如果$\frac{c_j+1}{n+1}\rightarrow q_j$,那么$L^{n}$会收敛($n\rightarrow \infty$),其它情况可能会发散.
 
 为了更好地描述一次观测的平均概率,我们采用几何平均数,令
 
