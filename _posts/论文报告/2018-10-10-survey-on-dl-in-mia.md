@@ -22,6 +22,6 @@ mathjax: true
 
 ## 导图
 
-![mind map](/images/survey-on-dl-in-mia/mind_map.png)
+![mind_map](/images/survey-on-dl-in-mia/mind_map.png)
 
 [思维导图的完整pdf](a)
