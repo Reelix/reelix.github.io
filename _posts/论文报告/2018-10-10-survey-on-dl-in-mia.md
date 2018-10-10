@@ -24,4 +24,4 @@ mathjax: true
 
 ![mind_map](/images/survey-on-dl-in-mia/mind_map.png)
 
-[思维导图的完整pdf](a)
+[思维导图的完整pdf](https://github.com/FengHZ/FengHZ.github.io/blob/master/images/suvery-on-dl-in-mia/A%20survey%20on%20deep%20learning%20in%20medical%20image%20analysis.pdf)
