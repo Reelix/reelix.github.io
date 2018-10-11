@@ -44,7 +44,7 @@ P(i\vert C=1;v)=p(i,v)\\
 P(i\vert C=0;v)=\frac{1}{n}
 $$
 
-Then we can calculate $P(C=1|i,v)$ use Bayes Formulation:
+Then we can calculate $P(C=1\vert i,v)$ use Bayes Formulation:
 
 $$
 h(i,v)=P(C=1\vert i,v)=\\
