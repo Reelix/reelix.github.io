@@ -3,7 +3,7 @@ layout: post
 title: A mind map for paper - a survey on deep learning in medical image analysis
 date: 2018-10-10 11:32:00
 categories: 深度学习
-tags: MIA DeepLearning
+tags: MIA
 mathjax: true
 ---
 
