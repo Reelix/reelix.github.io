@@ -36,7 +36,7 @@ p(i,v_i)=1,\forall i\\
 p(i,v_i)=\frac{exp(<v_i^{t-1},v_i>/\gamma)}{\sum_{j=1}^nexp(<v_j^{t-1},v_i>/\gamma)}=\frac{exp(<v_i^{t-1},v_i>/\gamma)}{Z_i}
 $$
 
-We transfer the problem into an binary estimation problem, and the noise vector $(v_1',...,v_m')$ is  uniformly chosen from $(v_1,...,v_n)$ with $p(v_i')=\frac{1}{n}$, then we have a vector $v_i$, from the data distribution，and $(v_1',...,v_m')$ from the noise distribution, we use $P(C=1|i,v)$ to  represent the probability for  $(i,v)$ belong to the data distribution, and we have:
+We transfer the problem into an binary estimation problem, and the noise vector $(v_1',...,v_m')$ is  uniformly chosen from $(v_1,...,v_n)$ with $p(v_i')=\frac{1}{n}$, then we have a vector $v_i$, from the data distribution，and $(v_1',...,v_m')$ from the noise distribution, we use $P(C=1\vert i,v)$ to  represent the probability for  $(i,v)$ belong to the data distribution, and we have:
 
 $$
 P(i\vert C=1;v)=p(i,v)\\
