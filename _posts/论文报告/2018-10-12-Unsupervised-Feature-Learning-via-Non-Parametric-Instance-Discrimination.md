@@ -31,6 +31,7 @@ mathjax: true
 $p(:,v)$ is a density function with parameters $v$, s.t. $\sum_{i=1}^np(i,v)=1$
 
 Our target is to find the suitable parameter $\theta$ for the network which can make :
+
 $$
 p(i,v_i)=1,\forall i\\
 p(i,v_i)=\frac{exp(<v_i^{t-1},v_i>/\gamma)}{\sum_{j=1}^nexp(<v_j^{t-1},v_i>/\gamma)}=\frac{exp(<v_i^{t-1},v_i>/\gamma)}{Z_i}
@@ -42,18 +43,24 @@ $$
 P(i\vert C=1;v)=p(i,v)\\
 P(i\vert C=0;v)=\frac{1}{n}
 $$
+
 Then we can calculate $P(C=1|i,v)$ use Bayes Formulation:
+
 $$
 h(i,v)=P(C=1\vert i,v)=\\
 \frac{P(i\vert C=1;v)P(C=1;v)}{P(i\vert C=1)P(C=1;v)+P(i\vert C=0;v)P(C=0;v)}\\
 =\frac{p(i,v)}{p(i,v)+\frac{P(C=0;v)}{P(C=1;v)}P(i\vert C=0;v)}\\
 $$
+
 And
+
 $$
 \frac{P(C=0;v)}{P(C=1;v)}P(i\vert C=0;v)=\frac{m}{n}\\
 P(C=0\vert i,v)=1-P(C=1\vert i,v)
 $$
+
 Then the binary cross entropy loss function is:
+
 $$
 l(\theta)=-[ln(P(C=1\vert i,v_i))+\sum_{j=1}^m ln(P(C=0\vert i,v_j'))]
 $$
