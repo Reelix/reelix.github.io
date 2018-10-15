@@ -179,3 +179,91 @@ H[p]=-\sum_{i} p(x_i) ln(p(x_i))
 $$
 
 #### 熵的极值
+
+假设$x_i$有M种状态，同时满足$\sum_{i=1}^{M} p(x_i)=1$，最大化$H[p]$可以用拉格朗日乘子法：
+
+$$
+\hat{H} = -\sum_{i=1}^{M} p(x_i)ln(p(x_i)) + \lambda (\sum_{i=1}^{M} p(x_i)-1)
+$$
+
+对其求导得该式在$\forall i,p(x_i)=\frac{1}{M}$时取得最大值。
+
+#### 从离散随机变量推广到连续随机变量
+
+我们可以将熵的定义推广到连续随机变量。给定一个连续随机变量$x$，我们将它的取值空间分为若干长度为$\Delta$的区间,写作
+
+$$
+[0,\Delta],[\Delta,2\Delta],...,[i\Delta,(i+1)\Delta],...]
+$$
+
+如果我们把每一个区间看成是一个箱子，那么随机变量$x$落入每一个箱子的概率可以记为:
+
+$$
+\int_{i\Delta}^{(i+1)\Delta}p(x)dx
+$$
+
+由均值定理，$\exists x_i \in [i\Delta,(i+1)\Delta]$,满足:
+
+$$
+\int_{i\Delta}^{(i+1)\Delta}p(x)dx = p(x_i)\Delta
+$$
+
+此时我们用$Delta$将连续变量离散化了，用离散随机变量的熵计算方法有
+
+$$
+H_{\Delta} = - \sum_{i} p(x_i)\Delta ln(p(x_i)\Delta)=-\sum_{i}p(x_i)\Delta ln(p(x_i)) - ln\Delta
+$$
+
+同时有:
+
+$$
+lim_{\Delta \rightarrow 0}{\sum_{i} p(x_i)\Delta ln(p(x_i))} = -\int p(x)ln(p(x))dx
+$$
+
+该部分被称为微分熵，注意到离散随机变量与连续随机变量的熵仅差一个$ln\Delta$，但是当$\Delta \rightarrow 0$时，该项发散，也就是说对一个连续随机变量进行精确刻画需要大量的比特。略去发散项，我们定义连续随机变量微分熵为:
+
+$$
+H[x]=-\int p(x)ln(p(x)) dx
+$$
+
+与离散随机变量相似，我们求使得连续随机变量微分熵最小的分布，为了保证连续随机变量的一阶矩与二阶矩存在，我们加如下限制条件:
+
+$$
+\int_{-\infty}^{\infty} p(x)dx=1\\
+\int_{-\infty}^{\infty} xp(x)dx=u\\
+\int_{-\infty}^{\infty} (x-u)^2 p(x)dx=\sigma^2
+$$
+
+采用变分法，微分熵$H[x]$在以上三个限制条件下取得最小值当且仅当
+
+$$
+p(x)=\frac{1}{(2\pi \sigma ^2)^{\frac{1}{2}}}exp{-\frac{(x-u)^2}{2\sigma ^2}}
+$$
+
+即，高斯分布是使得微分熵最小的分布,此时$H[x]=\frac{1}{2}(1+ln(2\pi\sigma^2))$ ,注意此时微分熵可以小于0(但是总熵还是大于0的，这是因为总熵=微分熵-$ln(\Delta)$)。
+
+#### 条件熵
+
+通过微分熵的定义我们可以自然推出条件熵:
+
+$$
+H[x,y] = -\int\int p(x,y)ln(p(x,y)) dxdy\\
+H[x\vert y]=-\int p(y)\int p(x\vert y)ln(p(x\vert y))dxdy\\
+H[y\vert x]=-\int p(x) \int p(y\vert x)ln(p(y\vert x))dydx
+$$
+
+同时我们有:
+
+$$
+H[x,y]=H[y\vert x]+H[x]
+$$
+
+#### 相对熵与KL散度
+
+我们之前写过一个[从似然角度给出的KL散度分析](https://fenghz.github.io/2018/10/05/KL-Divergency-Description/)，这里我们用相对熵来进行分析。
+
+考虑一个未知的概率分布$p(x)$，我们用概率分布$q(x)$对它进行估计。假设我们利用$q(x)$来构建一个编码系统以传输随机变量$x$的值，那么比利用$p(x)$来构建编码系统而言增加的平均信息量为：
+
+$$
+-\int p(x)ln(q(x)) dx -H_p[x] =-\int p(x) ln(\frac{q(x)}{p(x)}dx=KL(p\Vert q)
+$$
