@@ -149,6 +149,23 @@ $$
 
 如果$x,y$统计独立,那么$I(x;y)=0$.
 
+同时，在信息论的角度，定义随机变量$x$的交叉熵为:
+
+$$
+H[x]=-\sum_{x}p(x)lnp(x)\\
+H[x\vert y]=-\int p(y)\int p(x|y)ln(p(x|y))dxdy\\
+H[y\vert x]=-\int p(x) \int p(y\vert x)ln(p(y\vert x))dydx
+$$
+
+此时有:
+
+$$
+I(x,y)=-\int\int p(x,y)ln(\frac{p(x)p(y)}{p(x,y)})dxdy\\
+=-\int \int  p(x,y) ln (p(x)) dxdy +\int\int p(x,y)ln(p(x\vert y))dxdy\\
+= H[x]-H[y|x]\\
+= H[y]-H[x|y]
+$$
+
 ### 计算两个多元正态分布的KL散度
 
 假设$x=(x_1,x_2,..,x_n)$为多元正态分布随机向量,且
