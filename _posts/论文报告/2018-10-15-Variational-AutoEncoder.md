@@ -13,7 +13,7 @@ figure: /images/VAE/mainfold_hypothesis.png
 
 ## 前言
 
-Variational autoencoders(VAE)是一类生成模型，它将深度学习与统计推断相结合，可用于学习高维数据$X$的低维表示$Z$。与传统自编码器不同，Variational autoencoders 假设$X$与$Z$都是满足某种分布假设的随机变量(向量)，因此Variational autoencoder 本质是对随机向量分布参数的估计(如均值，方差等矩估计)。在这个假设下，我们可以利用分布函数假设与预测参数进对$p(x\vert z)$与$p(z\vert x)$进行估计，用最大似然设计损失函数，并利用概率分布$p($x$\vert z)$来对$X$进行采样与生成。
+Variational autoencoders(VAE)是一类生成模型，它将深度学习与统计推断相结合，可用于学习高维数据$X$的低维表示$z$。与传统自编码器不同，Variational autoencoders 假设$X$与$z$都是满足某种分布假设的随机变量(向量)，因此Variational autoencoder 本质是对随机向量分布参数的估计(如均值，方差等矩估计)。在这个假设下，我们可以利用分布函数假设与预测参数进对$p(X\vert z)$与$p(z\vert X)$进行估计，用最大似然设计损失函数，并利用概率分布$p($x$\vert X)$来对$X$进行采样与生成。
 
 本文旨在对VAE进行基于背景，损失函数以及应用方面的介绍。本文将先对VAE所需要的数学知识与基本假设进行简要描述，并在主体部分对文献[Tutorial on Variational Autoencoders](https://arxiv.org/abs/1606.05908)进行翻译，同时对该文章中省略或笔者认为叙述不清数学证明与显然性描述进行补全与解释。
 
@@ -321,7 +321,7 @@ $$
 
 ### 如何计算潜变量$z$上的积分
 
-考虑最大化似然函数公式$(1)$，同时利用潜变量假设$P(z)=N(z|0,I)$。我们的目的是找到$P(X)$的公式化表达，同时对这个公式进行梯度计算，用随机梯度下降法(SDG)优化模型。利用中心极限定理来对积分进行离散化，并估计$P(X)$是一个非常直观的想法，即先对潜变量$z$进行采样为$\{z_1,...,z_n\}$，然后计算
+考虑最大化似然函数公式$(1)$，同时利用潜变量假设$P(z)=N(z\vert 0,I)$。我们的目的是找到$P(X)$的公式化表达，同时对这个公式进行梯度计算，用随机梯度下降法(SDG)优化模型。利用中心极限定理来对积分进行离散化，并估计$P(X)$是一个非常直观的想法，即先对潜变量$z$进行采样为$\{z_1,...,z_n\}$，然后计算
 
 $$
 P(X)\approx \frac{1}{n}\sum_{i}P(X\vert z_i)
@@ -337,7 +337,7 @@ $$
 
 联系上文，直接在潜变量$z$的先验分布$p(z)=N(0,I)$上进行采样从而估计公式$(1)$具有实践上的困难之处，因为对于$N(0,I)$分布上的绝大部分$z$，$P(X\vert z)$都几乎是0，这些采样对$P(X)$的估计毫无用处。基于这个困难，一个很自然的想法是，给定$X$的信息作为先验，从最有可能生成一个待估计样本$X$的潜变量分布$P(z\vert X)$中对$z$进行采样，并用这些采样来高效估计$P(X)$。
 
-因此，VAE增加了一个编码函数$g(X)$来对分布$P(z\vert X)$进行估计，我们记$g(X)$的估计分布为$Q(z\vert X)$。$g(X)$输出最有可能生成$X$的潜变量$z$的分布参数，并用这些参数来构建$Q(z\vert X)$。此时在$Q(z|X)$下进行采样的效率远远高于在$P(z)$下的采样效率，这让我们对$E_{z\sim Q}P(X\vert z)$的计算更加容易。然而，如果潜变量$z$从分布$Q$中进行采样而不是从$N(0,I)$中进行采样，那又如何计算$P(X)$并优化它呢？VAE的核心基石之一就是指出了$E_{z\sim Q}P(X\vert z)$与$P(X)$的关系，并利用这种关系构建了优化目标函数，我们将详细阐述这种关系的推导过程。
+因此，VAE增加了一个编码函数$g(X)$来对分布$P(z\vert X)$进行估计，我们记$g(X)$的估计分布为$Q(z\vert X)$。$g(X)$输出最有可能生成$X$的潜变量$z$的分布参数，并用这些参数来构建$Q(z\vert X)$。此时在$Q(z\vert X)$下进行采样的效率远远高于在$P(z)$下的采样效率，这让我们对$E_{z\sim Q}P(X\vert z)$的计算更加容易。然而，如果潜变量$z$从分布$Q$中进行采样而不是从$N(0,I)$中进行采样，那又如何计算$P(X)$并优化它呢？VAE的核心基石之一就是指出了$E_{z\sim Q}P(X\vert z)$与$P(X)$的关系，并利用这种关系构建了优化目标函数，我们将详细阐述这种关系的推导过程。
 
 我们从$P(z\vert X)$与$Q(z\vert X)$的关系展开，研究这两个分布关系的工具为KL散度($\mathcal{D}$)，关于$\mathcal{D}$的知识背景可以回顾1.3.5节。
 
@@ -365,7 +365,7 @@ $$
 
 $$
 \begin{aligned}
-   L=log(P(X))=\sum_zQ(z|X)log(p(X))\\ = \sum_zQ(z|X)log(\frac{p(z,X)}{P(z|X)}) \\=\sum_zQ(z|X)log(\frac{p(z,X)}{Q(z|X)})+\sum_z Q(z|X)log(\frac{Q(z|X)}{P(z|X)})\\
+   L=log(P(X))=\sum_zQ(z\vert X)log(p(X))\\ = \sum_zQ(z\vert X)log(\frac{p(z,X)}{P(z\vert X)}) \\=\sum_zQ(z\vert X)log(\frac{p(z,X)}{Q(z\vert X)})+\sum_z Q(z\vert X)log(\frac{Q(z\vert X)}{P(z\vert X)})\\
    =L^V+\mathcal{D}[Q(z\vert X)\Vert P(z\vert X)]
 \end{aligned}
 $$
@@ -374,7 +374,8 @@ $$
 
 $$
 \begin{aligned}
-    L^V=\sum_z Q(z|X)log(\frac{P(z)}{Q(z|X)})+\sum_zQ(z|X)log(P(X|z))\\ =-\mathcal{D}(Q(z|X)||P(z))+E_{z\sim Q}[logP(X\vert z)]
+    L^V=\sum_z Q(z\vert X)log(\frac{P(z)}{Q(z\vert X)})+\sum_zQ(z\vert X)log(P(X\vert z))\\ =-\mathcal{D}(Q(z\vert X)\vert \vert P(z))+E_{z\sim Q}[logP(X\vert z)]
 \end{aligned}
 $$
+
 这个过程比较自然。
