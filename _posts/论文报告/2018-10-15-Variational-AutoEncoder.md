@@ -539,7 +539,9 @@ $$
 
 我们将$f(r)$在$g(X)$处进行泰勒展开(这是很自然的，因为$\sigma \rightarrow 0,r\rightarrow g(X)$),注意$fg(X)=X$,我们有：
 
-$f(r)=X+f'(g(X))*(z_0-g(X))*\sigma+\sum_{n=2}^{\infty}\frac{f^{(n)}(g(X))((z^0-g(X))*\sigma)^n}{n!}$
+$$
+f(r)=X+f'(g(X))*(z_0-g(X))*\sigma+\sum_{n=2}^{\infty}\frac{f^{(n)}(g(X))((z^0-g(X))*\sigma)^n}{n!}
+$$
 
 代入$(2.4.1-6)$，同时展开正态分布概率密度，我们有:
 
@@ -560,12 +562,14 @@ $$
 同时因为$f^{(n)}$有界连续，因此后面求和项都可以看作是0($\sigma \rightarrow 0$)。注意$C$是归一化参数，因此前面的参数项部分可以看作为1，此时$(2.4.1-7)$收敛到$Q^0(z_0\vert X)$。
 
 综上所述，在一维情况下，当$\sigma \rightarrow 0$时，
+
 $$
 \begin{aligned}
    P(X)\rightarrow P_{gt}(X)\\
     \mathcal{D}[Q(z\vert X)\Vert P(z\vert X)]\rightarrow 0
 \end{aligned}
 $$
+
 成立。
 
 #### 2.4.2 信息论视角的解释
