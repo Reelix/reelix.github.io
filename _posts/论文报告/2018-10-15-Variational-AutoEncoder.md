@@ -527,7 +527,7 @@ $$
 $$
 \begin{aligned}
     P_{\sigma}^0(z_0\vert X) = P_{\sigma}(z=r\vert X=X)*\sigma\\
-    = \frac{P_{\sigma}(X=X\vert z=r)* P(z=r)* \sigma}{P_{\sigma}(X=X)}\tag{2.4.1-5}
+    = \frac{P_{\sigma}(X=X\vert z=r)* P(z=r)* \sigma}{P_{\sigma}(X=X)} \tag{2.4.1-5}
 \end{aligned}
 $$
 
@@ -544,7 +544,7 @@ $f(r)=X+f'(g(X))*(z_0-g(X))*\sigma+\sum_{n=2}^{\infty}\frac{f^{(n)}(g(X))((z^0-g
 代入$(2.4.1-6)$，同时展开正态分布概率密度，我们有:
 
 $$
-\frac{C*f'(g(X))}{\sigma} * N(z_0\vert g(X)-\sum_{n=2}^{\infty}\frac{f^{(n)}(g(X))((z^0-g(X))*\sigma)^n}{n!f'(g(X))*\sigma},\frac{1}{f'(g(X))^2})\tag{2.4.1-7}
+\frac{C * f'(g(X))}{\sigma} * N(z_0\vert g(X)-\sum_{n=2}^{\infty}\frac{f^{(n)}(g(X))((z^0-g(X))* \sigma)^n}{n!f'(g(X))*\sigma},\frac{1}{f'(g(X))^2})\tag{2.4.1-7}
 $$
 
 这里有一个小trick是$\frac{1}{f'(g(X))}=g'(X),f=g^{-1}$，我们简单证明一下：
