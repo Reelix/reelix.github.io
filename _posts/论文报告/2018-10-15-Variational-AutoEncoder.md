@@ -502,7 +502,7 @@ $$
 \sigma \rightarrow 0,\mathcal{D}[Q(z\vert X)\Vert P(z\vert X)]\rightarrow 0
 $$
 
-一个很自然的想法是构造$g=f^{-1}$，即$g(X)=G^{-1}(F(X))$，同时令$u_{\sigma}(X)=g(X),\Sigma_{\sigma}(X)=(g'(X)*\sigma)^2$.此时$Q_{\sigma}(z\vert X)\sim N(z\vert g(X),(g'(X)*\sigma)^2$。
+一个很自然的想法是构造$g=f^{-1}$，即$g(X)=G^{-1}(F(X))$，同时令$u_{\sigma}(X)=g(X),\Sigma_{\sigma}(X)=(g'(X)*\sigma)^2$。此时$Q_{\sigma}(z\vert X)\sim N(z\vert g(X),(g'(X)*\sigma)^2$。
 
 利用[KL散度的放射变换不变性](https://fenghz.github.io/2018/10/05/KL-Divergency-Description/#%E4%BB%BF%E5%B0%84%E5%8F%98%E6%8D%A2%E4%B8%8D%E5%8F%98%E6%80%A7)，我们作出如下形式上的转变，令
 
