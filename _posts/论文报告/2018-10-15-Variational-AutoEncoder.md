@@ -504,6 +504,70 @@ $$
 
 一个很自然的想法是构造$g=f^{-1}$，即$g(X)=G^{-1}(F(X))$，同时令$u_{\sigma}(X)=g(X),\Sigma_{\sigma}(X)=(g'(X)*\sigma)^2$.此时$Q_{\sigma}(z\vert X)\sim N(z\vert g(X),(g'(X)*\sigma)^2$。
 
+利用[KL散度的放射变换不变性](https://fenghz.github.io/2018/10/05/KL-Divergency-Description/#%E4%BB%BF%E5%B0%84%E5%8F%98%E6%8D%A2%E4%B8%8D%E5%8F%98%E6%80%A7)，我们作出如下形式上的转变，令
+
+$$
+z_0=\frac{z-g(X)}{\sigma}+g(X)
+$$
+
+此时有:
+
+$$
+\begin{aligned}
+  Q^0(z_0\vert X)\sim N(\vert g(X),g'(X)^2)\\
+  P_{\sigma}^0(z_0 \vert X)=P_{\sigma}(z=g(X)+\sigma*(z_0-g(X))\vert X)*\sigma\\
+  \mathcal{D}[Q(z\vert X)\Vert P(z\vert X)]=\mathcal{D}[Q^0(z_0\vert X)\Vert P_{\sigma}^0(z_0\vert X)]
+\end{aligned}
+$$
+
+进行这样的变换是为了让$Q$的分布独立于$\sigma$，此时我们证明$\forall z,P_{\sigma}^0(z_0\vert X)\rightarrow Q^0(z_0\vert X)$。
+
+令$r=g(X)+(z_0-g(X))*\sigma$，我们有：
+
+$$
+\begin{aligned}
+    P_{\sigma}^0(z_0\vert X) = P_{\sigma}(z=r\vert X=X)*\sigma\\
+    = \frac{P_{\sigma}(X=X\vert z=r)* P(z=r)* \sigma}{P_{\sigma}(X=X)}\tag{2.4.1-5}
+\end{aligned}
+$$
+
+注意到我们已经证明了$\sigma \rightarrow 0,P(X)\rightarrow P_{gt}(X)$，同时此时有$r\rightarrow g(X)$，因此$P_{\sigma}(X=X),P(z=r)$都是常数，我们将$(2.4.1-5)$写成：
+
+$$
+C* N(X\vert f(r)*\sigma,\sigma^2)\tag{2.4.1-6}
+$$
+
+我们将$f(r)$在$g(X)$处进行泰勒展开(这是很自然的，因为$\sigma \rightarrow 0,r\rightarrow g(X)$),注意$fg(X)=X$,我们有：
+
+$f(r)=X+f'(g(X))*(z_0-g(X))*\sigma+\sum_{n=2}^{\infty}\frac{f^{(n)}(g(X))((z^0-g(X))*\sigma)^n}{n!}$
+
+代入$(2.4.1-6)$，同时展开正态分布概率密度，我们有:
+
+$$
+\frac{C*f'(g(X))}{\sigma} * N(z_0\vert g(X)-\sum_{n=2}^{\infty}\frac{f^{(n)}(g(X))((z^0-g(X))*\sigma)^n}{n!f'(g(X))*\sigma},\frac{1}{f'(g(X))^2})\tag{2.4.1-7}
+$$
+
+这里有一个小trick是$\frac{1}{f'(g(X))}=g'(X),f=g^{-1}$，我们简单证明一下：
+
+$$
+\begin{aligned}
+    f'(g(X))=\frac{f(g(X)+d(g(X)))-f(g(X))}{d(g(X))}\\
+    =\frac{f(g(X+dx))-f(g(X))}{g(X+dx)-g(X)}\\
+    =\frac{1}{g'(X)}
+\end{aligned}
+$$
+
+同时因为$f^{(n)}$有界连续，因此后面求和项都可以看作是0($\sigma \rightarrow 0$)。注意$C$是归一化参数，因此前面的参数项部分可以看作为1，此时$(2.4.1-7)$收敛到$Q^0(z_0\vert X)$。
+
+综上所述，在一维情况下，当$\sigma \rightarrow 0$时，
+$$
+\begin{aligned}
+   P(X)\rightarrow P_{gt}(X)\\
+    \mathcal{D}[Q(z\vert X)\Vert P(z\vert X)]\rightarrow 0
+\end{aligned}
+$$
+成立。
+
 #### 2.4.2 信息论视角的解释
 
 #### 2.4.3 VAE与正则化参数
