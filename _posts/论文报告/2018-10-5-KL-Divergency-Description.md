@@ -65,6 +65,25 @@ $$
 
 等号当且仅当 $\frac{Q(i)}{P(i)}=1,\forall i$ 时取得,此时有$P=Q$.
 
+#### 仿射变换不变性
+
+假设$y=ax+b$，那么：
+
+$$
+D_{KL}(P(x)\Vert Q(x))=D_{KL}(P(y)\Vert Q(y))
+$$
+
+证明：
+
+利用随机变量的变换公式$p(y)dy=p(x)dx$，我们有：
+
+$$
+\begin{aligned}
+    D_{KL}(P(y)\Vert Q(y))=\int P(y)log(\frac{P(y)}{Q(y)}) dy\\= \int P(x)log\frac{P(x)}{Q(x)}) dx\\ =D_{KL}(P(x)\Vert Q(x))
+\end{aligned}
+
+$$
+
 #### 非对易性
 
 $D_{KL}(P\vert \vert Q)\neq D_{KL}(Q\vert \vert P)$ 

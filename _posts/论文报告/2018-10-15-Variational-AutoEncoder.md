@@ -455,7 +455,15 @@ $$
 log(P_{\sigma}(X))-\mathcal{D}[Q_{\sigma}(z\vert X)\Vert P_{\sigma}(z\vert X)]\tag{2.4.1-1}
 $$
 
-这里$P_{\sigma}(X\vert z)\sim N(X\vert f(z),\sigma^2),z\sim N(0,1),P_{\sigma}(X)=\int_{z}P_{\sigma}(X\vert z)P(z)dz,Q_{\sigma}(z\vert X)\sim N(z\vert u_{\sigma}(X),\Sigma_{\sigma}(X)$，注意我们全部加了一个$\sigma$的下标，这是因为我们将在$\sigma \rightarrow 0$的情况下证明收敛性。式$(2.4.1-1)$达到理论最优解当且仅当$P_{\sigma}=P_{gt},\mathcal{D}[Q(z\vert X)\Vert P(z\vert X)]=0$，接下来我们证明存在潜变量$z$分布的拟合函数$g$和生成空间变量$X$分布的拟合函数$f$，使得$\sigma \rightarrow 0$时达到理论最优解。
+这里:
+
+$$
+\begin{aligned}
+  P_{\sigma}(X\vert z)\sim N(X\vert f(z),\sigma^2),z\sim N(0,1)\\ P_{\sigma}(X)=\int_{z}P_{\sigma}(X\vert z)P(z)dz\\ Q_{\sigma}(z\vert X)\sim N(z\vert u_{\sigma}(X),\Sigma_{\sigma}(X))  
+\end{aligned}
+$$
+
+注意我们全部加了一个$\sigma$的下标，这是因为我们将在$\sigma \rightarrow 0$的情况下证明收敛性。式$(2.4.1-1)$达到理论最优解当且仅当$P_{\sigma}=P_{gt},\mathcal{D}[Q(z\vert X)\Vert P(z\vert X)]=0$，接下来我们证明存在潜变量$z$分布的拟合函数$g$和生成空间变量$X$分布的拟合函数$f$，使得$\sigma \rightarrow 0$时达到理论最优解。
 
 假设$F$为$P_{gt}$的概率分布函数，$G$为$z\sim N(0,1)$的分布函数，那么$G(z)$是服从均匀分布$Unif(0,1)$的随机变量(任意随机变量的概率分布函数都是服从均匀分布$Unif(0,1)$的随机变量,留给读者自证)。构造$f(z)=F^{-1}(G(z))$，我们来证明，当$\sigma \rightarrow 0$时:
 
@@ -478,7 +486,7 @@ $$
 \sigma \rightarrow 0,F(x)=\int_{z}\int_{-\infty}^{x}e^{-\frac{(x-F^{-1}(G(z))}{2\sigma^2}}\frac{1}{\sqrt{2\pi}\sigma}dxG'(z)dz \tag{2.4.1-4}
 $$
 
-首先，当$\sigma \rightarrow 0$时，正态分布$X\sim N(u,\sigma)$的概率密度图将逼近于狄拉克函数:
+当$\sigma \rightarrow 0$时，正态分布$X\sim N(u,\sigma)$的概率密度图将逼近于狄拉克函数:
 
 ![dirac](/images/VAE/dirac.png)
 
@@ -488,6 +496,13 @@ $$
 
 积分$\int_{z}$的过程可以看作是令$n\rightarrow \infty$的过程，而$\sigma \rightarrow 0$的过程可以看作是采样的过程，因此式$(2.4.1-3)$成立(我的马鸭我终于糊弄过去了)。
 
+然后我们证明存在潜变量$z$分布的拟合函数$g$，令：
+
+$$
+\sigma \rightarrow 0,\mathcal{D}[Q(z\vert X)\Vert P(z\vert X)]\rightarrow 0
+$$
+
+一个很自然的想法是构造$g=f^{-1}$，即$g(X)=G^{-1}(F(X))$，同时令$u_{\sigma}(X)=g(X),\Sigma_{\sigma}(X)=(g'(X)*\sigma)^2$.此时$Q_{\sigma}(z\vert X)\sim N(z\vert g(X),(g'(X)*\sigma)^2$。
 
 #### 2.4.2 信息论视角的解释
 
