@@ -13,7 +13,7 @@ figure: /images/VAE/mainfold_hypothesis.png
 
 ## 前言
 
-Variational autoencoders(VAE)是一类生成模型，它将深度学习与统计推断相结合，可用于学习高维数据$X$的低维表示$z$。与传统自编码器不同，Variational autoencoders 假设$X$与$z$都是满足某种分布假设的随机变量(向量)，因此Variational autoencoder 本质是对随机向量分布参数的估计(如均值，方差等矩估计)。在这个假设下，我们可以利用分布函数假设与预测参数进对$p(X\vert z)$与$p(z\vert X)$进行估计，用最大似然设计损失函数，并利用概率分布$p($x$\vert X)$来对$X$进行采样与生成。
+Variational autoencoders(VAE)是一类生成模型，它将深度学习与统计推断相结合，可用于学习高维数据$X$的低维表示$z$。与传统自编码器不同，Variational autoencoders 假设$X$与$z$都是满足某种分布假设的随机变量(向量)，因此Variational autoencoder 本质是对随机向量分布参数的估计(如均值，方差等矩估计)。在这个假设下，我们可以利用分布函数假设与预测参数进对$p(X\vert z)$与$p(z\vert X)$进行估计，用最大似然设计损失函数，并利用概率分布$p(X\vert z)$来对$X$进行采样与生成。
 
 本文旨在对VAE进行基于背景，损失函数以及应用方面的介绍。本文将先对VAE所需要的数学知识与基本假设进行简要描述，并在主体部分对文献[Tutorial on Variational Autoencoders](https://arxiv.org/abs/1606.05908)进行翻译，同时对该文章中省略或笔者认为叙述不清数学证明与显然性描述进行补全与解释。
 
@@ -93,10 +93,10 @@ $$
 
 注意在这里我们用$P(X_i\vert z;\theta)$表示$P(X_i=f(z;\theta))$，即给定潜变量空间的潜变量向量$z$时，模型生成$X_i$的概率。这个目标函数的直观是最大似然理论，即如果模型生成训练样本$X_i$的概率最大时，它更有可能生成与训练样本相似的样本，而不是生成与训练样本完全不相似的样本。
 
-在变分自编码器领域中，我们对于生成空间的分布假设一般是高斯分布，即:
+在变分自编码器领域中，我们对于生成空间的条件分布假设一般是高斯分布，即:
 
 $$
-P(X\vert z;\theta)=N(X\vert f(z;\theta),\sigma ^2 *I)
+P(X\vert z;\theta)\sim N(X\vert f(z;\theta),\sigma ^2 *I)
 $$
 
 该概率密度函数的均值为$f(z;\theta)$，同时生成空间的各维度互相独立，且方差为$\sigma ^2$。在高斯分布假设下，有一些$z$可以生成仅仅是与$X$相似的样本而并不与$X$一致。总之，在训练过程中，我们的模型并不会生成与训练样本$X$完全一样的输出。
@@ -265,7 +265,7 @@ $$
 考虑一个未知的概率分布$p(x)$，我们用概率分布$q(x)$对它进行估计。假设我们利用$q(x)$来构建一个编码系统以传输随机变量$x$的值，那么比利用$p(x)$来构建编码系统而言增加的平均信息量为：
 
 $$
--\int p(x)ln(q(x)) dx -H_p[x] =-\int p(x) ln(\frac{q(x)}{p(x)}dx=KL(p\Vert q)
+-\int p(x)ln(q(x)) dx -H_p[x] =-\int p(x) ln(\frac{q(x)}{p(x)})dx=KL(p\Vert q)
 $$
 
 ## Section.2 [Tutorial on Variational Autoencoders](https://arxiv.org/abs/1606.05908)
@@ -435,6 +435,59 @@ $$
 * VAE的损失函数中是否有正则化项
 
 #### 2.4.1 最优目标函数的存在性
+
+VAE模型很大程度上依赖于假设$Q(z\vert X)$服从高斯分布，其均值$\mu(X)$，方差$\Sigma(X)$都是$X$的函数。最大化公式$(4)$的左半部分要求最大化$P(X)$的同时令${D}[Q(z\vert X)\Vert P(z\vert X)]=0$。然而，${D}[Q(z\vert X)\Vert P(z\vert X)]=0$并不一定成立，这是因为任取编码函数$z=g(X)$，$P(z\vert X)$并不一定是高斯分布，也就是说此时${D}[Q(z\vert X)\Vert P(z\vert X)]$永远不为0。因此，我们需要一对潜变量空间分布参数预测函数$g$和生成函数$f$，$(f,g)$在最大化似然函数$log(P(X))$的同时，将$X$映射到服从高斯分布的潜变量空间，从而使得${D}[Q(z\vert X)\Vert P(z\vert X)]=0$。
+
+那么，对于任意生成空间上的分布函数$P_{gt}(X)$，是否总能存在一组$(f,g)$，满足${D}[Q(z\vert X)\Vert P(z\vert X)]=0$，同时$P(X)\rightarrow P_{gt}(X)$呢？我们可以证明，对于一维空间上的$X$而言，在$P(X)\sim N(u,\sigma)$，同时$Q(z\vert X)$服从高斯分布，其均值$\mu(X)$，方差$\Sigma(X)$都是$X$的函数这两条假设下，一定能找到一组$(f,g)$，使得当$\sigma\rightarrow 0$时,有:
+
+$$
+\begin{aligned}
+   P(X)\rightarrow P_{gt}(X)\\
+    \mathcal{D}[Q(z\vert X)\Vert P(z\vert X)]\rightarrow 0
+\end{aligned}
+$$
+
+##### 一维情况的证明
+
+假设$P_{gt}(X)$为任意一个一维随机变量$X$的分布函数，假设$P_{gt}>0,a.e.$，$P_{gt}$无限次可微，同时$\forall n,\exists M(n)\in R,\vert P_{gt}^{(n)} \vert<M(n)$，我们想要在VAE的假设下用VAE来进行估计$P_{gt}$。回顾VAE优化的目标函数:
+
+$$
+log(P_{\sigma}(X))-\mathcal{D}[Q_{\sigma}(z\vert X)\Vert P_{\sigma}(z\vert X)]\tag{2.4.1-1}
+$$
+
+这里$P_{\sigma}(X\vert z)\sim N(X\vert f(z),\sigma^2),z\sim N(0,1),P_{\sigma}(X)=\int_{z}P_{\sigma}(X\vert z)P(z)dz,Q_{\sigma}(z\vert X)\sim N(z\vert u_{\sigma}(X),\Sigma_{\sigma}(X)$，注意我们全部加了一个$\sigma$的下标，这是因为我们将在$\sigma \rightarrow 0$的情况下证明收敛性。式$(2.4.1-1)$达到理论最优解当且仅当$P_{\sigma}=P_{gt},\mathcal{D}[Q(z\vert X)\Vert P(z\vert X)]=0$，接下来我们证明存在潜变量$z$分布的拟合函数$g$和生成空间变量$X$分布的拟合函数$f$，使得$\sigma \rightarrow 0$时达到理论最优解。
+
+假设$F$为$P_{gt}$的概率分布函数，$G$为$z\sim N(0,1)$的分布函数，那么$G(z)$是服从均匀分布$Unif(0,1)$的随机变量(任意随机变量的概率分布函数都是服从均匀分布$Unif(0,1)$的随机变量,留给读者自证)。构造$f(z)=F^{-1}(G(z))$，我们来证明，当$\sigma \rightarrow 0$时:
+
+$$
+P_{\sigma}(X)=\int_{z}P_{\sigma}(X\vert z)P(z)dz \rightarrow P_{gt}(X)\tag{2.4.1-2}
+$$
+
+证明式$(2.4.1-2)$等价于证明:
+
+$$
+\sigma \rightarrow 0,F(x)=\int_{-\infty}^{x}\int_{z}e^{-\frac{(x-F^{-1}(G(z))}{2\sigma^2}}\frac{1}{\sqrt{2\pi}\sigma}G'(z)dzdx \tag{2.4.1-3}
+$$
+
+这里笔者不直接给出它的分析形式的证明(其实就是笔者证明不出来，求求谁读了这篇Blog打救我一下谢谢)，但是笔者利用连续型随机变量分布函数利用采样方法拟合的过程进行近似证明如下(笔者要开始放飞自我了)：
+
+
+首先用$Fubini$定理交换式$(2.4.1-3)$的积分次序(笔者也不知道这里能不能用这个定理但是感觉反正都是有界可积连续函数应该可以用，不证了就当我是物理系的)：
+
+$$
+\sigma \rightarrow 0,F(x)=\int_{z}\int_{-\infty}^{x}e^{-\frac{(x-F^{-1}(G(z))}{2\sigma^2}}\frac{1}{\sqrt{2\pi}\sigma}dxG'(z)dz \tag{2.4.1-4}
+$$
+
+首先，当$\sigma \rightarrow 0$时，正态分布$X\sim N(u,\sigma)$的概率密度图将逼近于狄拉克函数:
+
+![dirac](/images/VAE/dirac.png)
+
+因此$\sigma \rightarrow 0,\int_{-\infty}^{x}e^{-\frac{(x-F^{-1}(G(z))}{2\sigma^2}}\frac{1}{\sqrt{2\pi}\sigma}dx$可以理解为先对随机变量$z$进行采样，然后用$G(z)$生成均匀分布$Unif(0,1)$上的采样，也就是对$F(X)$纵轴的均匀采样(注意$F(x)\sim   Unif(0,1)$，然后用$F^{-1}(G(z))$将对纵轴的采样映射到对$X$的采样过程。经过$n$次采样，我们得到了分布函数$F(X)$上的$n$个点，按$X$的采样大小从小到大排列为$(X_1,F(X_1),...,X_n,F(X_n)$，用这$n$个点分段线性拟合$F(X)$：
+
+![F](/images/VAE/F.png)
+
+积分$\int_{z}$的过程可以看作是令$n\rightarrow \infty$的过程，而$\sigma \rightarrow 0$的过程可以看作是采样的过程，因此式$(2.4.1-3)$成立(我的马鸭我终于糊弄过去了)。
+
 
 #### 2.4.2 信息论视角的解释
 
