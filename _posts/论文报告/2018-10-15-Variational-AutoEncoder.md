@@ -392,7 +392,7 @@ $$
 
 #### 2.2.2.1 计算$\mathcal{D}[Q(z\vert X)\Vert P(z)]$
 
-首先我们需要对$Q(z\vert X)$的分布形式进行假设，一般我们选择$Q(z\vert X)\sim N(z|\mu(X;\theta),\Sigma(X;\theta))$，这里正态分布的参数$\mu,\Sigma$都是由$\theta$所确定的函数，参数$\theta$可以从数据中学到(因此为书写方便起见，我们将隐藏$\theta$)，在实际使用中，我们用深度神经网络来学习$\mu,\Sigma$，同时令$\Sigma$是一个对角矩阵。正态假设与对角矩阵假设方便了对$(5)$进行计算，因为此时$Q(z\vert X)$与$p(z)$都是多元正态分布随机变量，而$\mathcal{D}[Q(z\vert X)\Vert P(z)]$可以由[正态分布的KL散度公式](https://fenghz.github.io/2018/10/05/KL-Divergency-Description/#%E8%AE%A1%E7%AE%97%E4%B8%A4%E4%B8%AA%E5%A4%9A%E5%85%83%E6%AD%A3%E6%80%81%E5%88%86%E5%B8%83%E7%9A%84kl%E6%95%A3%E5%BA%A6)进行计算。
+首先我们需要对$Q(z\vert X)$的分布形式进行假设，一般我们选择$Q(z\vert X)\sim N(z \vert \mu(X;\theta),\Sigma(X;\theta))$，这里正态分布的参数$\mu,\Sigma$都是由$\theta$所确定的函数，参数$\theta$可以从数据中学到(因此为书写方便起见，我们将隐藏$\theta$)，在实际使用中，我们用深度神经网络来学习$\mu,\Sigma$，同时令$\Sigma$是一个对角矩阵。正态假设与对角矩阵假设方便了对$(5)$进行计算，因为此时$Q(z\vert X)$与$p(z)$都是多元正态分布随机变量，而$\mathcal{D}[Q(z\vert X)\Vert P(z)]$可以由[正态分布的KL散度公式](https://fenghz.github.io/2018/10/05/KL-Divergency-Description/#%E8%AE%A1%E7%AE%97%E4%B8%A4%E4%B8%AA%E5%A4%9A%E5%85%83%E6%AD%A3%E6%80%81%E5%88%86%E5%B8%83%E7%9A%84kl%E6%95%A3%E5%BA%A6)进行计算。
 
 #### 2.2.2.2 计算$E_{z\sim Q}[log(P(X\vert z))]$
 
