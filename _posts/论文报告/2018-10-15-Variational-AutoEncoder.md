@@ -527,10 +527,8 @@ $$
 令$r=g(X)+(z_0-g(X))*\sigma$，我们有：
 
 $$
-\begin{aligned}
-    P_{\sigma}^0(z_0\vert X) = P_{\sigma}(z=r\vert X=X)*\sigma\\
-    = \frac{P_{\sigma}(X=X\vert z=r)* P(z=r)* \sigma}{P_{\sigma}(X=X)} \tag{2.4.1-5}
-\end{aligned}
+P_{\sigma}^0(z_0\vert X) = P_{\sigma}(z=r\vert X=X)*\sigma\\
+= \frac{P_{\sigma}(X=X\vert z=r)* P(z=r)* \sigma}{P_{\sigma}(X=X)} \tag{2.4.1-5}
 $$
 
 注意到我们已经证明了$\sigma \rightarrow 0,P(X)\rightarrow P_{gt}(X)$，同时此时有$r\rightarrow g(X)$，因此$P_{\sigma}(X=X),P(z=r)$都是常数，我们将$(2.4.1-5)$写成：
