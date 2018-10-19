@@ -546,9 +546,7 @@ $$
 代入$(2.4.1-6)$，同时展开正态分布概率密度，我们有:
 
 $$
-\begin{aligned}
-   \frac{C* f'(g(X))}{\sigma}*N(z_0\vert g(X)- \\ \sum_{n=2}^{\infty}\frac{f^{(n)}(g(X))((z^0-g(X))* \sigma)^n}{n!f'(g(X))*\sigma},\frac{1}{f'(g(X))^2})\tag{2.4.1-7}
-\end{aligned}
+\frac{C* f'(g(X))}{\sigma}* N(z_0\vert g(X)- \\ \sum_{n=2}^{\infty}\frac{f^{(n)}(g(X))((z^0-g(X))* \sigma)^n}{n!f'(g(X))*\sigma},\frac{1}{f'(g(X))^2})\tag{2.4.1-7}
 $$
 
 这里有一个小trick是$\frac{1}{f'(g(X))}=g'(X),f=g^{-1}$，我们简单证明一下：
