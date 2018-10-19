@@ -546,16 +546,18 @@ $$
 代入$(2.4.1-6)$，同时展开正态分布概率密度，我们有:
 
 $$
-\frac{C * f'(g(X))}{\sigma} * N(z_0\vert g(X)-\sum_{n=2}^{\infty}\frac{f^{(n)}(g(X))((z^0-g(X))* \sigma)^n}{n!f'(g(X))*\sigma},\frac{1}{f'(g(X))^2})\tag{2.4.1-7}
+\begin{aligned}
+   \frac{C* f'(g(X))}{\sigma}*N(z_0\vert g(X)- \\ \sum_{n=2}^{\infty}\frac{f^{(n)}(g(X))((z^0-g(X))* \sigma)^n}{n!f'(g(X))*\sigma},\frac{1}{f'(g(X))^2})\tag{2.4.1-7}
+\end{aligned}
 $$
 
 这里有一个小trick是$\frac{1}{f'(g(X))}=g'(X),f=g^{-1}$，我们简单证明一下：
 
 $$
 \begin{aligned}
-    f'(g(X))=\frac{f(g(X)+d(g(X)))-f(g(X))}{d(g(X))}\\
-    =\frac{f(g(X+dx))-f(g(X))}{g(X+dx)-g(X)}\\
-    =\frac{1}{g'(X)}
+    f'(g(X))&=\frac{f(g(X)+d(g(X)))-f(g(X))}{d(g(X))}\\
+    &=\frac{f(g(X+dx))-f(g(X))}{g(X+dx)-g(X)}\\
+    &=\frac{1}{g'(X)}
 \end{aligned}
 $$
 
@@ -606,8 +608,8 @@ $$
 
 $$
 \begin{aligned}
-    \mathcal{D}[Q(z\vert  \vert Y,X)\Vert P(z\vert Y,X)]&=E_{z\sim Q(.\vert X,Y)}[log(Q(z\vert Y,X))-log(P(z\vert Y,X))]\\
-    &=E_{z\sim Q(.\vert X,Y)}[log(Q(z\vert Y,X)) - log(P(Y\vert z,X)) - log(P(z\vert X))]+log(P(Y\vert X))
+    \mathcal{D}[Q(z\vert  \vert Y,X)\Vert P(z\vert Y,X)]=E_{z\sim Q(.\vert X,Y)}[log(Q(z\vert Y,X))-log(P(z\vert Y,X))]\\
+    =E_{z\sim Q(.\vert X,Y)}[log(Q(z\vert Y,X)) - log(P(Y\vert z,X)) - log(P(z\vert X))]+log(P(Y\vert X))
 \end{aligned}
 $$
 
