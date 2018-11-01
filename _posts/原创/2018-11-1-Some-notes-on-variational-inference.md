@@ -1,6 +1,14 @@
-# Some notes on variational inference
+---
+layout: post
+title: Some notes on variational inference
+date: 2018-11-1 12:32:00
+categories: 机器学习
+tags: Variational-Inference
+mathjax: true
+---
 
-[TOC]
+* content
+{:toc}
 
 
 ## [变分是什么](https://en.wikipedia.org/wiki/Calculus_of_variations)
