@@ -11,7 +11,7 @@ brief-intro: 不要用战术上的勤奋掩盖战略上的懒惰
 baseurl: "" # the subpath of your site, e.g. /blog
 url: "https://FengHZ.github.io" # the base hostname & protocol for your site
 
-permalink: /:year/:month/:day/:title/
+permalink: /:title/
 
 # other links
 twitter_username: 
@@ -23,7 +23,7 @@ zhihu_username: 小透明
 linkedIn_username: 
 dribbble_username:
 
-description_footer: 狼狈比失去难受
+description_footer: To be able to spend your life in your own way
 
 # comments
 # two ways to comment, only choose one, and use your own short name
