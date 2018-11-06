@@ -260,7 +260,7 @@ $$
 
 #### 1.3.5 相对熵与KL散度
 
-我们之前写过一个[从似然角度给出的KL散度分析](https://fenghz.github.io/2018/10/05/KL-Divergency-Description/)，这里我们用相对熵来进行分析。
+我们之前写过一个[从似然角度给出的KL散度分析](https://fenghz.github.io/KL-Divergency-Description/)，这里我们用相对熵来进行分析。
 
 考虑一个未知的概率分布$p(x)$，我们用概率分布$q(x)$对它进行估计。假设我们利用$q(x)$来构建一个编码系统以传输随机变量$x$的值，那么比利用$p(x)$来构建编码系统而言增加的平均信息量为：
 
@@ -390,7 +390,7 @@ $$
 
 ##### 2.2.2.1 计算$\mathcal{D}[Q(z\vert X)\Vert P(z)]$
 
-首先我们需要对$Q(z\vert X)$的分布形式进行假设，一般我们选择$Q(z\vert X)\sim N(z \vert \mu(X;\theta),\Sigma(X;\theta))$，这里正态分布的参数$\mu,\Sigma$都是由$\theta$所确定的函数，参数$\theta$可以从数据中学到(因此为书写方便起见，我们将隐藏$\theta$)，在实际使用中，我们用深度神经网络来学习$\mu,\Sigma$，同时令$\Sigma$是一个对角矩阵。正态假设与对角矩阵假设方便了对$(5)$进行计算，因为此时$Q(z\vert X)$与$p(z)$都是多元正态分布随机变量，而$\mathcal{D}[Q(z\vert X)\Vert P(z)]$可以由[正态分布的KL散度公式](https://fenghz.github.io/2018/10/05/KL-Divergency-Description/#%E8%AE%A1%E7%AE%97%E4%B8%A4%E4%B8%AA%E5%A4%9A%E5%85%83%E6%AD%A3%E6%80%81%E5%88%86%E5%B8%83%E7%9A%84kl%E6%95%A3%E5%BA%A6)进行计算。
+首先我们需要对$Q(z\vert X)$的分布形式进行假设，一般我们选择$Q(z\vert X)\sim N(z \vert \mu(X;\theta),\Sigma(X;\theta))$，这里正态分布的参数$\mu,\Sigma$都是由$\theta$所确定的函数，参数$\theta$可以从数据中学到(因此为书写方便起见，我们将隐藏$\theta$)，在实际使用中，我们用深度神经网络来学习$\mu,\Sigma$，同时令$\Sigma$是一个对角矩阵。正态假设与对角矩阵假设方便了对$(5)$进行计算，因为此时$Q(z\vert X)$与$p(z)$都是多元正态分布随机变量，而$\mathcal{D}[Q(z\vert X)\Vert P(z)]$可以由[正态分布的KL散度公式](https://fenghz.github.io/KL-Divergency-Description/#%E8%AE%A1%E7%AE%97%E4%B8%A4%E4%B8%AA%E5%A4%9A%E5%85%83%E6%AD%A3%E6%80%81%E5%88%86%E5%B8%83%E7%9A%84kl%E6%95%A3%E5%BA%A6)进行计算。
 
 ##### 2.2.2.2 计算$E_{z\sim Q}[log(P(X\vert z))]$
 
@@ -504,7 +504,7 @@ $$
 
 此时$Q_{\sigma}(z\vert X)\sim N(z\vert g(X),(g'(X)*\sigma)^2$。
 
-利用[KL散度的仿射变换不变性](https://fenghz.github.io/2018/10/05/KL-Divergency-Description/#%E4%BB%BF%E5%B0%84%E5%8F%98%E6%8D%A2%E4%B8%8D%E5%8F%98%E6%80%A7)，我们作出如下形式上的转变，令
+利用[KL散度的仿射变换不变性](https://fenghz.github.io/KL-Divergency-Description/#%E4%BB%BF%E5%B0%84%E5%8F%98%E6%8D%A2%E4%B8%8D%E5%8F%98%E6%80%A7)，我们作出如下形式上的转变，令
 
 $$
 z_0=\frac{z-g(X)}{\sigma}+g(X)
