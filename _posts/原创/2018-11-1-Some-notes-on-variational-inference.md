@@ -158,7 +158,7 @@ $$
 
 那么现在的问题就转化为如何设置损失函数(或者说泛函空间到实数空间的映射了)，我们可以[用$KL$散度进行设置](https://fenghz.github.io/KL-Divergency-Description/)：
 $$
-KL(q(z)\Vert p(z\vert x))=log\ p(x)-(E_q[log\ p(z,x)]-E_q[log\ q(z)])\tag{20}
+KL(q(z\vert x)\Vert p(z\vert x))=log\ p(x)-(E_q[log\ p(z,x)]-E_q[log\ q(z)])\tag{20}
 $$
 
 此时注意到我们需要在$q$的泛函空间中最小化$KL$散度，$log\ p(x)$与该泛函空间无关，因此其本质是最大化：
