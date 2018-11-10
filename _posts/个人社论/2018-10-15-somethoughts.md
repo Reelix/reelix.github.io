@@ -1,7 +1,7 @@
 ---
 layout: post
 title: 一些碎碎念
-date: 2018-9-8 22:43:00
+date: 2018-11-10 12:43:00
 categories: 个人社论
 tags: Comments Thoughts
 mathjax: true
