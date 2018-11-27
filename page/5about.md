@@ -40,3 +40,8 @@ Deep Learning, Machine Learning & Medical Image Analysis, PhD, State Key Lab of 
 
 
   * 在[Jarvis](https://jarvis73.github.io/)的帮助与成果的基础上花了一个晚上就搭建了自己的blog。作为一个站在巨人肩膀上拥有了第一个自己的blog的人特此对**Jarvis 无私的帮助**致谢。
+
+* **2018-11-27**
+
+  * 修复Blog无法评论的Bug,将`https://imsun.github.io/gitment/dist/gitment.browser.js`语句替换为`https://www.wenjunjiang.win/js/gitment.js`即可。
+
