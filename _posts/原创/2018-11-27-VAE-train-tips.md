@@ -11,7 +11,7 @@ figure: /images/VAE_train_trick/vae_failed.png
 * content
 {:toc}
 
-## Introduction
+## 简介
 
 训练变分自编码器(Variational AutoEncoder, VAE)并不是一件容易的事情，在VAE非常**Fancy**的模型背后，其训练过程非常不稳定。在本文中，笔者回顾自己在**LIDC-IDRI**以及**MNIST**数据集上的训练经验，给出一些训练的技巧，它们包括:
 
