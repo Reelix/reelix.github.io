@@ -5,7 +5,6 @@ date: 2018-11-27 12:32:00
 categories: 机器学习
 tags: Variational-Inference
 mathjax: true
-figure: /images/VAE_train_trick/vae_failed.png
 ---
 
 * content
