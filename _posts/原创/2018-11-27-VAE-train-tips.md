@@ -45,7 +45,7 @@ $$
 我们将最大化$(1)$转变为最大化$(2)$式右边项，构成了VAE的损失函数。我们对$X$关于$z$的后验，$z$关于$X$的后验与$z$的先验使用正态假设，即假设
 
 $$
-P(X\vert z;\theta) = \mathcal{N}(X\vert f(z;\theta),\sigma^2*I) \tag{3}
+P(X\vert z;\theta) \sim\mathcal{N}(X\vert f(z;\theta),\sigma^2*I) \tag{3}
 $$
 
 $$
@@ -53,7 +53,7 @@ Q(z\vert X)\sim N(z \vert \mu(X;\theta),\Sigma(X;\theta)) \tag{4}
 $$
 
 $$
-P(z)=N(0,I)\tag{5}
+P(z)\sim N(0,I)\tag{5}
 $$
 
 
