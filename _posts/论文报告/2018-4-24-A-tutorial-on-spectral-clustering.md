@@ -258,23 +258,30 @@ $$
 我们将阐述谱聚类算法与子图分割算法的联系，这里我们采用的工具是研究最小割问题.
 
 给定一个有权值矩阵W的相似图，一个最简单最直接的构建图割的策略是解一个最小割问题.我们记$W(A,B)=\sum_{i\in A,j\in B}w_{ij}$,同时延续上文的记号记$\bar{A}$为$A$的补集.给定分割的子集数k，最小割方法即选取子图划分$A_1,...,A_k$，从而最小化函数:
+
 $$
 cut(A_1,...,A_k)=\frac{1}{2}\sum_{i=1}^kW(A_i,\bar{A_i})
 $$
+
 这里我们用系数$\frac{1}{2}$以保持标记的一致性，并保证每条边只计算一次.对于$k=2$,这个图割算法是非常容易求解的（解一个最大流问题），但是在实际使用中，基于上文公式，这个损失函数一般不会给出一个令人满意的分割.导致这个问题的原因在于，在实际过程中这个最小割的解往往会把整个数据集分为一团和一个非常非常非常孤立的孤立点，这显然不是我们想要的聚类结果.一个改进的方案是我们对划分加以约束，使得$A_1,...,A_k$都相对来说比较"大".基于这个目的的两个常用的损失函数是$RatioCut$和$Ncut$.它们的定义是这样的：
+
 $$
 RatioCut(A_1,...,A_k)=\sum_{i=1}^k\frac{cut(A_i,\bar{A_i})}{\ \vert A_i\ \vert }\\
 Ncut(A_1,...,A_k)=\sum_{i=1}^k\frac{cut(A_i,\bar{A_i})}{vol(A_i)},vol(A_i)=\sum_{x_i\in A_i}d_i
 $$
+
 也就是说，$RatioCut$直接用子集元素个数来衡量集合大小，而$Ncut$则用了子集内所有元素的度来衡量大小. 这两个目标函数都是为了类别能够尽量平衡.但是加权图割算法就是一个$NP-hard$问题了，而我们下面会证明整个谱聚类的过程就是为了解决这个问题，以及松弛的$RatioCut$算法诱导出了非正则化谱聚类.
 
 ### 5.1 对于$k=2$的近似$RatioCut$算法推导
 
 我们先研究$RatioCut$，并设定$k=2$来进行初步分析.我们的目的是解决优化问题
+
 $$
 min_{A\subset V}RatioCut(A,\bar{A})
 $$
+
 我们用组合优化的方式来写这个问题.给定一个子集$A\subset V$，我们如下定义一个向量$f=(f_1,...,f_n)'\in R^n$：
+
 $$
 f_i=\begin{cases}
 \sqrt{\ \vert \bar{A}\ \vert / \ \vert  A\ \vert }&\text{if $v_i\in A$},\\
@@ -282,7 +289,9 @@ f_i=\begin{cases}
 \text{if $v_i\in \bar{A}$}.
 \end{cases}
 $$
+
 此时对于未正则化拉普拉斯矩阵L,我们有
+
 $$
 f'Lf=\frac{1}{2}\sum_{i,j=1}^nw_{ij}(f_i-f_j)^2\\
 注意到f_i的特性，在同一类的f_i,f_j互相抵消得\\
@@ -291,16 +300,21 @@ f'Lf=\frac{1}{2}\sum_{i,j=1}^nw_{ij}(f_i-f_j)^2\\
 $$
 
 同时对$f_i$我们有:
+
 $$
 \sum_{i=1}^nf_i=\sum_{i\in A}\sqrt{\ \vert \bar{A}\ \vert / \ \vert  A\ \vert }+\sum_{i\in \bar{A}}-\sqrt{\ \vert A\ \vert /\ \vert \bar{A}\ \vert }=0\\
  \vert  \vert f \vert  \vert ^2=n
 $$
+
 因此，原优化问题可以写成：
+
 $$
 min_{A\subset V}f'Lf\\
 s.t.\ f\perp 1_{V},\ \vert f\ \vert =\sqrt{n}
 $$
+
 因为此时向量$f$仍然是个二值向量，因此它仍然是个$NP$难问题.而它的松弛解正好是一个线性规划.我们不加证明地给出一个结论，即这个问题的解向量$f$恰好是L的第二个最小特征值对应的特征向量(其实这个结论是很显然的，但是证明起来就费劲一些).得到了$k=2$的解向量$f\in R^n$之后，我们可以把其映射到一个坐标轴上，这样就形成了数据点$x_i$与坐标轴$R$上的点$f_i$的一个1-1对应，我们对坐标轴上的点进行$k-means$聚类为$C,\bar{C}$，然后对原数据点按照:
+
 $$
 \begin{cases}
 v_i\in A&\text{if $f_i\in C$},\\
@@ -308,28 +322,35 @@ v_i\in A&\text{if $f_i\in C$},\\
 \text{if $f_i\in\bar{C}$}.
 \end{cases}
 $$
+
 这就是未正则化的谱聚类在k=2的时候的聚类算法（考虑到此时第一列都是1）
 
 ### 5.2 对于任意聚类数k的$RatioCut$
 
 对于k聚类数的松弛线性规划我们可以写成这样的形式.给出集合V的一个分割$A_1,...,A_k$，我们定义k个指标向量$h_j=(h_{1,j},...,h_{n,j})''$:
+
 $$
 h_{i,j}=\begin{cases}
 1/\sqrt{\ \vert A_j\ \vert }&\text{if $v_i\in A_j$},\\
 0&\text{otherwise}.
 \end{cases}
 $$
+
 此时我们有：
+
 $$
 H'H=I\\
 h_k'Lh_k=\sum_{i,j}w_{i,j}(h_{i,k}-h_{j,k})^2=\sum_{i\in A,j\in\bar{A}}w_{i,j}/\ \vert A_k\ \vert +\sum_{j\in A,i\in\bar{A}}w_{i,j}/\ \vert A_k\ \vert \\
 =2*cut(A_k,\bar{A_k})/\ \vert A_k\ \vert 
 $$
+
 (注意此时按照原文的定理应该是$2*cut(A_k,\bar{A_k})$)，因为此时权重都没有$1/2$在，因此我认为应该给一个修正是$1/\sqrt{\ \vert A_j\ \vert }\rightarrow1/\sqrt{2*\ \vert A_j\ \vert }$
 
 同时此时有$h_i'Lh_i=(H'LH)_{ii}$，原来的$min_{A_1,...,A_k\subset V}RatioCut(A_1,...,A_k)$可以写成是：
 
-$min_{A_1,...,A_k}Tr(H'LH),s.t. H'H=I$
+$$
+min_{A_1,...,A_k}Tr(H'LH),s.t. H'H=I
+$$
 
 和$k=2$的情况一致，我们可以得出此时松弛线性规划的解是$H=(u_1,...,u_k)$，代表了$L$的前$k$个最小的特征根.注意到这个时候我们利用k-means的工具将松弛线性规划映射到了非松弛的线性规划.这个映射一般是有效的，但是这里的理论支持就弱了一些.
 
@@ -338,6 +359,7 @@ $min_{A_1,...,A_k}Tr(H'LH),s.t. H'H=I$
 ### 近似$Ncut$
 
 上面描述了对于$RatioCut$的分析，接下来我们来分析$Ncut$的松弛线性规划.还是从$k=2$开始，我们来定义指标向量$f:$
+
 $$
 f_i=\begin{cases}
 \sqrt{vol(\bar{A})/ vol(A)}&\text{if $v_i\in A$},\\
@@ -345,32 +367,50 @@ f_i=\begin{cases}
 \text{if $v_i\in \bar{A}$}.
 \end{cases}
 $$
+
 有几个显然的结论是这样的：
 
-$(Df)'1_{V}=\sum_{v_i\in A}d_i*\sqrt{\frac{vol(\bar{A})}{vol(A)}}-\sum_{v_i\in\bar{A}}d_i*\sqrt{vol(A)/vol(\bar{A})}=0$
+$$
+(Df)'1_{V}=\sum_{v_i\in A}d_i*\sqrt{\frac{vol(\bar{A})}{vol(A)}}-\sum_{v_i\in\bar{A}}d_i*\sqrt{vol(A)/vol(\bar{A})}=0
+$$
 
-$f'Df=\sum_{i=1}^nd_if_i^2=\sum_{v_i\in A}d_i*\frac{vol(\bar{A})}{vol{A}}+\sum_{v_i\in\bar{A}}d_i*\frac{vol(A)}{vol(\bar{A})}=vol(V)$
+$$
+f'Df=\sum_{i=1}^nd_if_i^2=\sum_{v_i\in A}d_i*\frac{vol(\bar{A})}{vol{A}}+\sum_{v_i\in\bar{A}}d_i*\frac{vol(A)}{vol(\bar{A})}=vol(V)
+$$
 
-$f'Lf=\sum_{w_{ij}}(f_i-f_j)^2=\sum_{i\in A,j\in \bar{A}}w_{ij}(\sqrt{vol(\bar{A})/ vol(A)}+\sqrt{vol(A)/vol(\bar{A})})^2$
+$$
+f'Lf=\sum_{w_{ij}}(f_i-f_j)^2=\sum_{i\in A,j\in \bar{A}}w_{ij}(\sqrt{vol(\bar{A})/ vol(A)}+\sqrt{vol(A)/vol(\bar{A})})^2
+$$
 
-又有$\sum_{i\in A,j\in \bar{A}}w_{ij}=cut(A,\bar{A})$
+又有
+
+$$
+\sum_{i\in A,j\in \bar{A}}w_{ij}=cut(A,\bar{A})
+$$
 
 代入有原式等于$cut(A,\bar{A})*\frac{(vol(\bar{A})+vol(A))^2}{vol(A)vol(\bar{A})}=vol(V)Ncut(A,\bar{A})$
 因此我们可以把问题写成一个最小割的形式：
+
 $$
 min_Af'Lf,s.tDf\perp 1_{V},f'Df=vol(V)
 $$
+
 同时f由上定义.它的松弛线性规划的写法与$RatioCut$一样可以写成
+
 $$
 min_{f\in R^n}f'Lf,s.tDf\perp 1_{V},f'Df=vol(V)
 $$
+
 为了把这个松弛线性规划与拉普拉斯图矩阵相联系，我们令$g=D^{1/2}f$,则原松弛线性规划可以写成
+
 $$
 min_{g\in R^n}g'D^{-1/2}LD^{-1/2}g,s.t.g\perp D^{1/2}1_{V},\ \vert g\ \vert ^2=vol(V)
 $$
+
 此时$D^{-1/2}LD^{-1/2}=L_{sym}$,而同时$D^{1/2}1_{V}$是$L_{sym}$的0特征值的特征根，因此根据我们在$RatioCut$中所提到的定理，我们可以得出它的松弛解为$L_{sym}$的第2个特征向量.而利用$L_{rw},L_{sym}$之间的关系我们可以得出此时$f$为$L_{rw}$的第2个最小特征值所对应的特征向量.
 
 对于$K>2$的结论，我们可以定义一系列指标向量$h_j=(h_{1,j},...,h_{n,j})'$，其定义为
+
 $$
 h_{i,j}=\begin{cases}
 1/\sqrt{vol(A_j)}&\text{if $v_i\in A_j$},\\
@@ -378,14 +418,19 @@ h_{i,j}=\begin{cases}
 \end{cases}\\
 i=1,...,n;j=1,...,k
 $$
+
 与RatioCut类似我们有$H'H=I,h_i'Dh_i=1,h_i'Lh_i=cut(A_i,\bar{A_i})/vol(A_i)$.因此我们可以把$Ncut$问题重写为：
+
 $$
 min_{A_1,...,A_k}Tr(H'LH),s.t. H'DH=I
 $$
+
 记$T=D^{1/2}H$,它的松弛线性规划为:
+
 $$
 min_{T\in R^{n*k}}Tr(T'D^{-1/2}LD^{-1/2}T),s.t. T'T=I
 $$
+
 显然它的解T是$L_{sym}$的前k个最小的特征根$T=(t_1,...,t_k)$，同时由$T=D^{1/2}H,t_i=D^{1/2}h_i$，我们得到$H$为$L_{sym}$的前k个最小特征向量，即满足$Lu=\lambda D u$的前k个最小特征值对应的广义特征向量.
 
 ### 对松弛方法的一些评论
@@ -491,16 +536,20 @@ $$
 2. 我们想让在同一类的点尽量相似，也就是说我们想要让类内相似度尽可能大
 
 所有的$RatioCut$以及$Ncut$都能达到第一个任务，但是对于第二个任务而言，不同的算法表现都不一样.注意到：
+
 $$
 W(A,A)=vol(A)-cut(A,\bar{A})
 $$
+
 如果$vol(A)$很大,同时$cut(A,\bar{A})$很小的话，类内相似度就会很大，这正是$Ncut$所能达到的目的.同时我们也可以考虑另外一个叫做$MinmaxCut$的损失函数：
+
 $$
 MinmaxCut(A_1,...A_k)=\sum_{i=1}^k\frac{cut(A_i,\bar{A_i})}{W(A_i,A_i)}
 $$
+
 对比Ncut，这里把每一项的分母换了一下.事实上，Ncut与MinimaxCut往往都会最小化$cut(A,\bar{A})$,因此分母项并不重要.同时，最小化MinmaxCut问题的松弛算法与最小化Ncut的松弛算法的解一模一样，即用$L_{rw}$的特征向量做的谱聚类算法，因此正则化谱聚类可以同时实现以上两个目标.
 
-同时考虑RatioCut的情形，我们的目的是最大化$\ \vert A\ \vert ,\ \vert \bar{A}\ \vert $从而代替$vol(A)$,$vol(\bar{A})$ .但是$\ \vert A\ \vert ,\ \vert \bar{A}\ \vert $与类内相似度没有必然的联系，因为类内相似度与边有关，但是和A中顶点的个数无关.比如说如果集合A有很多顶点，但是顶点之间的边权重很低，那么最小化RatioCut并不能达到第二个目的，而RatioCut的松弛解是未正则化的谱聚类.
+同时考虑RatioCut的情形，我们的目的是最大化$\vert A \vert , \vert \bar{A} \vert$ 从而代替$vol(A)$,$vol(\bar{A})$ .但是$\vert A \vert , \vert \bar{A} \vert$与类内相似度没有必然的联系，因为类内相似度与边有关，但是和A中顶点的个数无关.比如说如果集合A有很多顶点，但是顶点之间的边权重很低，那么最小化RatioCut并不能达到第二个目的，而RatioCut的松弛解是未正则化的谱聚类.
 
 因此我们的脑海里要有第一个观念，就是正则化的谱聚类能够达成上面的2种目的，而未正则化的谱聚类则只能达到第一种聚类目的.
 
