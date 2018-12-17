@@ -79,7 +79,7 @@ $$
 
 $$
 \begin{aligned}
-    D_{KL}(P(y)\Vert Q(y))=\int P(y)log(\frac{P(y)}{Q(y)}) dy\\= \int P(x)log\frac{P(x)}{Q(x)}) dx\\ =D_{KL}(P(x)\Vert Q(x))
+    D_{KL}(P(y)\Vert Q(y))=\int P(y)log(\frac{P(y)}{Q(y)}) dy\\= \int P(x)log(\frac{P(x)}{Q(x)}) dx\\ =D_{KL}(P(x)\Vert Q(x))
 \end{aligned}
 
 $$
