@@ -53,15 +53,13 @@ $$
 
 1. 给图像加噪的过程等价于在推断网络(编码部分)的输入层加入一层或几层随机输出层，我们把推断网络的参数记作$\phi$,把随机输出层记作$\psi$，整个网络参数记录为$\Phi=\{\phi,\psi\}$，同时我们把从潜变量还原输入(对输入分布进行推断)的神经网络层的参数记作$\theta$.在这种记号下，我们可以对$(2),(3)$的表达进行如下改进:
    
-   \[
-   \begin{split}
-   q(z\vert x)&=q_{\Phi}(z\vert x)\\
-   p(\tilde{x}\vert x)&=p_{\psi}(\tilde{x}\vert x)\\
-   q(z\vert \tilde{x})&=q_{\phi}(z\vert \tilde{x})\\
-   p(x\vert z)&=p_{\theta}(x\vert z)\\
-   q_{\Phi}(z\vert x)=\tilde{q}(z\vert x)&=\int_{\tilde{x}} q_{\phi}(z\vert \tilde{x})p_{\psi}(\tilde{x}\vert x)d\tilde{x}
-   \end{split}
-   \]
+   $$
+   q(z\vert x)=q_{\Phi}(z\vert x)\\
+   p(\tilde{x}\vert x)=p_{\psi}(\tilde{x}\vert x)\\
+   q(z\vert \tilde{x})=q_{\phi}(z\vert \tilde{x})\\
+   p(x\vert z)=p_{\theta}(x\vert z)\\
+   q_{\Phi}(z\vert x)=\tilde{q}(z\vert x)=\int_{\tilde{x}} q_{\phi}(z\vert \tilde{x})p_{\psi}(\tilde{x}\vert x)d\tilde{x}
+   $$
 
 2. 引理$1$:
    
