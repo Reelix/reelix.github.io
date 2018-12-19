@@ -18,23 +18,23 @@ mathjax: true
 
 1. 给定一个对原数据进行corrupt的噪声分布$p(\tilde{x}\vert x)$，并从中采样$\tilde{x}$作为网络的输入
    
-2. 将$\tilde{x}$映射到潜变量空间，并对潜变量空间分布参数$\tilde{q}(z\vert \tilde{x})$进行预测，同时令给定加了噪声的$\tilde{x}$后对潜变量$z$分布的条件预测$\tilde{q}(z\vert \tilde{x})$尽量接近真实分布$p(z\vert x)$,也就是最小化$\mathcal{D}[\tilde{q}(z\vert \tilde{x})\Vert p(z\vert x)]$
+2. 将$\tilde{x}$映射到潜变量空间，并对潜变量空间分布参数$q(z\vert \tilde{x})$进行预测，同时令给定加了噪声的$\tilde{x}$后对潜变量$z$分布的条件预测$q(z\vert \tilde{x})$尽量接近真实分布$p(z\vert x)$,也就是最小化$\mathcal{D}[q(z\vert \tilde{x})\Vert p(z\vert x)]$
 
-3. 从$\tilde{q}(z\vert \tilde{x})$中对$z$进行采样，并对$p(x\vert z)$进行预测，要求预测$p(x\vert z)$接近于$x$的真实分布，并最大化$x$的出现概率(最大似然思想)
-
-
+3. 从$q(z\vert \tilde{x})$中对$z$进行采样，并对$p(x\vert z)$进行预测，要求预测$p(x\vert z)$接近于$x$的真实分布，并最大化$x$的出现概率(最大似然思想)
 
 
 
-注意到，这个自然的训练流程包括在潜变量空间的去噪过程$\mathcal{D}[\tilde{q}(z\vert \tilde{x})\Vert p(z\vert x)]$以及在生成空间(高维空间,观测空间)的重构过程。
 
-那么一个自然的问题是，$\mathcal{D}[\tilde{q}(z\vert \tilde{x})\Vert p(z\vert x)]$这个公式与$log(p(x))$之间可以进行怎样的联系呢？传统变分自编码器有一个很漂亮的核心公式是
+
+注意到，这个自然的训练流程包括在潜变量空间的去噪过程$\mathcal{D}[q(z\vert \tilde{x})\Vert p(z\vert x)]$以及在生成空间(高维空间,观测空间)的重构过程。
+
+那么一个自然的问题是，$\mathcal{D}[q(z\vert \tilde{x})\Vert p(z\vert x)]$这个公式与$log(p(x))$之间可以进行怎样的联系呢？传统变分自编码器有一个很漂亮的核心公式是
 
 $$
 log(P(X))-\mathcal{D}[Q(z\vert X)\Vert P(z\vert X)]=E_{z\sim Q}[log(P(X\vert z))]-\mathcal{D}[Q(z\vert X)\Vert P(z)]
 $$
 
-因此，本文最大的贡献是提出了$\mathcal{D}[\tilde{q}(z\vert \tilde{x})\Vert p(z\vert x)]$与$log(p(x))$的关系:
+因此，本文最大的贡献是提出了$\mathcal{D}[q(z\vert \tilde{x})\Vert p(z\vert x)]$与$log(p(x))$的关系:
 
 $$
 log(p(x))=\mathcal{L}_{dvae}+E_{p(\tilde{x}\vert x)}[\mathcal{D}[q(z\vert \tilde{x})\Vert p(z\vert x)]] \tag{1}
