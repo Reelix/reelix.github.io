@@ -346,7 +346,7 @@ $$
 注意$P(z\vert X)=\frac{P(X\vert z)P(z)}{P(X)}$，将该等式代入$(2)$式，得到$(3)$式：
 
 $$
-\mathcal{D}[Q(z\vert X)\Vert P(z\vert X)]=E_{z\sim Q}[log(Q(z\vert X))-log(P(X\vert z)-log( P(z))]+log(P(X))\tag{3}
+\mathcal{D}[Q(z\vert X)\Vert P(z\vert X)]=E_{z\sim Q}[log(Q(z\vert X))-log(P(X\vert z))-log( P(z))]+log(P(X))\tag{3}
 $$
 
 简单调换次序我们有:
