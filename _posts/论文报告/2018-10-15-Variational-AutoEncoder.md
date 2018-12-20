@@ -109,7 +109,7 @@ $$
 
 $$
 \text{在高斯分布假设下满足:}
--log(p(X\vert z))=C_1 + C_2*\Vert f(z,\theta)-X\Vert_2
+-log(p(X\vert z))=C_1 + C_2*\Vert f(z,\theta)-X\Vert_2^2
 $$
 
 因此最小化$-log(P(X\vert z))$等价于最小化$X$与$f(z,\theta)$的二范数。如果高斯分布不满足，比如$P(X\vert z)$是一个Dirac delta function，那么我们就没有办法最大化概率函数，因为此时$f(z;\theta)$所预测的并不是均值，而是以概率1收敛到$P(X\vert z)$的预测，此时我们没有办法定义梯度。
