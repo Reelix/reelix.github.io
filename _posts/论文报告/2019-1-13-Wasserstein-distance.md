@@ -51,7 +51,11 @@ mathjax: true
 ## 最优运输问题的定义与基本形式
 给定一个完备可分度量空间(**Polish空间**)(见附录)$X$, 我们用$\mathcal{P}(X)$来表示在$X$上的**Borel概率测度**的集合(也就是说$\forall u\in \mathcal{P}(X)$,$u$是一个概率测度,注意我们可以把$u$看成是一个分布函数，而不是概率密度,$du(x)=p(x)dx$才是概率密度).
 
-如果$X,Y$是2个**Polish空间**, $T:X\rightarrow Y$是一个**Borel**映射(见附录), 同时$u\in \mathcal{P}(X)$, 我们诱导$u \rightarrow T_{\#}u\in \mathcal{P}(Y)$，满足$\forall E\subset Y, T_{\#}u(E)=u(T^{-1}(E))$.
+如果$X,Y$是2个**Polish空间**, $T:X\rightarrow Y$是一个**Borel**映射(见附录), 同时$u\in \mathcal{P}(X)$, 我们诱导 $u \rightarrow T_{\#}u\in \mathcal{P}(Y)$, 满足
+
+$$
+\forall E\subset Y, T_{\#}u(E)=u(T^{-1}(E))
+$$
 
 假定对于$X\times Y$空间, 我们定义了一个费用函数用以度量将$x\in X$转移到$y \in Y$的损失
 $$
