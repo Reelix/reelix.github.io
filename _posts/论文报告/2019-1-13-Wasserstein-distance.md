@@ -203,7 +203,7 @@ $$
 这里不加证明地给出几种分布的**Wasserstein**距离的闭式解:
 
 * Normal distributions
-* 
+   
   $$
   \mu_1=\mathcal{N}(m_1,C_1),\mu_2=\mathcal{N}(m_2,C_2)\\
   W_2(\mu_1,\mu_2)^2=\Vert m_1-m_2 \Vert_2^2+ trace(C_1+C_2-2(C_2^{1/2}C_1C_2^{1/2})^{1/2})
