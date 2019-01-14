@@ -13,7 +13,7 @@ figure: /images/VAE/mainfold_hypothesis.png
 
 ## 前言
 
-Variational autoencoders(VAE)是一类生成模型，它将深度学习与统计推断相结合，可用于学习高维数据$X$的低维表示$z$。与传统自编码器不同，Variational autoencoders 假设$X$与$z$都是满足某种分布假设的随机变量(向量)，因此Variational autoencoder 本质是对随机向量分布参数的估计(如均值，方差等矩估计)。在这个假设下，我们可以利用分布函数假设与预测参数进对$p(X\vert z)$与$p(z\vert X)$进行估计，用最大似然设计损失函数，并利用概率分布$p(X\vert z)$来对$X$进行采样与生成。
+Variational autoencoders(VAE)是一类生成模型，它将深度学习与统计推断相结合，可用于学习高维数据$X$的低维表示$z$。与传统自编码器不同，Variational autoencoders 假设$X$与$z$都是满足某种分布假设的随机变量(向量)，因此Variational autoencoder 本质是对随机向量分布参数的估计(如均值，方差等矩估计)。在这个假设下，我们可以利用分布函数假设与预测参数对$p(X\vert z)$与$p(z\vert X)$进行估计，用最大似然设计损失函数，并利用概率分布$p(X\vert z)$来对$X$进行采样与生成。
 
 本文旨在对VAE进行基于背景，损失函数以及应用方面的介绍。本文先对VAE所需要的数学知识与基本假设进行简要描述。同时，在写作本文主体部分过程中，本文主要以[Tutorial on Variational Autoencoders](https://arxiv.org/abs/1606.05908)为主干进行翻译工作，并辅以其它参考资料对该文献的观点进行选择性删减，重整理与补充性叙述，同时对该文章中省略或笔者认为叙述不清数学证明与显然性描述进行补全与解释。为了对照方便起见，本文自第二部分起，主要结构与该文献结构一致，读者可以自行选择直接阅读本文，或者阅读该文献并辅以本文进行辅助理解。
 
