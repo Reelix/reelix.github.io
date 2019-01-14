@@ -26,13 +26,16 @@ mathjax: true
    $$
    dist_{tv}(F,G)=sup_{A}\vert F(A)-G(A)\vert = \frac{1}{2}\int_{\Omega} \vert p-q\vert dv 
    $$
+
    其中第二个等号的证明[如下](https://math.stackexchange.com/questions/1481101/confusion-about-definition-of-the-total-variation-distance)，主要利用的结论为
+
    $$
    B=\{x\in \Omega:p(x)>q(x) \},\int_{\Omega}\vert p-q \vert dv=\int_{B}\vert p-q \vert dv+\int_{\Omega- B}\vert p-q \vert dv;\\
    \int_{B} p-q \ dv = \int_{\Omega- B} q-p \  dv
    $$
 
 2. [Hellinger](https://en.wikipedia.org/wiki/Hellinger_distance)
+   
    $$
    dist_{H}(F,G)=\sqrt{\frac{1}{2}\int _{\Omega}(\sqrt{p}-\sqrt{q})^2 dv}
    $$
@@ -58,21 +61,29 @@ $$
 $$
 
 假定对于$X\times Y$空间, 我们定义了一个费用函数用以度量将$x\in X$转移到$y \in Y$的损失
+
 $$
 c:X\times Y \rightarrow R^{+}\cup{+\infty}
 $$
+
 同时, 每一个$x$所占据的质量为$du(x)$,每一个$y$所占据的质量为$dv(y)$, 那么对于满足$T_{\#}u=v,T\in \mathcal{T}$的最优运输策略$T:X\rightarrow Y$而言, 它的损失为:
+
 $$
 \int_{x\in X}c(x,T(x))du(x)
 $$
+
 因此我们可以构造$\mathcal{T}\rightarrow R$的映射
+
 $$
 T\rightarrow \int_{x\in X}c(x,T(x))du(x)\tag{1}
 $$
+
 而寻找$T$使得$(1)$取得最小值的过程可以用变分法求解，我们将
+
 $$
 \inf_{T}\int_{x\in X}c(x,T(x))du(x)\tag{2}
 $$
+
 称作**Monge**视角下的最优运输问题.注意到在这个问题中，$x$是不可分的，也就是说只能把一个$x$移动到一个$y$位置，而不能将一个$x$进行细分并移动到多个$y$位置, 这就导致了令$(1)$式取最小值可能没有解，甚至$\mathcal{T}$空间可能都是$\emptyset$.如$u$为一个$dirac-delta$度量,如$\delta_0$而$v=\frac{\delta_{-1}+\delta_{1}}{2}$，假设$\exists T,s.t. T_{\#}u=v$，那么满足$v(1)=u(T^{-1}(1))=\frac{1}{2}$矛盾.
 
 基于这个问题, 一个很自然的视角是让$du(x)$变得可分,也就是说此时$du(x)$可以分成很多份，同时用于接收的$v$也满足$dv(x)$可以分为很多份，这样$x$就可以细分并运送给不同的$y$位置了, 在这个视角下我们对最优运输问题有了新的定义,即**Wasserstein**形式的最优运输问题:
@@ -80,18 +91,25 @@ $$
 $$
 \inf_{\gamma}\int_{X\times Y}c(x,y)d\gamma(x,y)\tag{3}
 $$
+
 其中,$\gamma \in \mathcal{P}(X\times Y)$(可以理解为是$X,Y$的联合分布函数),满足
 
 $$
 \gamma(A\times Y)=u(A),\forall A\in \mathcal{B}(X);\gamma(X\times B)=v(B),\forall B\in \mathcal{B}(Y)
 $$
+
 它的一个等价形式是:
+
 $$
 \pi^{X}((x,y))=x,\pi^{Y}((x,y))=y,\forall (x,y)\in X\times Y\\
 \gamma\ s.t.\pi^{X}_{\#}\gamma =u;\pi^{Y}_{\#}\gamma =v
 $$
+
 其中$\gamma$则被称为是最优运输方案, 假定$\exists \gamma^*$为$(3)$式子的最优解，那么我们可以理解$d\gamma^*(x,y)$为将$du(x)$质量的位于$x$位置的物品切片播撒到$Y$空间的每一个位置，其中任意一个位置$y\in Y$的物品质量为$d\gamma(x,y)$,它们满足
-$\int_{y}d\gamma(x,y)=du(x),\int_{x}d\gamma(x,y)=dv(y)$.
+
+$$
+\int_{y}d\gamma(x,y)=du(x),\int_{x}d\gamma(x,y)=dv(y)
+$$
 
 ## 从最优运输问题到**Wasserstein**距离
 从$(3)$式中我们可以很自然地推广到两个分布$X\sim P,Y\sim Q$之间的**Wasserstein**距离. 一个很自然的想法是，因为$X,Y$都是$R^n$空间，因此可以令$c(x,y)=\Vert x-y\Vert^p$,同时已知$P(x),Q(y)$的情况下我们可以有:
@@ -101,6 +119,7 @@ W_p(P,Q)=(inf_{\gamma\in \Gamma(P,Q)}\int_{x}\int_{y} \Vert x-y\Vert^pd\gamma(x,
 $$
 
 我们可以通过变分方法证明, 令$(4)$有解的$\gamma$是存在的，同时$(4)$存在对偶形式,即
+
 $$
 W_p(P,Q)^p=sup_{\phi,\psi}\ \int \psi(y)dQ(y)-\int \phi(x)dP(x)\tag{5}\\
 \psi,\phi :R^d\rightarrow R,s.t.\vert \psi(y)-\phi(x)\vert\leq  \Vert x-y\Vert^p
@@ -118,6 +137,7 @@ $$
 $$
 W_{p}(P,Q)=(\int_{0}^{1}\vert F^{-1}(z)-G^{-1}(z)\vert ^p)^{\frac{1}{p}},F,G\text{ are the cdf's of }P,Q\tag{6} 
 $$
+
 ## **Wasserstein**距离的优越性,计算方法与闭式解
 
 ### **Wasserstein**距离的优越性
@@ -158,10 +178,12 @@ $$
 这里不加证明地给出几种分布的**Wasserstein**距离的闭式解:
 
 * Normal distributions
+* 
   $$
   \mu_1=\mathcal{N}(m_1,C_1),\mu_2=\mathcal{N}(m_2,C_2)\\
   W_2(\mu_1,\mu_2)^2=\Vert m_1-m_2 \Vert_2^2+ trace(C_1+C_2-2(C_2^{1/2}C_1C_2^{1/2})^{1/2})
   $$
+  
 ## 附录(名词解释)
 * 完备可分度量空间:一个完备度量空间是可分的当且仅当它存在一个可数稠密子集，或者说空间上存在一个序列$\{x_n\}_{n=1}^{\infty}$，满足该空间中的任意一个开子集都至少包含该序列中的一个元素. R是完备可分度量空间, $R^n$也是.
 * Borel集:由R上所有左开右闭区间所组成的$\sigma$代数
