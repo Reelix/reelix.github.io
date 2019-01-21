@@ -52,3 +52,6 @@ $$
 ## Hierarchical VAE基本结构与损失函数
 
 ![basic structure](/images/hierarchical-vae/basic_structure.png)
+
+如图所示为**Hierarchical VAE**的基本结构，
+
