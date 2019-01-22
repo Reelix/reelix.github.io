@@ -247,7 +247,7 @@ $$
 
 $$
 \log(\vert C \vert )=\log\eta-\log(\vert D \vert)\\
-Tr(C)=Tr(D^-1)-\eta u^TD^{-2}u
+Tr(C)=Tr(D^{-1})-\eta u^TD^{-2}u
 $$
 
 ### 指数分布族
