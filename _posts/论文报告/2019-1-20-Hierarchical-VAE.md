@@ -141,7 +141,8 @@ $$
 
 来估计期望
 
-$$E_{z\sim q(z\vert X,\theta^r)}\log(p(X\vert h_1(z_{1,\ldots,L},\theta^g))
+$$
+E_{z\sim q(z\vert X,\theta^r)}\log(p(X\vert h_1(z_{1,\ldots,L},\theta^g))\tag{3}
 $$
 
 此时可以给出$(2)$的解析形式, 即目标函数为
@@ -153,9 +154,117 @@ $$
 它等价于
 
 $$
-arg\min_{\theta^g,\theta^r}\frac{1}{K}\sum_{k=1}^K\frac{\Vert X- h_1(\hat{z_k},\theta^g \Vert_2^2)}{\sigma ^2} +\frac{\Vert \theta^g \Vert _2^2}{2*\kappa}  - \sum_{l=1}^L[\Vert \mu_l\Vert_2^2+Tr(C_l)-\log\vert C_l\vert] \tag{3}
+arg\min_{\theta^g,\theta^r}[\frac{1}{K}\sum_{k=1}^K\frac{\Vert X- h_1(\hat{z_k},\theta^g \Vert_2^2)}{\sigma ^2}](\text{part.1}) +(\frac{\Vert \theta^g \Vert _2^2}{2*\kappa}  - \sum_{l=1}^L[\Vert \mu_l\Vert_2^2+Tr(C_l)-\log\vert C_l\vert])(\text{part.2}) \tag{4}
 $$
 
 ## 重参数化技巧
 
-如果我们用**Deep Learning**模型进行建模,而$\theta^r$与$\theta^g$ 分别是识别网络(或者说编码网络)以及生成网络(或者说解码网络)的如何优化$(3)$
+如果我们用**Deep Learning**模型进行建模,而$\theta^r$与$\theta^g$ 分别是识别网络(或者说编码网络)以及生成网络(或者说解码网络)的参数, 那么一个很自然的问题是如何计算$\theta^r$与$\theta^g$的梯度. 
+
+注意**Hierarchical VAE**的结构图中,关于$\theta^r$参数的流向都汇聚到$(\mu_i(\theta^r),C_i(\theta^r)),i=1,2,\ldots,L$的参数预测中,$\theta^g$的参数流向也汇聚为
+
+$$(p(X\vert h_1(z_{1,\ldots,L},\theta^g))\sim \mathcal{N}(u_{X\vert z}(h_1(z_{1,\ldots,L},\theta^g),\sigma^2)
+$$
+
+中对于$u_{X\vert z}$的计算, 因此计算$\theta^r,\theta^g$的梯度, 等价于计算$(4)$中损失函数对于
+
+$$
+(\mu_i(\theta^r),C_i(\theta^r)),i=1,2,\ldots,L; u_{X\vert z} \tag{5}
+$$
+
+这些参数的梯度即可, 然后再用链式法则传导到$\theta^r,\theta^g$中. 
+
+$(4)$中的**part.2**部分对$(5)$的梯度计算非常简单, 因为它们都是简单线性运算, 而计算**part.1**部分对于$(5)$的梯度则有困难之处, 原因有两点
+
+* $\hat{z_k}$是采样得到的, 而采样运算并不能计算梯度
+* 我们用采样方法对$(3)$进行估计, 用采样方法可以对$3$的梯度进行估计吗? 即
+  
+  $$
+  \nabla E_{z\sim q(z\vert X,\theta^r)}\log(p(X\vert h_1(z_{1,\ldots,L},\theta^g)) =E_{z\sim q(z\vert X,\theta^r)} \nabla \log(p(X\vert h_1(z_{1,\ldots,L},\theta^g))\tag{6}
+  $$
+  
+  是否成立, 或者说,在哪些分布假设下成立。如果成立的话, 我们自然可以用采样来估计梯度.
+
+文献[Stochastic Backpropagation and Approximate Inference in Deep Generative Models](https://arxiv.org/abs/1401.4082)的另外一大贡献就是讨论了在正态分布与指数分布族下$(6)$式的形式(当然证明过程也是照搬前人数学家的结论), 从而诱导出了重参数化技巧, 文章给出了正态分布族与指数分布族下$(6)$式的成立条件.
+
+### 正态分布族
+
+在正态分布族上主要有两个主要结论
+
+$$
+\nabla_{\mu_i}E_{z_i\sim \mathcal{N}(\mu_i,C_i),i=1,2,\ldots,L}[f(z_1,\ldots,z_L)]=E_{z_i\sim \mathcal{N}(\mu_i,C_i),i=1,2,\ldots,L}[\nabla_{z_i}f(z_1,\ldots,z_L)] \tag{7}
+$$
+
+$$
+\nabla_{C_{i,j}}E_{z_i\sim \mathcal{N}(\mu_i,C_i),i=1,2,\ldots,L}[f(z_1,\ldots,z_L)]=\frac{1}{2}E_{z_i\sim \mathcal{N}(\mu_i,C_i),i=1,2,\ldots,L}[\nabla^2_{z_i,z_j}f(z_1,\ldots,z_L)] \tag{8}
+$$
+
+它们的证明放于附录中, 证明用了简单的分部积分方法. 此时我们解决了对于期望的估计问题(即求导和期望符号算符在正态分布假设下可以进行交换), 但是注意到此时$(8)$式需要求$\nabla^2_{z_i,z_j}$, 这就意味着运算为$O(n^3)$, 同时梯度的流向并不自然, 因此此时我们可以引入变换
+
+$$
+z=\mu + R\epsilon,s.t.\ C=RR^T,\epsilon \sim \mathcal{N}(0,I)
+$$
+
+此时
+
+$$
+\nabla _R E_{\mathcal{N}(\mu,C)}f(z)=\nabla_R E_{\epsilon\sim \mathcal{N}(0,I)}[f(\mu+R\epsilon)]\\
+=E_{\epsilon\sim \mathcal{N}(0,I)}[\epsilon g^T] \approx \sum_{k=1}^K \frac{\epsilon_ig_i^T}{K}\tag{9}
+$$
+
+$$
+\nabla _\mu E_{\mathcal{N}(\mu,C)}f(z)=\nabla_\mu E_{\epsilon\sim \mathcal{N}(0,I)}[f(\mu+R\epsilon)]\\
+=E_{\epsilon\sim \mathcal{N}(0,I)}[g] \approx \sum_{k=1}^K \frac{g_i}{K}\tag{10}
+$$
+
+其中$g$为$f$在$\mu+R\epsilon$处的导数. 而$z=\mu + R\epsilon$的过程就是重参数化的过程, 它使得原本无法与$\mu_i,C_i$直接建立联系的采样过程变得可计算导数, 同时把对期望求导转换为对有限个采样求导并对期望进行估计的过程.
+
+注意到$(7)$告诉我们, 我们也可以直接对$z \sim \mathcal{N}(\mu,C)$ 进行采样, 同样可以通过对采样$\hat{z_i}$进行求导而得到对$\mu$的求导. 
+
+总之, $(7),(8)$以及衍生出的$(9),(10)$都解决了如何对采样过程进行求导的问题, 基于这两组公式, 我们大可以对采样过程写**forward** 和 **backward**两个函数, 或者更简单地, 采用
+
+$$
+z=\mu + R\epsilon
+$$
+
+这一公式直接建立**forward**联系,再自动进行**backward**即可, 以上就是重参数化技巧的意义与工程实现.
+
+#### 正态分布中协方差矩阵的分析
+我们在上文中通过$C=RR^T$的形式给出了对协方差矩阵$C$进行推断的梯度下降法, 但是协方差矩阵仍然存在参数量过大的问题. 我们当然可以对$C$做出对角矩阵假设, 但是这样后验分布也就彼此不相关了, 无法体现因子之间的交互影响. 为了改进对角矩阵假设的缺点, 同时又不引入太多参数, 我们采用**rank-1**矩阵假设并辅以对角修正. 给定向量$u,d$, 记$D=diag(d)$, 我们给定协方差矩阵$C$的形式为
+
+$$
+C^{-1}=D+uu^T
+$$
+
+这种表示能够允许在一个主要方向上高斯分布的坐标旋转, 同时只引入了少量额外参数, 在这种表示下, 我们可以给出$C$与$R$的精确形式
+
+$$
+C=D^{-1}-\eta D^{-1}uu^TD^{-1},\eta = \frac{1}{u^TD^-1 u+1}\\
+R=D^{-\frac{1}{2}}-\frac{1-\sqrt{\eta}}{u^TD^{-1}u}D^{-1}uu^TD^{-\frac{1}{2}}
+$$
+
+同时此时有
+
+$$
+\log(\vert C \vert )=\log\eta-\log(\vert D \vert)\\
+Tr(C)=Tr(D^-1)-\eta u^TD^{-2}u
+$$
+
+### 指数分布族
+
+如果有参数分布族$\mathcal{F}=\{p(\xi;\theta):\theta \in \Theta\}$, $p(\xi;\theta)$为分布的密度函数或分布列, 如果$p(\xi;\theta)$可以表示为如下形式
+
+$$
+p(\xi;\theta)=c(\theta)exp\{\sum_{j=1}^{k}Q_{j}(\theta)T_{j}(\xi)\}h(\xi)
+$$
+
+那么称该分布为指数分布族, 对于很多指数型分布族, 往往能找到一个函数$B(\xi;\theta)$满足
+
+$$
+\nabla_{\theta}E_{p(\xi\vert \theta)}[f(\xi)]=-E_{p(\xi\vert \theta)}[\nabla_{\xi}[B(\xi;\theta)f(\xi)]] \tag{11}
+$$
+
+$(11)$的证明我们放于附录中, 这里贴出原论文中几个重要分布$B(\xi;\theta)$的解析形式
+
+![exponential](/images/hierarchical-vae/exponential_family_distribution.png)
+
