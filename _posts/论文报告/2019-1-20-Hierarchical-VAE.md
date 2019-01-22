@@ -133,7 +133,18 @@ $$
 \mathcal{D}[q(z\vert X,\theta^r),p(z)]=\sum_{l=1}^L[\Vert \mu_l\Vert_2^2+Tr(C_l)-log\vert C_l\vert]+b
 $$
 
-其中$b$是一个固定常数, 我们用*K*个采样$(\hat{z}_1,\hat{z}_2,\ldots,\hat{z}_K)\sim q(z\vert X,\theta^r)$来估计期望$E_{z\sim q(z\vert X,\theta^r)}\log(p(X\vert h_1(z_{1,\ldots,L},\theta^g))$, 此时可以给出$(2)$的解析形式, 即目标函数为
+其中$b$是一个固定常数, 我们用*K*个采样
+
+$$
+(\hat{z}_1,\hat{z}_2,\ldots,\hat{z}_K)\sim q(z\vert X,\theta^r)
+$$
+
+来估计期望
+
+$$E_{z\sim q(z\vert X,\theta^r)}\log(p(X\vert h_1(z_{1,\ldots,L},\theta^g))
+$$
+
+此时可以给出$(2)$的解析形式, 即目标函数为
 
 $$
 arg\max_{\theta^g,\theta^r}\frac{1}{K}\sum_{k=1}^K-\frac{\Vert X- h_1(\hat{z_k},\theta^g \Vert_2^2)}{\sigma ^2} -\frac{\Vert \theta^g \Vert _2^2}{2*\kappa}  + \sum_{l=1}^L[\Vert \mu_l\Vert_2^2+Tr(C_l)-\log\vert C_l\vert]
@@ -147,4 +158,4 @@ $$
 
 ## 重参数化技巧
 
-如果我们用**Deep Learning**模型进行建模,而$\theta^r$与$\theta^g$ 分别是识别网络(或者说编码网络)以及生成网络(或者说解码网络)的如何优化$(3)
+如果我们用**Deep Learning**模型进行建模,而$\theta^r$与$\theta^g$ 分别是识别网络(或者说编码网络)以及生成网络(或者说解码网络)的如何优化$(3)$
