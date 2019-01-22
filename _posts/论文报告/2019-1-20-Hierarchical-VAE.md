@@ -180,7 +180,7 @@ $(4)$中的**part.2**部分对$(5)$的梯度计算非常简单, 因为它们都�
 * 我们用采样方法对$(3)$进行估计, 用采样方法可以对$3$的梯度进行估计吗? 即
   
   $$
-  \nabla E_{z\sim q(z\vert X,\theta^r)}\log(p(X\vert h_1(z_{1,\ldots,L},\theta^g)) =E_{z\sim q(z\vert X,\theta^r)} \nabla \log(p(X\vert h_1(z_{1,\ldots,L},\theta^g))\tag{6}
+  \nabla_{\theta^r} E_{z\sim q(z\vert X,\theta^r)}\log(p(X\vert h_1(z_{1,\ldots,L},\theta^g)) =E_{z\sim q(z\vert X,\theta^r)} \nabla_{z} \log(p(X\vert h_1(z_{1,\ldots,L},\theta^g))\tag{6}
   $$
   
   是否成立, 或者说,在哪些分布假设下成立。如果成立的话, 我们自然可以用采样来估计梯度.
