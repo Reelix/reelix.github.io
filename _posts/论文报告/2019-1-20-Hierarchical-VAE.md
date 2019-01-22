@@ -43,8 +43,8 @@ $$
 x=f_1(z_1,f_2(z_2),f_2\circ f_3(z_3),\ldots,f_1\circ f_{2}\circ \ldots \circ f_{n}(z_n))\\
 z_i =g_{i}\circ g_{i-1}\circ \ldots \circ g_{1}(x),i=1,2,\ldots,n\\
 z_i\in \mathcal{Z},x\in \mathcal{X}
-
 $$
+
 那么潜变量之间具有较为明显的层次关系,而**Kingma**所提出**VAE**仅构建了一层随机层,此时$z_1,\ldots,z_n$的关系是并列关系, 因此没有办法揭示潜变量之间的层次关系. 基于此问题, 文献[Stochastic Backpropagation and Approximate Inference in Deep Generative Models](https://arxiv.org/abs/1401.4082)与**Kingma**同时独立提出了变分自编码器. 该文献主要有两个贡献, 一是提出了具有层次结构的变分自编码器, 二是对于重参数化技巧给出了严谨的数学证明, 是**VAE**领域的基石文章之一. 在该篇文章后, 也有诸多论文对**Hierarchical VAE**的结构与损失函数进行了优化, 如[Importance Weighted Autoencoders](https://arxiv.org/abs/1509.00519)对不同层次的因子进行了加权处理, [Ladder Variational Autoencoders](https://arxiv.org/abs/1602.02282)采用**ladder**结构, 将对潜变量分布的预测分为编码预测与解码预测两部分, 并用两部分预测结果的平均来作为最终预测以保证编码解码中的信息对称. [Semi-supervised Learning with Deep Generative Models](https://arxiv.org/abs/1406.5298)将**Hierarchical VAE**的结构扩展到半监督任务上, 将数据标签看作是服从多项式分布的离散潜变量. 
 
 本文将先给出**Hiearachical VAE**的基本形式与损失函数, 然后证明与重参数化技巧息息相关的几个结论，并给出从该结论出发的对于其他分布假设的计算方法, 最后对上文列出的**Hierarchical VAE**的扩展结构进行讨论总结.
