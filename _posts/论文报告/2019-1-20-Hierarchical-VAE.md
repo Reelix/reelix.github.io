@@ -268,3 +268,91 @@ $(11)$的证明我们放于附录中, 这里贴出原论文中几个重要分布
 
 ![exponential](/images/hierarchical-vae/exponential_family_distribution.png)
 
+## 附录
+
+### $(7)-(11)$证明
+
+* (Bonnet's Theorem) 
+  
+  令
+  $$
+  f(\xi_1,\ldots,\xi_L):R^{d_1}\times R^{d_2}\times \ldots \times R^{d_L} \rightarrow R
+  $$
+  为对于任意$\xi_i$可积且二次可微的函数. 给定$\xi_i \sim \mathcal{N}(\mu_i,C_i)$, 我们有以下公式成立
+
+  $$
+  \nabla_{\mu_i}E_{\xi_l \sim \mathcal{N}(\mu_l,C_l)}f(\xi_1,\ldots,\xi_L)=E_{\xi_l \sim \mathcal{N}(\mu_l,C_l)}\nabla_{\xi_i}f(\xi_1,\ldots,\xi_L)
+  $$
+
+  证明:
+  $$
+  \nabla_{\mu_i}E_{\xi_l \sim \mathcal{N}(\mu_l,C_l)}f(\xi_1,\ldots,\xi_L) \\
+
+  =\nabla _{u_i}\int_{\xi_1}\ldots\int_{\xi_L}\Pi_{l=1}^{L} \frac{1}{\sqrt{2\pi \vert C_l\vert }}\exp(-\frac{(\xi_l -\mu_l)'C_{l}^{-1}(\xi_l-\mu_l)}{2})f(\xi_1,\ldots,\xi_L)d\xi_1\ldots d\xi_L\\
+  =\int_{\xi_1}\ldots\int_{\xi_L}[\Pi_{\neg i} \frac{1}{\sqrt{2\pi \vert C_l\vert }}\exp(-\frac{(\xi_l -\mu_l)'C_{l}^{-1}(\xi_l-\mu_l)}{2})]\nabla _{u_i}p(\xi_i)f(\xi_1,\ldots,\xi_L)d\xi_1\ldots d\xi_L \tag{A.1}
+  $$
+
+  注意到
+
+  $$
+  p(\xi_i)=\frac{1}{\sqrt{2\pi \vert C_i\vert }}\exp(-\frac{(\xi_i -\mu_i)'C_{i}^{-1}(\xi_i-\mu_i)}{2}) \\
+  $$
+
+  利用矩阵求导公式$\frac{\partial(Ax+b)^TC(Dx+e)}{\partial x}=D^TC^T(Ax+b)+A^TC(Dx+e)$我们有
+
+  $$
+  \nabla_{\mu_i}p(\xi_i)=-\nabla_{\xi_i}p(\xi_i)
+  $$
+
+  代入$(A.1)$有
+
+  $$
+  = \int_{\xi_1}\ldots\int_{\xi_L}[\Pi_{\neg i} \frac{1}{\sqrt{2\pi \vert C_l\vert }}\exp(-\frac{(\xi_l -\mu_l)'C_{l}^{-1}(\xi_l-\mu_l)}{2})]-\nabla _{\xi_i}p(\xi_i)f(\xi_1,\ldots,\xi_L)d\xi_1\ldots d\xi_L
+  $$
+
+  利用分部积分公式
+
+  $$
+  =[-\int_{\xi_1}\ldots\int_{\xi_{L \neg i}} \Pi_{\neg i}p(\xi_l)f(\xi_1,\ldots,\xi_L)d\xi_1\ldots d\xi_{L \neg i}p(\xi_i)]_{\xi_i=-\infty}^{\xi_i=+\infty}(=0)+
+  
+  \int_{\xi_1}\ldots\int_{\xi_L}\Pi p(\xi_l)\nabla _{\xi_i}f(\xi_1,\ldots,\xi_L)d\xi_1\ldots d\xi_L\\
+  =E_{\xi_l \sim \mathcal{N}(\mu_l,C_l)}\nabla_{\xi_i}f(\xi_1,\ldots,\xi_L)
+  $$
+
+* (Price's theorem)
+  
+  与Bonnet's Theorem相同条件, 我们有以下公式成立
+
+  $$
+  \nabla_{C_{i,j}}E_{\xi_l \sim \mathcal{N}(0,C_l)}f(\xi_1,\ldots,\xi_L)=E_{\xi_l \sim \mathcal{N}(0,C_l)}\nabla_{\xi_i,\xi_j}f(\xi_1,\ldots,\xi_L)
+  $$
+  这里与Bonnet's Theorem相同证明方法，同样用了
+
+  $$
+  \nabla C_{i,j} \mathcal{N}(\mu,C)=\frac{1}{2}\nabla_{\xi_i,\xi_j}\mathcal{N}(\mu,C)
+  $$
+  
+* 指数分布族
+  
+  对于指数分布族$p(\xi\vert \theta)=h(\xi)\exp(\eta(\theta)^T\phi(x)-A(\theta))$而言, 我们有以下公式成立
+
+  $$
+  \nabla_{\theta}E_{p}[f(x)]=-E_{p}[\nabla_{x}[B(x;\theta)f(x)]]
+  $$
+
+  其中
+  
+  $$
+  B(x,\theta)=\frac{[\nabla_{\theta}\eta(\theta)\phi(x)-\nabla_{\theta}A(\theta)]}{[\nabla_{x}\log[h(x)]+\eta(\theta^T)\nabla_{x}\phi(x)]}
+  $$
+  
+  这里仍然使用了
+
+  $$
+    \nabla_{\theta} p(x\vert \theta) f(x)dx=\nabla_{x} p(x\vert \theta)B(x;\theta)f(x)
+  $$
+
+  这一我们之前已经用过很多次的公式
+
+  
+
