@@ -268,6 +268,14 @@ $(11)$的证明我们放于附录中, 这里贴出原论文中几个重要分布
 
 ![exponential](/images/hierarchical-vae/exponential_family_distribution.png)
 
+## **Hierarchical VAE**模型结构汇总
+
+### Importance Weighted AutoEncoders
+
+### Ladder Variational AutoEncoders
+
+### Semi-supervised Learning with Deep Generative Models
+
 ## 附录
 
 ### $(7)-(11)$证明
