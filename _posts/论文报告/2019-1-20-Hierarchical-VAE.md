@@ -45,7 +45,7 @@ z_i =g_{i}\circ g_{i-1}\circ \ldots \circ g_{1}(x),i=1,2,\ldots,n\\
 z_i\in \mathcal{Z},x\in \mathcal{X}
 $$
 
-那么潜变量之间具有较为明显的层次关系,而**Kingma**所提出**VAE**仅构建了一层随机层,此时$z_1,\ldots,z_n$的关系是并列关系, 因此没有办法揭示潜变量之间的层次关系. 基于此问题, 文献[Stochastic Backpropagation and Approximate Inference in Deep Generative Models](https://arxiv.org/abs/1401.4082)与**Kingma**同时独立提出了变分自编码器. 该文献主要有两个贡献, 一是提出了具有层次结构的变分自编码器, 二是对于重参数化技巧给出了严谨的数学证明, 是**VAE**领域的基石文章之一. 在该篇文章后, 也有诸多论文对**Hierarchical VAE**的结构与损失函数进行了优化, 如[Importance Weighted Autoencoders](https://arxiv.org/abs/1509.00519)对不同层次的因子进行了加权处理, [Ladder Variational Autoencoders](https://arxiv.org/abs/1602.02282)采用**ladder**结构, 将对潜变量分布的预测分为编码预测与解码预测两部分, 并用两部分预测结果的平均来作为最终预测以保证编码解码中的信息对称. [Semi-supervised Learning with Deep Generative Models](https://arxiv.org/abs/1406.5298)将**Hierarchical VAE**的结构扩展到半监督任务上, 将数据标签看作是服从多项式分布的离散潜变量. 
+那么潜变量之间具有较为明显的层次关系,而**Kingma**所提出**VAE**仅构建了一层随机层,此时$z_1,\ldots,z_n$的关系是并列关系, 因此没有办法揭示潜变量之间的层次关系. 基于此问题, 文献[Stochastic Backpropagation and Approximate Inference in Deep Generative Models(SBAI)](https://arxiv.org/abs/1401.4082)与**Kingma**同时独立提出了变分自编码器. 该文献主要有两个贡献, 一是提出了具有层次结构的变分自编码器, 二是对于重参数化技巧给出了严谨的数学证明, 是**VAE**领域的基石文章之一. 在该篇文章后, 也有诸多论文对**Hierarchical VAE**的结构与损失函数进行了优化, 如[Importance Weighted Autoencoders](https://arxiv.org/abs/1509.00519)对不同层次的因子进行了加权处理, [Ladder Variational Autoencoders](https://arxiv.org/abs/1602.02282)采用**ladder**结构, 将对潜变量分布的预测分为编码预测与解码预测两部分, 并用两部分预测结果的平均来作为最终预测以保证编码解码中的信息对称. [Semi-supervised Learning with Deep Generative Models](https://arxiv.org/abs/1406.5298)将**Hierarchical VAE**的结构扩展到半监督任务上, 将数据标签看作是服从多项式分布的离散潜变量. 
 
 本文将先给出**Hiearachical VAE**的基本形式与损失函数, 然后证明与重参数化技巧息息相关的几个结论，并给出从该结论出发的对于其他分布假设的计算方法, 最后对上文列出的**Hierarchical VAE**的扩展结构进行讨论总结.
 
@@ -271,10 +271,138 @@ $(11)$的证明我们放于附录中, 这里贴出原论文中几个重要分布
 ## **Hierarchical VAE**模型结构汇总
 
 ### Importance Weighted AutoEncoders
+**SBAI**率先提出了**Hiearachical VAE**的基本结构与损失函数, 但是它没有解决两个问题:
+
+1. 对于层次**VAE**不同层次的因子, 我们认为它们之间没有相关关系,这一假设其实非常强, 同时也不自然
+
+2. 注意我们对$(3)$式期望进行估计时, 采用了随机采样**K**个并对这**K**个采样求平均作为对期望的估计, 这种估计方法对采样施加了相同的权重, 如果能对不同的采样自动赋以不同的权重则可以加入**attention**机制辅助训练
+
+本篇文章就是从这两点出发, 提出了对不同的采样赋以不同权重的加权层次**VAE**, 同时对不同层次的因子间关系进行建模并给出了损失函数, 它的基本结构如图所示
+
+![iwa](/images/hierarchical-vae/iwa.png)
+
+同时, 记观测空间为$\mathcal{X}$, 潜变量空间为$\mathcal{Z}$, 记$X\in \mathcal{X},z=(z_1,\ldots,z_L)\in \mathcal{Z}$, 我们对潜变量的先验后验做出以下假设
+
+$$
+p(X\vert z;\theta^g)\sim \mathcal{N}(g(z_1;\theta^g),\sigma^2)\\
+p(z_1,\ldots,z_L\vert \theta^g)=p(z_L\vert \theta^g)p(z_{L-1}\vert z_L,\theta^g)\ldots p(z_1\vert z_2,\theta^g)\\
+q(z_1,\ldots,z_L\vert X,\theta^r)=q(z_1 \vert X,\theta^r)q(z_2\vert z_1,\theta^r)\ldots q(z_L\vert z_{L-1},\theta^r)\\
+p(z_{l}\vert z_{l+1},\theta^g)\sim \mathcal{N}(\mu_{p,l},\Sigma_{p,l})\\
+q(z_{l}\vert z_{l-1},\theta^r)\sim \mathcal{N}(\mu_{q,l},\Sigma_{q,l}) \tag {IWA-Hypothesis}\\
+$$
+这样就把潜变量之间的关系刻画出来了, 而此时损失函数的推导可以写成
+
+$$
+\log p(X)=\log E_{q(z\vert X)}\frac{p(X,z)}{q(z\vert X)}\geq^{\text{Jensen Inequality}}E_{q(z\vert X)}\log \frac{p(X,z)}{q(z\vert X)}=\mathcal{L}(X)
+$$
+
+$\mathcal{L}(x)=\log p(X)-\mathcal{D}[q(z\vert x)\Vert p(z\vert x)]$称作变分下界(**ELBO**), 我们通过最大化$\mathcal{L}(x)$来最大化原函数, 即目标函数为
+
+$$
+arg \min _{\theta^r,\theta^g} E_{q(z\vert X,\theta ^r)}\log \frac{p(X,z\vert \theta^g)}{q(z\vert X,\theta^r)} \tag{IWA-1}
+$$
+
+同时,我们采用重参数化技巧, 记从$\mathcal{N}(0,I)$中采样得到$L$ 个 $\xi =(\xi _1,\ldots , \xi _L)$,并用它们生成了$z=(z_1,\ldots,z_L)$, 式(IWA-1)对参数的导数可以写成
+
+$$
+\nabla _{\theta} E_{q(z\vert X,\theta ^r)}\log \frac{p(X,z\vert \theta^g)}{q(z\vert X,\theta^r)} = \nabla _{\theta} E_{\xi_1,\ldots,\xi_L \sim \mathcal{N}(0,I)}[\log \frac{p(X,z(\xi,X,\theta)\vert \theta)}{q(z(\xi,X,\theta)\vert X,\theta)}]\\
+=E_{\xi_1,\ldots,\xi_L \sim \mathcal{N}(0,I)} \nabla _{\theta}[\log \frac{p(X,z(\xi,X,\theta)\vert \theta)}{q(z(\xi,X,\theta)\vert X,\theta)}]\approx \frac{1}{K}\sum _{j=1}^{K}\nabla_{\theta}\log w(X,\xi^j ,\theta)   
+$$
+
+注意流程的推导应用了积分求导互换这一非常物理的技巧, 其中
+
+$$
+w(X,\xi^j ,\theta) = \frac{p(X,z(\xi^j,X,\theta)\vert \theta)}{q(z(\xi ^j,X,\theta)\vert X,\theta)}
+$$
+
+按照假设是可以计算的部分, 在实际工程计算中, 我们采用**IWA-Hypothesis**把它写成
+
+$$
+w(X,\xi^j ,\theta) = \frac{p(X\vert z_1(\xi^j,\theta);\theta)p(z_L(\xi^j)\vert \theta)p(z_{L-1}(\xi^j)\vert z_L(\xi^j),\theta)\ldots p(z_1(\xi^j)\vert z_2(\xi^j),\theta)}{q(z_1 \vert X,\theta)q(z_2\vert z_1,\theta)\ldots q(z_L\vert z_{L-1},\theta)} \tag{IWA-2}
+$$
+
+在训练过程中, 我们生成$\xi$, 然后代入网络进行计算，并计算在给定$\xi$ 下 **(IWA-2)** 的值作为目标函数, 并进行多次采样来对 **(IWA-1)** 进行估计.
+
+注意到这里我们解决了计算问题, 而IWA的第二个贡献就是提出了采样次数与结果的关系, 并给出了一个具有新形式的损失函数, 这个损失函数可以自然地导出对采样的加权形式
+
+首先我们利用一个比较巧妙的变换:
+
+$$
+p(X)=E_{z\sim q(z\vert X)} \frac{p(X,z)}{q(z\vert X)}=E_{z^1,\ldots,z^{K}\sim q(z\vert X)}\frac{1}{K}\sum_{k=1}^K\frac{p(X,z^k)}{q(z^k\vert X)}
+$$
+
+利用**Jenson**不等式, 我们有
+
+$$
+\log p(X)=\log E_{z^1,\ldots,z^{K}\sim q(z\vert X)}\frac{1}{K}\sum_{k=1}^K\frac{p(X,z^k)}{q(z^k\vert X)} \geq E_{z^1,\ldots,z^{K}\sim q(z\vert X)} \log \frac{1}{K}\sum_{k=1}^K\frac{p(X,z^k)}{q(z^k\vert X)} =\mathcal{L}_{K} 
+$$
+
+注意这里对标的是
+
+$$
+L(X)\approx  \frac{1}{K} \sum_{k=1}^{K}  \log \frac{p(X,z^k)}{q(z^k\vert X)}
+$$
+
+我们仍然沿用上面的记号, 记
+
+$$
+w(z,X) = \frac{p(X,z^k)}{q(z^k\vert X)}
+$$
+
+我们有
+
+$$
+\nabla _{\theta} \mathcal{L}(X) = E_{z^1,\ldots,z^{K}\sim q(z\vert X)}  \frac{1}{K} \sum_{k=1}^{K}  \nabla_{\theta} \log w(z,X)\approx \frac{1}{K} \sum_{k=1}^{K}  \nabla_{\theta} \log w(z,X) \tag{IWA-3}
+$$
+
+$$
+\nabla _{\theta} \mathcal{L}_{K}(X) = E_{z^1,\ldots,z^{K}\sim q(z\vert X)} \nabla _{\theta}  \log \frac{1}{K}\sum_{k=1}^K w(z^k,X) \tag{IWA-4}
+$$
+
+利用
+
+$$
+\nabla _{\theta}  \log \frac{1}{K}\sum_{k=1}^K w(z^k,X) = \sum_{k=1}^K \hat{w_k} \nabla _{\theta} \log w(z^k,X)\\
+\text{其中 }\hat{w_k}=\frac{w(z^k,X)}{\sum_{i=1}^K w(z^i,X)}
+$$
+
+我们可以自然推导出它的加权形式, 同时我们有
+
+$$
+\log p(X) \geq \mathcal{L}_{K+1}(X) \geq \mathcal{L}_{K}(X) \\
+\text {if } \frac{p(z,x)}{q(z\vert x)} \text{ is bounded, } \lim_{k\rightarrow \infty} \mathcal{L}_{K}(X) = \log p(X)
+$$
+
+因此, 这就构建了采样次数与预测结果的关系, 并将预测结果写成了典型的加权形式, 这就是 **IWA** 的精髓了.
+
+但是我觉得这个结构好像不太实用, 真的一点都不实用, 主要是所有的随机层彼此都相关, 这样的话对第$l,l\leq L$层而言, 它的变量必然是有交互的, 因此对角化假设是真的一点点都不能用, 也就是说协方差矩阵必须是非对角矩阵. 
 
 ### Ladder Variational AutoEncoders
+**Ladder VAE** 是**IWA**的一个改进, 注意到**IWA**中编码和解码的过程对相同的中间潜变量$z_{l},l=1,\ldots,L-1$进行了对$p(z_l\vert z_{l-1})$与$q(z_{l-1}\vert z_l)$的分别预测, 我们刚刚已经提到了, 这个预测并不是很自然的, 而 **Ladder VAE**就改变了这个不自然的过程, 它仍然沿用写成**KL**散度形式的损失函数, 同时沿用了**SBAI**的假设[即$p(z_l\vert z_{l-1})=p(z_l)\sim \mathcal{N}(0,I)$]与**IWA**的结构, 它用**IWA**编码与解码过程中对相同的潜变量$z_l$的分布参数预测
+
+$$
+(\mu_{q,l},C_{q,l}),(\mu_{p,l},C_{p,l})
+$$
+
+取几何平均来预测编码过程中的$q(z_l\vert z_{l-1}) \sim \mathcal{N}(\mu_l,C_l)$, 即
+
+$$
+C_{l_{i,j}} = \frac{1}{\frac{1}{C_{{p,l}_{i,j}}}+\frac{1}{C_{{q,l}_{i,j}}}}\\
+
+\mu_{l_{i}}=\frac{\frac{\mu_{q_{i}}}{C_{{q,l}_{i,i}}}+\frac{\mu_{p_{i}}}{C_{{p,l}_{i,i}}}}{\frac{1}{C_{{p,l}_{i,j}}}+\frac{1}{C_{{q,l}_{i,j}}}}
+$$
+
+并采用损失函数
+
+
+$$
+E_{z\sim q(z\vert X,\theta^r)}\log(p(X\vert h_1(z_{1,\ldots,L},\theta^g))+\log(p(\theta^g))-\mathcal{D}[q(z\vert X,\theta^r),p(z)]
+$$
+
+来进行优化, **Ladder VAE**的好处是沿用了更加**make sense**的结构并同时使用了编码解码的层次信息. 
 
 ### Semi-supervised Learning with Deep Generative Models
+
 
 ## 附录
 
