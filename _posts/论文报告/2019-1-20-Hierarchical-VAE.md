@@ -387,9 +387,9 @@ $$
 取几何平均来预测编码过程中的$q(z_l\vert z_{l-1}) \sim \mathcal{N}(\mu_l,C_l)$, 即
 
 $$
-C_{l_{i,j}} = \frac{1}{\frac{1}{C_{{p,l}_{i,j}}}+\frac{1}{C_{{q,l}_{i,j}}}}\\
+C_{l_{i,j}} = \frac{1}{\frac{1}{C_{ {p,l}_{i,j} } }+\frac{1}{C_{ {q,l}_{i,j} } } }\\
 
-\mu_{l_{i}}=\frac{\frac{\mu_{q_{i}}}{C_{{q,l}_{i,i}}}+\frac{\mu_{p_{i}}}{C_{{p,l}_{i,i}}}}{\frac{1}{C_{{p,l}_{i,j}}}+\frac{1}{C_{{q,l}_{i,j}}}}
+\mu_{l_{i}}=\frac{\frac{\mu_{q_{i}}}{C_{{q,l}_{i,i}}}+\frac{\mu_{p_{i}}}{C_{ {p,l}_{i,i} } } }{\frac{1}{C_{ {p,l}_{i,j} } }+\frac{1}{C_{ {q,l}_{i,j} } } }
 $$
 
 并采用损失函数
