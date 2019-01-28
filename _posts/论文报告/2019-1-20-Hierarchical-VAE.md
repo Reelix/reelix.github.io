@@ -474,6 +474,11 @@ $$
 \mathcal{J}^{\alpha} = \mathcal{J} +\alpha \mathcal{C}
 $$
 
+注意, 在这种层次模型中, 应当满足的一个条件是 
+
+$$
+\dim(z_2)+\dim(y) \geq \dim(z_1)
+$$
 
 ## 附录
 
