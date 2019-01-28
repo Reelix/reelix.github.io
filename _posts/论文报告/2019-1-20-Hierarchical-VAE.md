@@ -403,6 +403,76 @@ $$
 
 ### Semi-supervised Learning with Deep Generative Models
 
+本文提出了一种用**Hierarchical VAE**来进行半监督学习的策略, 它的结构可以看成2层**IWA**, 它将潜变量分为两层, 第一层仍然是符合正态性假设的潜变量, 而第二层则是由符合多项式分布的潜变量与正态潜变量构成, 其中符合多项式分布的潜变量代表着标签潜变量, 而正态潜变量则是与第一层潜变量服从相同假设的层次潜变量, 如图所示为它的结构
+
+![semi-supervised](/images/hierarchical-vae/semisupervised_vae.png)
+
+它的基本假设如下
+
+$$
+p(X,y,z_1,z_2)=p(X\vert z_1)p(z_1 \vert y,z_2)p(z_2)p(y)\\
+p(z_2)\sim \mathcal{N}(0,I),i = 1,2;\\
+p(y)\sim \text{multinomial}(n,\theta_{prior}),n\text{ is the number of classes,$\theta$  is the prior distribution of classes}\\
+p(z_1\vert y,z_2)= \mathcal{N}(\mu_{p_1},C_{p_1}) \\
+q(z_1,z_2,y\vert X)=q(z_1\vert X)q(y \vert z_1)q(z_2\vert z_1,y) \\
+q(z_1\vert X) \sim \mathcal{N}(\mu_{q_1},C_{q_1})\\
+q(y\vert z_1) \sim \text{multinomial}(n,\theta_{pos}),n\text{ is the number of classes,$\theta$  is the posterior distribution of classes}\\
+q(z_2\vert y,z_1) \sim \mathcal{N}(\mu_{q_2},C_{q_2})
+$$
+
+损失函数都是基于**Jenson**不等式而得到的, 对它的分类讨论分为两种, 一种是对有标注数据的损失, 还有一种是对无标注数据的损失. 
+
+#### 有标注损失
+
+对有标注数据的损失中, 我们认为$y$是一个确定变量, 即此时$p(y)$是一个退化分布, 损失函数可以写成
+
+$$
+\log p(X,y)\geq E_{z\sim q(z\vert X,y)}[\log p(x\vert z_1)+\log p(z_1,z_2)-\log q(z_1,z_2\vert X,y)]\\
+=E_{z\sim q(z\vert X,y)}\log p(x\vert z_1)-\mathcal{D}[q(z_1,z_2\vert X,y) \Vert p(z_1,z_2)]\\ 
+= -\mathcal{L}(X,y)
+$$
+
+其中
+
+$$
+\mathcal{D}[q(z_1,z_2\vert X,y) \Vert p(z_1,z_2)]=E_{q(z_1,z_2\vert X,y)}[\log\frac{q(z_1\vert X)}{p(z_1\vert y,z_2)}+ \log \frac{q(z_2\vert z_1,y)}{p(z_2)}] \\ \approx \sum_{k=1}^{K}\frac{1}{K}[\log\frac{q(z_1^k\vert X)}{p(z_1^k\vert y,z_2^k)}+ \log \frac{q(z_2^k\vert z_1^k,y)}{p(z_2^k)}] 
+$$
+
+或者也可以写成不太恰当的粗略解析形式
+
+$$
+\mathcal{D}[q(z_1,z_2\vert X,y) \Vert p(z_1,z_2)] = \mathcal{D}[q(z_1\vert x)\Vert p(z_1\vert y,z_2)] +\mathcal{D}[q(z_2\vert z_1,y)\Vert p(z_2)]
+$$
+
+由正态分布假设, 该形式存在解析解. 
+
+#### 无标注损失
+对于那些没有标注的损失函数而言, 我们将标注看成是一个服从多项式分布的随机变量
+
+$$
+\log p(X) \geq E_{y,z\sim q(z\vert X)}[\log p(x\vert z_1)+\log p(z_1,z_2)+\log p_{\theta}(y)-\log q(z_1,z_2,y\vert X) \\
+= E_{y,z\sim q(z,y\vert X)}[\log p(x\vert z_1)+\log p(z_1,z_2)+\log p_{\theta}(y)- \log q(z_1\vert X)-\log q(y \vert z_1)-\log q(z_2\vert z_1,y) ]\\
+= E_{y \sim q(y\vert z_1)}E_{z_1,z_2\sim q(z_1,z_2\vert X,y)}[\log p(x\vert z_1)+\log p(z_1,z_2)+\log p_{\theta}(y)- \log q(z_1\vert X)-\log q(y \vert z_1)-\log q(z_2\vert z_1,y) ]\\
+=\sum_{y}q_(y\vert z_1)(-\mathcal{L}(X,y)) +\mathcal{H}(q(y\vert z_1))=- \mathcal{U}(X)
+$$
+
+因此, 此时我们可以很自然地导出损失函数(用$\tilde{p_l},\tilde{p_u}$)分别表示有标注和没有标注的数据集. 
+
+$$
+\mathcal{J}=\sum_{X,y \sim \tilde{p_l}}\mathcal{L}(X,y) +\sum_{X \sim \tilde{p_u}} \mathcal{U}(X)
+$$
+
+注意到上面的所有推导都是将$y$视作为一个离散潜变量而言的, 尤其是损失函数$\mathcal{L}(X,y)$中并没有利用$y$的标注信息, 注意给定$y$后相当于$y$坍缩到一个退化分布(或者说有一个类出现概率为1的多项式分布), 因此我们再引入此时变分编码器对离散潜变量的分布预测与退化分布的**KL**散度,通过最小化它来利用标注信息, 即
+
+$$
+\mathcal{C}=\min \mathcal{D}[p(y\vert X) \Vert q(y\vert z_1)]=\min -\sum_{y_i} y_i \log q(y_i\vert z_1) 
+$$
+
+因此最后损失函数为 
+
+$$
+\mathcal{J}^{\alpha} = \mathcal{J} +\alpha \mathcal{C}
+$$
 
 
 ## 附录
@@ -422,10 +492,12 @@ $$
   $$
 
   证明:
+
   $$
   \nabla_{\mu_i}E_{\xi_l \sim \mathcal{N}(\mu_l,C_l)}f(\xi_1,\ldots,\xi_L) \\
 
   =\nabla _{u_i}\int_{\xi_1}\ldots\int_{\xi_L}\Pi_{l=1}^{L} \frac{1}{\sqrt{2\pi \vert C_l\vert }}\exp(-\frac{(\xi_l -\mu_l)'C_{l}^{-1}(\xi_l-\mu_l)}{2})f(\xi_1,\ldots,\xi_L)d\xi_1\ldots d\xi_L\\
+
   =\int_{\xi_1}\ldots\int_{\xi_L}[\Pi_{\neg i} \frac{1}{\sqrt{2\pi \vert C_l\vert }}\exp(-\frac{(\xi_l -\mu_l)'C_{l}^{-1}(\xi_l-\mu_l)}{2})]\nabla _{u_i}p(\xi_i)f(\xi_1,\ldots,\xi_L)d\xi_1\ldots d\xi_L \tag{A.1}
   $$
 
