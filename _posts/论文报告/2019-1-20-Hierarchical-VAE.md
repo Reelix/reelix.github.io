@@ -11,7 +11,6 @@ figure: /images/hierarchical-vae/basic_structure.png
 * content
 {:toc}
 
-参考资料:
 
 
 **FengHZ's Blog 首发原创**
