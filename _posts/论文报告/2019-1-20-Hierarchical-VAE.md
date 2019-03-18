@@ -5,7 +5,6 @@ date: 2019-1-13 20:10:00
 categories: 机器学习
 tags: Variational-Inference
 mathjax: true
-figure: /images/hierarchical-vae/basic_structure.png
 ---
 
 * content
