@@ -1,7 +1,7 @@
 ---
 layout: post
 title: Some notes on hierarchical vae
-date: 2019-1-13 20:10:00
+date: 2018-12-18 20:10:00
 categories: 机器学习
 tags: Variational-Inference
 mathjax: true
@@ -9,9 +9,6 @@ mathjax: true
 
 * content
 {:toc}
-
-
-
 **FengHZ's Blog 首发原创**
 
 ## 前言
@@ -27,6 +24,8 @@ $$
 $$
 \log(p(x))=log(E_{q(z\vert x)}\frac{p(x,z)}{q(z\vert x)})\geq E_{q(z\vert x)}\log(\frac{p(x,z)}{q(z\vert x)})=ELBO \tag{1}
 $$
+
+
 
 
 
