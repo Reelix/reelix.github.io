@@ -51,7 +51,9 @@ $$
 
 然后对$\mathbf{\Lambda}=diag(\lambda_1,...,\lambda_p)$进行排序，满足$\lambda_1\geq \lambda_2\geq\lambda_p$，然后挑选出前$q$个$\mathbf{a}$，得到$\mathbf{h}$，此时$Var(h_i)=\lambda_i$，同时$h_i,h_j$线性无关。
 
-注意到PCA所分解的对象$\mathbf{X}$仍然是随机变量，但是PCA所用的手法却属于数值代数的范畴。PCA等价于一个坐标旋转变换，它将数据协方差矩阵进行了旋转，并在新的坐标系上进行了投影，然后只选择那些投影度量比较高的分量作为最后的结果。
+注意到PCA所分解的对象$\mathbf{X}$仍然是随机变量，但是PCA所用的手法却属于数值代数的范畴。PCA等价于一个坐标旋转变换，它将数据协方差矩阵进行了旋转，并在新的坐标系上进行了投影，然后只选择那些投影度量比较高的分量作为最后的结果，它的几何解释可以参考下图。
+
+![PCA](/images/representation-learning/PCA.gif)
 
 因子模型可以看作是一个生成模型，它描述了一个以潜变量$\mathbf{h}$为因，以可观测变量$\mathbf{X}$为果的生成关系。假定$\mathbf{h}\sim p(\mathbf{h})$, 其中$\mathbf{h}$满足独立性假设，即$p(\mathbf{h})$$=\Pi_{i=1}^{n}p(z_i)$。我们对$\mathbf{h}$进行一次观测，得到一个观测结果$\mathbf{\tilde{h}}$，然后用如下生成模式生成其对应的观测变量$\mathbf{\tilde{X}}$:
 
