@@ -1,6 +1,6 @@
 ---
 layout: post
-title: From Representation Learning to VAE - A brief history
+title: From Representation Learning to VAE - A Brief History
 date: 2019-3-19 12:32:00
 categories: 机器学习
 tags: Variational-Inference, Representation-Learning
