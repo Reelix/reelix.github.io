@@ -338,7 +338,9 @@ $$
 L(\mathbf{X,\theta},q)&=\log p(\mathbf
 {X;\theta})-\mathcal{D}_{KL}[q(\mathbf{h\vert X})\Vert p(\mathbf{h\vert X;\theta})]\\
 &=E_{\mathbf{h\sim}q}[\log p(\mathbf{h,X})]+H(q)\\
-&=E_{\mathbf{h\sim}q}[\log p(\mathbf{X\vert h})]-\mathcal{D}_{KL}[q(\mathbf{h\vert X )\Vert p(h)})] \tag{10}
+&=E_{\mathbf{h\sim}q}[\log p(\mathbf{X\vert h})]-\mathcal{D}_{KL}[q(\mathbf{h\vert X )\Vert p(h)})] \\
+
+\tag{10}
 \end{aligned}
 $$
 
