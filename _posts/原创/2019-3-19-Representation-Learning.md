@@ -479,7 +479,13 @@ $$
 
 * *ELBO*的估计问题
   
-  我们在训练过程中，往往采用最大化*ELBO*$(10)$的方式来间接最大化$\mathbf{X}$的似然函数。它的问题在于我们无法定量估计$\mathcal{D}_{KL}[p\Vert q]$，即可能会存在非常复杂的后验分布$p$，使得$max_{q} L(\mathbf{X},\theta^*,q)<<\log p(\mathbf{X},\theta^*)$，此时$q$完全无法拟合$p$。
+  我们在训练过程中，往往采用最大化*ELBO*$(10)$的方式来间接最大化$\mathbf{X}$的似然函数。它的问题在于我们无法定量估计 $\mathcal{D}_{KL}[p\Vert q]$，即可能会存在非常复杂的后验分布$p$，使得
+  
+  $$
+  max_{q} L(\mathbf{X},\theta^*,q)\ll\log p(\mathbf{X},\theta^*)
+  $$
+  
+  此时$q$完全无法拟合$p$。
 
   这一类问题已经得到了广泛的讨论，最新的文献是[Adversarial Variational Bayes - Unifying Variational Autoencoders and Generative Adversarial Networks](https://arxiv.org/abs/1701.04722)，文献提出用对抗训练模式寻找$p$的真实分布，并给出了该训练模式下的纳什均衡点一定是$p$的真实后验分布的数学证明，从理论上一举解决了这个问题。
 
