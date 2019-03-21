@@ -334,14 +334,10 @@ $$
 但是对于$p(\mathbf{h\vert X})$的具体形式我们仍然无法进行计算，一个方法是用预先给定的一类分布族$q(\mathbf{h\vert X})$来逼近$p(\mathbf{h\vert X})$，这样就引出了变分推断的核心公式(证据下界,变分自由能)
 
 $$
-\begin{aligned}
-L(\mathbf{X,\theta},q)&=\log p(\mathbf
+L(\mathbf{X,\theta},q)=\log p(\mathbf
 {X;\theta})-\mathcal{D}_{KL}[q(\mathbf{h\vert X})\Vert p(\mathbf{h\vert X;\theta})]\\
-&=E_{\mathbf{h\sim}q}[\log p(\mathbf{h,X})]+H(q)\\
-&=E_{\mathbf{h\sim}q}[\log p(\mathbf{X\vert h})]-\mathcal{D}_{KL}[q(\mathbf{h\vert X )\Vert p(h)})] \\
-
-\tag{10}
-\end{aligned}
+=E_{\mathbf{h\sim}q}[\log p(\mathbf{h,X})]+H(q)\\
+=E_{\mathbf{h\sim}q}[\log p(\mathbf{X\vert h})]-\mathcal{D}_{KL}[q(\mathbf{h\vert X )\Vert p(h)})] \tag{10}
 $$
 
 与自动编码器建立联系的一个例子是，如果我们认为$q(\mathbf{h\vert X )}$满足*Dirac*分布
@@ -388,12 +384,11 @@ $$
 函数$f$的函数$J[f]$称为泛函，从函数到实数的常用映射是积分，因此变分法的基本公式是
 
 $$
-\begin{aligned}
-J[f] &= \int L(x,f(x),\nabla f(x))\ dx \\
-\frac{\partial F}{\partial f} &= \frac{\partial L}{\partial f} - \nabla \frac{\partial L}{\partial \nabla f(x)} \\
+J[f] = \int L(x,f(x),\nabla f(x))\ dx 
+$$
 
-\tag{13}
-\end{aligned}
+$$
+\frac{\partial F}{\partial f} = \frac{\partial L}{\partial f} - \nabla \frac{\partial L}{\partial \nabla f(x)} \tag{13}
 $$
 
 我们给出变分法的一个应用。考虑寻找一个定义于$x\in \mathcal{R}$上的有最大[微分熵](https://fenghz.github.io/Variational-AutoEncoder/#133-%E4%BB%8E%E7%A6%BB%E6%95%A3%E9%9A%8F%E6%9C%BA%E5%8F%98%E9%87%8F%E6%8E%A8%E5%B9%BF%E5%88%B0%E8%BF%9E%E7%BB%AD%E9%9A%8F%E6%9C%BA%E5%8F%98%E9%87%8F)的概率密度函数$p$，其微分熵$H[p] = -\int p(x)\log p(x) dx$。我们一般不能简单地最大化$H[p]$，因为这样结果可能不是一个归一化的概率分布。同时，当方差增大的时候，熵也会无限增大。最后，给定方差后，概率分布可以不断平移而保证$H[p]$不变，因此为了获得唯一解，我们需要对分布的均值进行约束，三个约束如下表示
