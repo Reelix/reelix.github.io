@@ -65,7 +65,7 @@ $$
 
 ### 因子模型中的*meta-prior*
 
-如果我们将已知大量可观测变量$\mathbf{\tilde{X}}$后的因子模型 $(2)$ 看作是一个统计推断问题, 即已知模型 $(2)$，给定一个新的样本 $\mathbf{X}_{test}$ 后，我们来推断到底是什么样的 $\mathbf{h}_{test}$ 生成了 $\mathbf{X}_{test}$，一个很自然的想法是最大似然估计，即找到单个最可能的编码值
+如果我们将已知大量可观测变量$\mathbf{\tilde{X}}$后的因子模型 $(2)$ 看作是一个统计推断问题, 即已知模型 $(2)$，给定一个新的样本 $\mathbf{X_{test}}$ 后，我们来推断到底是什么样的 $\mathbf{h_{test}}$ 生成了 $\mathbf{X_{test}}$，一个很自然的想法是最大似然估计，即找到单个最可能的编码值
 
 $$
 \mathbf{h}^{*}_{test} = \arg\max_{\mathbf{h}} p(\mathbf{h}\vert \mathbf{x}) \tag{3}
