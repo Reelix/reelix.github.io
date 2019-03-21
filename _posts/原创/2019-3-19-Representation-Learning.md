@@ -325,10 +325,10 @@ $$
 
 对模型进行推断，推断一般需要对$p\mathbf{(X\vert h)}$以及$p(\mathbf{h})$的分布做出假设。回顾上文，如果我们对$p(\mathbf{h})$做出了*Laplacian*假设的话，那么会得到一个稀疏约束。
 
-注意如果我们要给出$(9)$式的精确值，那么我们需要多次重复计算$\mathbf{p(X\vert h)}$，如果$p(\mathbf{h})$是一类连续分布的话，计算次数将趋向于无穷，这显然是不可接受的。一个非常自然的想法是，如果我们能找到出现概率最大的$\mathbf{h^{*}}$，并利用$\mathbf{h^{*}}$来预测 $(9)$ ，即
+注意如果我们要给出$(9)$式的精确值，那么我们需要多次重复计算$\mathbf{p(X\vert h)}$，如果$p(\mathbf{h})$是一类连续分布的话，计算次数将趋向于无穷，这显然是不可接受的。一个非常自然的想法是，如果我们能找到出现概率最大的$\mathbf{h^{\star}}$，并利用$\mathbf{h^{\star}}$来预测 $(9)$ ，即
 
 $$
-\mathbf{h^*}=\arg\max_{\mathbf{h}}p(\mathbf{h\vert X})
+\mathbf{h^\star}=\arg\max_{\mathbf{h}}p(\mathbf{h\vert X})
 $$
 
 但是对于$p(\mathbf{h\vert X})$的具体形式我们仍然无法进行计算，一个方法是用预先给定的一类分布族$q(\mathbf{h\vert X})$来逼近$p(\mathbf{h\vert X})$，这样就引出了变分推断的核心公式(证据下界,变分自由能)
@@ -389,8 +389,10 @@ $$
 
 $$
 \begin{aligned}
-J[f] = \int L(x,f(x),\nabla f(x))\ dx \\
-\frac{\partial F}{\partial f} = \frac{\partial L}{\partial f} - \nabla \frac{\partial L}{\partial \nabla f(x)} \tag{13}
+J[f] &= \int L(x,f(x),\nabla f(x))\ dx \\
+\frac{\partial F}{\partial f} &= \frac{\partial L}{\partial f} - \nabla \frac{\partial L}{\partial \nabla f(x)} \\
+
+\tag{13}
 \end{aligned}
 $$
 
