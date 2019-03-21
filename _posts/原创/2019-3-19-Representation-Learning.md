@@ -10,6 +10,8 @@ mathjax: true
 * content
 {:toc}
 
+**FengHZ‘s Blog首发原创**
+
 ## 简介
 
 从主成分分析(PCA)，线性因子模型到自动编码器，基于无监督学习的特征提取方法不断发展。同时自从引入深度学习技术后，我们对潜变量与因子空间的推断效率与推断方法都有极大的突破，此时原始数据可以在因子空间(通常是潜变量空间)得到更简洁的表示。一个很自然的问题是，如何来比较两种表示的优越程度呢？到底是什么因素决定了一种表示比另外一种表示更好呢?
@@ -310,4 +312,191 @@ $$
 * 时间与空间相关性
   
   慢特征分析假设对于整个时序场景而言，构成整个时序场景主要语义的特征变化是缓慢的，因此我们可以用该缓慢变化构造正则化条件，具体参考Section.2中的不变特征(慢特征)分析一节
+
+## Section.4 变分推断与变分自编码器(VAE)
+
+在之前的章节中，我们探究了表示学习的基本概念以及一些经典表示学习算法，本节中，我们将表示学习与变分推断关联起来，阐述受表示学习启发的变分推断模型的基本形式，以及参数推断的优化方法的变迁。关于变分自编码器(VAE)部分，我们将只关注于它的一些工程问题，模型的不足之处与亟待解决的问题，VAE的细节可以参考[Hierarchical VAE](https://fenghz.github.io/Hierarchical-VAE/)以及[A tutorial to VAE](https://fenghz.github.io/Variational-AutoEncoder/)这两篇Blog，这里我们默认读者已经对VAE有了初步的了解。
+
+表示学习模型往往呈现生成模型的形式，我们认为观测数据$\mathbf{X}$由多个解释因子$\mathbf{h}$所生成，它们具有因果性，$\mathbf{X}$是结果，而$\mathbf{h}$则是原因。模型基于$p(\mathbf{X})$的极大似然原则，利用公式
+
+$$
+\mathbf{p(X)=\sum_{h}p(X,h) = \sum_{h}p(X\vert h)p(h)} \tag{9}
+$$
+
+对模型进行推断，推断一般需要对$p\mathbf{(X\vert h)}$以及$p(\mathbf{h})$的分布做出假设。回顾上文，如果我们对$p(\mathbf{h})$做出了*Laplacian*假设的话，那么会得到一个稀疏约束。
+
+注意如果我们要给出$(9)$式的精确值，那么我们需要多次重复计算$\mathbf{p(X\vert h)}$，如果$p(\mathbf{h})$是一类连续分布的话，计算次数将趋向于无穷，这显然是不可接受的。一个非常自然的想法是，如果我们能找到出现概率最大的$\mathbf{h*}$，并利用$\mathbf{h*}$来预测$(9)$，即
+
+$$
+\mathbf{h^*}=\arg\max_{\mathbf{h}}p(\mathbf{h\vert X})
+$$
+
+但是对于$p(\mathbf{h\vert X})$的具体形式我们仍然无法进行计算，一个方法是用预先给定的一类分布族$q(\mathbf{h\vert X})$来逼近$p(\mathbf{h\vert X})$，这样就引出了变分推断的核心公式(证据下界,变分自由能)
+
+$$
+\begin{aligned}
+L(\mathbf{X,\theta},q)&=\log p(\mathbf
+{X;\theta})-\mathcal{D}_{KL}[q(\mathbf{h\vert X})\Vert p(\mathbf{h\vert X;\theta})]\\
+&=E_{\mathbf{h\sim}q}[\log p(\mathbf{h,X})]+H(q)\\
+&=E_{\mathbf{h\sim}q}[\log p(\mathbf{X\vert h})]-\mathcal{D}_{KL}[q(\mathbf{h\vert X )\Vert p(h)})] \tag{10}
+\end{aligned}
+$$
+
+与自动编码器建立联系的一个例子是，如果我们认为$q(\mathbf{h\vert X )}$满足*Dirac*分布
+
+$$
+q(\mathbf{h\vert X}) = \delta(\mathbf{h-\mu})
+$$
+
+那么此时模型退化到自动编码器，即
+
+$$
+\max_{\theta}  \log(\mathbf{p(X\vert h=\mu)})
+$$
+
+### 变分推断的优化方法
+
+#### EM算法
+
+在早期的变分推断方法中，我们往往将$(10)$视作是一个目标函数，同时采用EM算法完成迭代优化任务。EM算法是一个用于因变量推断的优化算法。令$\mathbf{X}$表示可观测变量集，$\mathcal{h}$表示隐变量集，$\theta$表示模型参数。如果我们要对$\theta$进行极大似然估计，那么我们可以最大化已观测变量的对数似然函数来对模型参数$\theta$进行优化：
+
+$$
+\log p(\mathbf{X}\vert \theta) = \log \sum_{\mathbf{h}}p(\mathbf{X,h}\vert \theta) \tag{11}
+$$
+
+假定待观测参数的初始值为$\theta^0$，EM算法分两步进行迭代：
+
+1. 计算期望
+   给定参数后，$p(\mathbf{X,h}\vert \theta)$ 变成了可以进行计算的部分，此时我们可以给出$(11)$的估计
+
+   $$
+   Q(\theta\vert \theta^t) = E_{\mathbf{h\vert X,\theta^t}} \log p(\mathbf{X,h}\vert \theta) \tag{12}
+   $$
+
+2. 最大化$(12)$式所表达的期望
+   
+    $$
+    \theta^{t+1} = \arg \max_{\theta} Q(\theta\vert \theta^t) 
+    $$
+
+#### 变分法
+
+求期望的过程是一个积分过程，因此对$(10)$的最大化可以转化为对$q$求变分的过程。我们首先介绍一下变分法的基本公式与应用，再揭示一下在$(10)$中应用变分法可以得到怎样有趣的结果。
+
+函数$f$的函数$J[f]$称为泛函，从函数到实数的常用映射是积分，因此变分法的基本公式是
+
+$$
+\begin{aligned}
+J[f] = \int L(x,f(x),\nabla f(x))\ dx \\
+\frac{\partial F}{\partial f} = \frac{\partial L}{\partial f} - \nabla \frac{\partial L}{\partial \nabla f(x)} \tag{13}
+\end{aligned}
+$$
+
+我们给出变分法的一个应用。考虑寻找一个定义于$x\in \mathcal{R}$上的有最大[微分熵](https://fenghz.github.io/Variational-AutoEncoder/#133-%E4%BB%8E%E7%A6%BB%E6%95%A3%E9%9A%8F%E6%9C%BA%E5%8F%98%E9%87%8F%E6%8E%A8%E5%B9%BF%E5%88%B0%E8%BF%9E%E7%BB%AD%E9%9A%8F%E6%9C%BA%E5%8F%98%E9%87%8F)的概率密度函数$p$，其微分熵$H[p] = -\int p(x)\log p(x) dx$。我们一般不能简单地最大化$H[p]$，因为这样结果可能不是一个归一化的概率分布。同时，当方差增大的时候，熵也会无限增大。最后，给定方差后，概率分布可以不断平移而保证$H[p]$不变，因此为了获得唯一解，我们需要对分布的均值进行约束，三个约束如下表示
+
+$$
+\begin{aligned}
+\int p(x) dx=1\\
+\int xp(x) =\mu\\
+\int (x-\mu)^2 p(x) = \sigma^2
+\end{aligned}
+$$
+
+我们将带约束优化问题写成拉格朗日泛函形式
+
+$$
+\mathcal{L}[p] = H[p] + \lambda_1[\int p(x)dx-1]+\lambda_2 [\int xp(x)dx-\mu] + \lambda_3 [\int x^2p(x)dx -\sigma^2]
+$$
+
+利用$(13)$，我们令泛函导数等于0为
+
+$$
+\frac{\partial L}{\partial p} = \lambda_1  +\lambda_2 x+ \lambda_3(x-\mu)^2 -(1+\log p)=0
+$$
+
+可以解得 
+
+$$
+p = \exp[\lambda_1+\lambda_2 x+\lambda_3(x-\mu)^2 -1]
+$$
+
+我们将$p$代入三个约束，得到
+
+$$
+p=N(\mu,\sigma^2)
+$$
+
+这就给出了正态分布总是令微分熵最小的分布这一经典统计学结论。为了说明变分法在变分推断中的关键作用，我们给出并证明如下定理
+
+* 如果我们对潜变量施加因子独立性假设，即$\mathbf{q(h\vert X)} = \Pi_{i} q(h_i\vert \mathbf{X})$，那么在假设
+  
+  $$
+  p(\mathbf{h}) = \mathcal{N}(\mathbf{h};0,I);p(\mathbf{X\vert h})= \mathcal{N}(\mathbf{W^Th,\sigma^2}) \tag{14}
+  $$
+
+    时，我们可以给出结论，令$(10)$取得最大值的分布$q$是各分量独立的多元正态分布。
+
+    证明：
+
+    $$
+    \begin{aligned}
+    E_{q}\log p(\mathbf{X;h})+H[q] &= \log p(\mathbf{X}) +\sum_{j=1}^m E_{q} \log p(h_j\vert h_{1:j-1},\mathbf{X}) -\sum_{j=1}^m E_{q}[\log q(z_j)]
+    \end{aligned}
+    $$
+    我们记$q_{h_j}=q_j$，给定$\mathbf{X,h_{-j}}$的信息，我们对$q_j$用变分法
+
+    $$
+    \arg\max _{q_j} \mathcal{L} = \arg\max_{q_j} E_{q}[\log p(h_j\vert \mathbf{h_{-j},X})] -E_{q_j}\log(q(z_j))
+    $$
+    
+    可以得到
+
+    $$
+    q_j \propto \exp (E_{\mathbf{h_{-j}}\sim q(\mathbf{h_{-j}\vert X})}\log p(\mathbf{X,h}))
+    $$
+
+    再利用
+
+    $$
+    p(\mathbf{h,X}) = p(\mathbf{h})p(\mathbf{X\vert h})
+    $$
+    
+    以及$(14)$中的假设，我们可以得到
+
+    $$
+    q_j =  \mathcal{N}(h_j;\mu_j,\sigma_j)
+    $$
+
+    利用独立因子假设可得，令$(10)$取得最大值的分布$q$是各分量独立的多元正态分布。
+
+#### 反向传播算法
+
+利用变分法所得的正态性结论，我们将对$q$的变分推断问题简化为对$q$的正态分布参数的推断问题，此时我们就可以用深度学习作为万能近似器来学习推断，并用反向传播算法训练VAE，[VAE的几篇奠基性文章正是给出了训练中的反向传播梯度计算方式](https://fenghz.github.io/Hierarchical-VAE/#7-11%E8%AF%81%E6%98%8E)。
+
+### VAE的一些工程问题讨论
+
+上文中，我们给出了从经典潜变量模型到变分推断的一些有效结论，并通过这些结论自然引导出了VAE的基本思想。但是VAE在工程实现方面仍然有诸多问题，我们主要讨论变分下界ELBO的估计问题与生成图像问题。
+
+* *ELBO*的估计问题
+  
+  我们在训练过程中，往往采用最大化*ELBO*$(10)$的方式来间接最大化$\mathbf{X}$的似然函数。它的问题在于我们无法定量估计$\mathcal{D}_{KL}[p\Vert q]$，即可能会存在非常复杂的后验分布$p$，使得$max_{q} L(\mathbf{X},\theta^*,q)<<\log p(\mathbf{X},\theta^*)$，此时$q$完全无法拟合$p$。
+
+  这一类问题已经得到了广泛的讨论，最新的文献是[Adversarial Variational Bayes - Unifying Variational Autoencoders and Generative Adversarial Networks](https://arxiv.org/abs/1701.04722)，文献提出用对抗训练模式寻找$p$的真实分布，并给出了该训练模式下的纳什均衡点一定是$p$的真实后验分布的数学证明，从理论上一举解决了这个问题。
+
+* 生成图像问题
+  
+  VAE生成的图像往往会出现模糊的情况，这种现象的原因尚不清楚，一种可能性是模糊性是最大似然估计的一个固有效应，因为我们需要最小化$D_{KL}[q\Vert p]$，如图所示
+
+    ![KL_Div](/images/representation-learning/KL_div.png)
+
+  另外一个原因是因为我们对$p(\mathbf{X\vert h}$一般给出高斯分布假设，它与传统自动编码器的损失函数一致，倾向于忽略由少量像素表示的特征，或其中亮度变化微小的像素。
+
+    ![reconstruct_loss](/images/representation-learning/reconstruction_loss.png)
+
+  一个解决方法是引入GAN的对抗训练模式来训练解码器，实践证明这样的训练确实是有效的。
+
+  还有一个问题是，现代VAE模型倾向于使用完整预设潜变量空间中的较小子集，这是因为模型需要优化$\mathcal{D}_{KL}[q\Vert \mathcal{N}(0,I)]$，这使得大部分潜变量分布将退化为标准正态分布不含任何信息，而大量信息将聚集在方差极小的潜变量上，这是否是KL散度的固有问题(优化过程中将必然出现凝聚现象)，还是VAE的固有问题还是一个非常值得探究的前沿方向。
+
+
+
 
