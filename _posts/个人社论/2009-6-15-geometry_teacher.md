@@ -1,6 +1,6 @@
 ---
 layout: post
-title: 地理老师——一个可爱的小老太婆[2009.6]
+title: 地理老师——一个可爱的小老太婆
 date: 2009-6-15 22:43:00
 categories: 个人社论
 tags: Thoughts

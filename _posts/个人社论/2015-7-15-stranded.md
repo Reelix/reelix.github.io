@@ -1,6 +1,6 @@
 ---
 layout: post
-title: 搁浅[2015.7]
+title: 搁浅
 date: 2015-6-15 22:43:00
 categories: 个人社论
 tags: Thoughts
