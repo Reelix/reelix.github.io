@@ -8,7 +8,10 @@ type: page
 
 * content
 {:toc}
-## 关于我
+## [关于我](https://fenghz.github.io/resume/)
+
+![myphoto](/images/about/fhz.jpg)
+
 
 ### 教育经历
 
