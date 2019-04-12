@@ -53,7 +53,12 @@ $$
 -E_{ q_{\phi}(\mathbf{z}\vert \mathbf{x})}E_{ q_{\phi}(\mathbf{c}\vert \mathbf{x})}[\log p_{\theta}(\mathbf{x}\vert \mathbf{z},\mathbf{c})] + \mathcal{D}_{KL}[q_{\phi}(\mathbf{z}\vert \mathbf{x}) \Vert p(\mathbf{z})]+\mathcal{D}_{KL}[q_{\phi}(\mathbf{c} \vert \mathbf{x}) \Vert p(\mathbf{c})]  \tag{2}
 $$
 
-Based on $(2)$, the paper mainly solves how to sample $\mathbf{c}$ from the discrete distribution $q_{\phi}(\mathbf{c}\vert \mathbf{x})$ and proposes a differentiable reparametrisation trick baed on the Gumbel Max trick. It also use information capacity method to provide an upper bound on the mutual information of $\mathcal{D}_{KL}[q_{\phi}(\mathbf{z},\mathbf{c} \vert \mathbf{x}) \Vert p(\mathbf{z},\mathbf{c})]$, which is proved to be the key to successfully train model.
+Based on $(2)$, the paper mainly solves how to sample $\mathbf{c}$ from the discrete distribution $q_{\phi}(\mathbf{c}\vert \mathbf{x})$ and proposes a differentiable reparametrisation trick baed on the Gumbel Max trick. It also use information capacity method to provide an upper bound on the mutual information of 
+
+$$
+\mathcal{D}_{KL}[q_{\phi}(\mathbf{z},\mathbf{c} \vert \mathbf{x}) \Vert p(\mathbf{z},\mathbf{c})]$$
+
+which is proved to be the key to successfully train model.
 
 ### Differentiable Reparametrisation Trick for Discrete Distribution
 
@@ -148,6 +153,6 @@ $$
 \mathbf{e_i = \sum _{n,i,j:\mathbf{z_q(x_n)_{i,j}=e_i}}}\mathbf{z_e(x_n)_{i,j}}/\vert \{n,i,j:\mathbf{z_q(x_n)_{i,j}=e_i}\}\vert 
 $$
 
-which is the k-means centroid for the $i-th$ cluster.
+which is the k-means centroid for the *i-th* cluster.
 
-To give a brief summary, the VQ-VAE just uses the vector quantization method in the encoder feature and do the "feature compression" job instead of the fully connected feature encoder and decoder operation. 
+To give a brief summary, the VQ-VAE just utilizes the vector quantization method in the encoder feature and do the "feature compression" job instead of the fully connected feature encoder and decoder operation. 
