@@ -1,7 +1,7 @@
 ---
 layout: post
 title: Some Notes on Discrete VAE
-date: 2019-3-19 12:32:00
+date: 2019-4-12 12:32:00
 categories: 机器学习
 tags: VAE
 mathjax: true
