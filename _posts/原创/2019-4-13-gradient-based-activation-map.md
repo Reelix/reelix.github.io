@@ -1,7 +1,7 @@
 ---
 layout: post
 title: Some Gradient Based Methods to Visualizing and Understanding CNN
-date: 2019-4-12 12:32:00
+date: 2019-4-15 12:32:00
 categories: 机器学习
 tags: VAE
 mathjax: true
