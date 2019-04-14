@@ -124,7 +124,7 @@ The dimensions of discrete variables highly depend on the dataset itself. If a d
 
 ### Vector Quantization
 
-Vector Quantization is one of the basic image compression technique. It focuses on the problem that how to compress a n-bits image to m-bits. Vector Quantization views the 3 channel $H*W$ image as  $H*W$ 3-dim vectors and use k-means algorithms to cluster these vectors into m classes. Then we can map each pixel into the cluster label and compress the whole image into m-bits. We also need to create a dictionary recording the centroid of each cluster. When we want to unzip the compressed images, we just use the centroid of the corresponding cluster to fill each pixel. The detail of this algorithm can be found in [this blog]((http://blog.pluskid.org/?p=57)
+Vector Quantization is one of the basic image compression technique. It focuses on the problem that how to compress a n-bits image to m-bits. Vector Quantization views the 3 channel $H\times W$ image as  $H\times W$ 3-dim vectors and use k-means algorithms to cluster these vectors into m classes. Then we can map each pixel into the cluster label and compress the whole image into m-bits. We also need to create a dictionary recording the centroid of each cluster. When we want to unzip the compressed images, we just use the centroid of the corresponding cluster to fill each pixel. The detail of this algorithm can be found in [this blog]((http://blog.pluskid.org/?p=57)
 ). 
 
 ### VQ-VAE
