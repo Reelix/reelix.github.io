@@ -135,7 +135,7 @@ The following figure describes the main structure of VQ-VAE
 
 ![VQ-VAE](/images/discrete-vae/vq-vae.png)
 
-As seen on figure, it firstly define a latent embedding space $\mathbf{e}\in R^{K\times D}$ where $K$ is the size of the discrete latent space and $D$ is the dimensionality of each latent embedding vector $\mathbf{e_i}$.The encoder take raw image as input and output the concated feature $\mathbf{z_e(x)}$, then the discrete latent variables $\mathbf{z}$ are then calculated by a nearest neighbour look-up using the shared space $\mathbf{e}\in R^{K\times D}$. The input to the decoder is the corresponding  embedding vector $\mathbf{z_q(x)}$ given as 
+As seen on figure, it firstly defines a latent embedding space $\mathbf{e}\in R^{K\times D}$ where $K$ is the size of the discrete latent space and $D$ is the dimensionality of each latent embedding vector $\mathbf{e_i}$.The encoder takes a raw image $\mathbf{x}$ as input and output the concated feature $\mathbf{z_e(x)}$, then the discrete latent variables $\mathbf{z}$ are then calculated by a nearest neighbour look-up using the shared space $\mathbf{e}\in R^{K\times D}$. The input to the decoder is the corresponding  embedding vector $\mathbf{z_q(x)}$ given as 
 
 $$
 \mathbf{z_q(x)_{i,j} = e_k},k=\arg\min _p \Vert \mathbf{z_e(x)_{i,j}-e_p} \Vert_2^2
