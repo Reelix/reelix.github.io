@@ -352,9 +352,19 @@ h_k'Lh_k=\sum_{i,j}w_{i,j}(h_{i,k}-h_{j,k})^2=\sum_{i\in A,j\in\bar{A}}w_{i,j}/\
 =2*cut(A_k,\bar{A_k})/\ \vert A_k\ \vert 
 $$
 
-(注意此时按照原文的定理应该是$2*cut(A_k,\bar{A_k})$)，因为此时权重都没有$1/2$在，因此我认为应该给一个修正是$1/\sqrt{\ \vert A_j\ \vert }\rightarrow1/\sqrt{2*\ \vert A_j\ \vert }$
+(注意此时按照原文的定理应该是$2\times cut(A_{k},\bar{A_k})$)，因为此时权重都没有$1/2$在，因此我认为应该给一个修正是
 
-同时此时有$h_i'Lh_i=(H'LH)_{ii}$，原来的$min_{A_1,...,A_k\subset V}RatioCut(A_1,...,A_k)$可以写成是：
+$$
+1/\sqrt{\ \vert A_j\ \vert }\rightarrow1/\sqrt{2 \vert A_j\ \vert }
+$$
+
+同时此时有$h_{i}'Lh_{i}=(H'LH)_{ii}$，原来的
+
+$$
+min_{A_{1},...,A_{k}\subset V}RatioCut(A_{1},...,A_{k})
+$$
+
+可以写成是：
 
 $$
 min_{A_1,...,A_k}Tr(H'LH),s.t. H'H=I
