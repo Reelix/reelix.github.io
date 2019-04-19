@@ -21,6 +21,7 @@ Large Convolutional Network models have recently demonstrated impressive classif
 
 
 
+
 Take an chest X-ray medical image as an example. To this image, an experienced radiologist will rely on the feature that the left thoracic cavity (on the right side of the image) has a sharp pleural boundary(the blue bounding box), while the right pleural boundary (on the left side of the image) has an obtuse angle and then diagnose pleural effusion. If we train an deep classification CNN model take it as input, the model will also make a diagnosis that it's a patient with pleural effusion on the right part of the chest, while the process of prediction is a black box. The black box model may achieve high accuracy,whereas the lack of interpretability makes the model not directly usable in the clinic. Therefore, it's important to make it clear what the diagnosis obtained from the model is based on.
 
 ![chest-x-ray](/images/cnn_visual/chest-x-ray.png)
