@@ -45,6 +45,8 @@ Here we list some commonly used forms along with the proof. Our main references 
 
 2. [Adversarial Variational Bayes: Unifying Variational Autoencoders and Generative Adversarial Networks](https://dl.acm.org/citation.cfm?id=3305928)
 
+3. [Autoencoding beyond pixels using a learned similarity metric](https://arxiv.org/abs/1512.09300)
+
 ## Commonly used forms of ELBO
 
 At the beginning, we may declare some symbols and tricks as following
@@ -96,7 +98,13 @@ $$
 =\mathcal{D}_{KL}(q_{\phi}(z)\Vert \Pi_{j} q_{\phi}(z_j))+ \sum_{j=1}^{n} \mathcal{D}_{KL}(q_{\phi}(z_j)\Vert p(z_j))
 $$
 
-A widely used notation for $\mathcal{D}_{KL}(q_{\phi}(z)\Vert \Pi_{j} q_{\phi}(z_j))$ is $TC(q_{\phi}(z))$. We can assign high weight to the *part.1* loss to ensure the entanglement.
+A widely used notation for 
+
+$$
+\mathcal{D}_{KL}(q_{\phi}(z)\Vert \Pi_{j} q_{\phi}(z_{j}))
+$$ 
+
+is $TC(q_{\phi}(z))$. We can assign high weight to the *part.1* loss to ensure the entanglement.
 
 ### Info-VAE
 
@@ -145,7 +153,7 @@ L^{pixel}_{llike}=E_{\hat{p}(x)}[E_{q_{\phi}(z\vert x)}[-\log p_{\theta}(x\vert 
 L_{prior}=E_{\hat{p}(x)}[D_{KL}(q_{\phi}(z\vert x)\Vert p_{\theta}(z))] 
 $$
 
-The article adds a discriminator network to the original VAE and uses the output feature in the *l-th* layer of discriminator to calculate $L^{Dis_{l}}_{llike}$ as an alternative to $L^{pixel}_{llike}$
+The article adds a discriminator network to the original VAE and uses the output feature in the *l-th* layer of discriminator to calculate $L^{Dis_{l}}_{llike} \text{ as an alternative to }L^{pixel}_{llike}$
 
 $$
 L^{Dis_{l}}_{llike} = -E_{\hat{p}(x)}[E_{q_{\phi}(z\vert x)}[\log p(\text{Dis}_{l}(x\vert z)]]
@@ -164,7 +172,7 @@ In the training proceduer, we use adversarial method to train *Encoder*, *Decode
 * $L_{prior}=\mathcal{D}_{KL}(q(z\vert x)\Vert p(z))$
 * use *Decoder* to calculate $x_{reconstruct}$ 
 * sample $z\sim p(z)$, use *Decoder* to generate $x_{generate}$
-* calculate the *l-th* output feature of *Discriminator* as $\text{Dis}_{l}(x)$ and then calculate $L^{Dis_{l}}_{llike} = -\log p(\text{Dis}_{l}(x) \vert z)$
+* calculate the *l-th* output feature of *Discriminator* as $\text{Dis}_{l}(x) \text{ and then calculate} L^{Dis_{l}}_{llike} = -\log p(\text{Dis}_{l}(x) \vert z)$
 * use *Decoder* to calculate $L_{GAN} = \log(\text{Dis}(x)) + \log(1-\text{Dis}(x_{reconstruct})) + \log(1-\text{Dis}(x_{generate}))$
 * update the parameters step by step with SGD
    
@@ -300,7 +308,7 @@ $$
 T^{\star}(x,z_{\phi}(x,\epsilon)) = \log q_{\phi}(z\vert x) -\log r_{\alpha}(z\vert x)
 $$
 
-To estimate the mean and variance of $r_{\alpha}(z\vert x)$, we can simply sample $\epsilon$ many times and calculate the mean and std as the estimation. Another method is to use the network to predict $\mu$ and $\sigma$ for $z$ and do normalization with $\bar{z}_{\phi} = \frac{z_{\phi}-\mu}{\sigma}$, then we can view $r_{\alpha}(\bar{z}\vert x)\sim \mathcal{N}(0,I).$ 
+To estimate the mean and variance of $r_{\alpha}(z\vert x)$, we can simply sample $\epsilon$ many times and calculate the mean and std as the estimation. Another method is to use the network to predict $\mu$ and $\sigma$ for $z$ and do normalization with $\bar{z}_{\phi} = \frac{z_{\phi}-\mu}{\sigma}\text{ then we can view }r_{\alpha}(\bar{z}\vert x)\sim \mathcal{N}(0,I).$ 
 
 Following are the algorithm with adaptive contrast method
 
@@ -312,9 +320,15 @@ Following are the algorithm with adaptive contrast method
 4. sample $\{\epsilon^{(1)},\ldots,\epsilon^{(m)}\}$ from $\mathcal{N}(0,1)$
 5. sample $\{\eta^{(1)},\ldots,\eta^{(m)}\}$ from $\mathcal{N}(0,1)$
 6. **for** k =1,...,m **do**
-7. $z_{\phi}^{(k)},\mu^{(k)},\sigma^{(k)} =encoder_{\phi}(x^{(k)},\epsilon^{(k)})$
-8. $\bar{z}_{\phi}^{(k)} = \frac{z_{\phi}^{(k)}-\mu^{(k)}}{\sigma^{(k)}}$
-9. **end for**
+   
+7. $$
+   z_{\phi}^{(k)},\mu^{(k)},\sigma^{(k)} =encoder_{\phi}(x^{(k)},\epsilon^{(k)})
+   $$
+
+8. $$ 
+   \bar{z}_{\phi}^{(k)} = \frac{z_{\phi}^{(k)}-\mu^{(k)}}{\sigma^{(k)}}
+   $$
+9.  **end for**
 10. compute $\theta$-gradient
     
     $$
