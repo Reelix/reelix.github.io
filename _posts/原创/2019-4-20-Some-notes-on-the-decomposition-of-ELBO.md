@@ -153,7 +153,13 @@ L^{pixel}_{llike}=E_{\hat{p}(x)}[E_{q_{\phi}(z\vert x)}[-\log p_{\theta}(x\vert 
 L_{prior}=E_{\hat{p}(x)}[D_{KL}(q_{\phi}(z\vert x)\Vert p_{\theta}(z))] 
 $$
 
-The article adds a discriminator network to the original VAE and uses the output feature in the *l-th* layer of discriminator to calculate $L^{Dis_{l}}_{llike}$ *as an alternative to* $L^{pixel}_{llike}$.
+The article adds a discriminator network to the original VAE and uses the output feature in the *l-th* layer of discriminator to calculate 
+
+$$
+L^{Dis_{l}}_{llike}
+$$
+
+*as an alternative to* $L^{pixel}_{llike}$.
 
 $$
 L^{Dis_{l}}_{llike} = -E_{\hat{p}(x)}[E_{q_{\phi}(z\vert x)}[\log p(\text{Dis}_{l}(x\vert z)]]
