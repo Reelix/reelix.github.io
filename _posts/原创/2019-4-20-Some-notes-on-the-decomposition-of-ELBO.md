@@ -153,8 +153,7 @@ L^{pixel}_{llike}=E_{\hat{p}(x)}[E_{q_{\phi}(z\vert x)}[-\log p_{\theta}(x\vert 
 L_{prior}=E_{\hat{p}(x)}[D_{KL}(q_{\phi}(z\vert x)\Vert p_{\theta}(z))] 
 $$
 
-The article adds a discriminator network to the original VAE and uses the output feature in the *l-th* layer of discriminator to calculate $L^{Dis_{l}}_{llike}$ as an alternative to 
-$L^{pixel}_{llike}$.
+The article adds a discriminator network to the original VAE and uses the output feature in the *l-th* layer of discriminator to calculate $L^{Dis_{l}}_{llike}$ *as an alternative to* $L^{pixel}_{llike}$.
 
 $$
 L^{Dis_{l}}_{llike} = -E_{\hat{p}(x)}[E_{q_{\phi}(z\vert x)}[\log p(\text{Dis}_{l}(x\vert z)]]
@@ -312,7 +311,12 @@ $$
 T^{\star}(x,z_{\phi}(x,\epsilon)) = \log q_{\phi}(z\vert x) -\log r_{\alpha}(z\vert x)
 $$
 
-To estimate the mean and variance of $r_{\alpha}(z\vert x)$, we can simply sample $\epsilon$ many times and calculate the mean and std as the estimation. Another method is to use the network to predict $\mu$ and $\sigma$ for $z$ and do normalization with $\bar{z}_{\phi} = \frac{z_{\phi}-\mu}{\sigma}$ then we can view 
+To estimate the mean and variance of $r_{\alpha}(z\vert x)$, we can simply sample $\epsilon$ many times and calculate the mean and std as the estimation. Another method is to use the network to predict $\mu$ and $\sigma$ for $z$ and do normalization with 
+
+$$
+\bar{z}_{\phi} = \frac{z_{\phi}-\mu}{\sigma}$$ 
+
+then we can view 
 
 $$
 r_{\alpha}(\bar{z}\vert x)\sim \mathcal{N}(0,I)
