@@ -153,9 +153,7 @@ L^{pixel}_{llike}=E_{\hat{p}(x)}[E_{q_{\phi}(z\vert x)}[-\log p_{\theta}(x\vert 
 L_{prior}=E_{\hat{p}(x)}[D_{KL}(q_{\phi}(z\vert x)\Vert p_{\theta}(z))] 
 $$
 
-The article adds a discriminator network to the original VAE and uses the output feature in the *l-th* layer of discriminator to calculate $L^{Dis_{l}}_{llike}$ 
-
-<!-- \text{ as an alternative to }L^{pixel}_{llike}$ -->
+The article adds a discriminator network to the original VAE and uses the output feature in the *l-th* layer of discriminator to calculate $L^{Dis_{l}}_{llike}$ as an alternative to $L^{pixel}_{llike}$.
 
 $$
 L^{Dis_{l}}_{llike} = -E_{\hat{p}(x)}[E_{q_{\phi}(z\vert x)}[\log p(\text{Dis}_{l}(x\vert z)]]
@@ -174,7 +172,10 @@ In the training proceduer, we use adversarial method to train *Encoder*, *Decode
 * $L_{prior}=\mathcal{D}_{KL}(q(z\vert x)\Vert p(z))$
 * use *Decoder* to calculate $x_{reconstruct}$ 
 * sample $z\sim p(z)$, use *Decoder* to generate $x_{generate}$
-* calculate the *l-th* output feature of *Discriminator* as $\text{Dis}_{l}(x) \text{ and then calculate} L^{Dis_{l}}_{llike} = -\log p(\text{Dis}_{l}(x) \vert z)$
+* calculate the *l-th* output feature of *Discriminator* as $\text{Dis}_{l}(x)$ and then calculate
+  $$
+   L^{Dis_{l}}_{llike} = -\log p(\text{Dis}_{l}(x) \vert z)
+  $$
 * use *Decoder* to calculate $L_{GAN} = \log(\text{Dis}(x)) + \log(1-\text{Dis}(x_{reconstruct})) + \log(1-\text{Dis}(x_{generate}))$
 * update the parameters step by step with SGD
    
