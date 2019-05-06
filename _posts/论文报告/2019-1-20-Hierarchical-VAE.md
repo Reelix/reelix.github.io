@@ -1,7 +1,7 @@
 ---
 layout: post
 title: Some notes on hierarchical vae
-date: 2018-12-18 20:10:00
+date: 2019-1-18 20:10:00
 categories: 机器学习
 tags: Variational-Inference
 mathjax: true
