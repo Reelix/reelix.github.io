@@ -388,7 +388,7 @@ J[f] = \int L(x,f(x),\nabla f(x))\ dx
 $$
 
 $$
-\frac{\partial F}{\partial f} = \frac{\partial L}{\partial f} - \nabla \frac{\partial L}{\partial \nabla f(x)} \tag{13}
+\frac{\partial J[f]}{\partial f} = \frac{\partial L}{\partial f} - \nabla \frac{\partial L}{\partial \nabla f(x)} \tag{13}
 $$
 
 我们给出变分法的一个应用。考虑寻找一个定义于$x\in \mathcal{R}$上的有最大[微分熵](https://fenghz.github.io/Variational-AutoEncoder/#133-%E4%BB%8E%E7%A6%BB%E6%95%A3%E9%9A%8F%E6%9C%BA%E5%8F%98%E9%87%8F%E6%8E%A8%E5%B9%BF%E5%88%B0%E8%BF%9E%E7%BB%AD%E9%9A%8F%E6%9C%BA%E5%8F%98%E9%87%8F)的概率密度函数$p$，其微分熵$H[p] = -\int p(x)\log p(x) dx$。我们一般不能简单地最大化$H[p]$，因为这样结果可能不是一个归一化的概率分布。同时，当方差增大的时候，熵也会无限增大。最后，给定方差后，概率分布可以不断平移而保证$H[p]$不变，因此为了获得唯一解，我们需要对分布的均值进行约束，三个约束如下表示
