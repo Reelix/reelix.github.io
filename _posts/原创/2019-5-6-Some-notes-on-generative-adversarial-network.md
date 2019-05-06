@@ -11,10 +11,12 @@ mathjax: true
 
 **FengHZ‘s Blog首发原创**
 
-
-### 
-
 Based on the latent variable assumption, the essential purpose of GAN is to map the distribution of latent variable $z\sim p(z)$ into the data distribution $x\sim p_{data}$. GAN utilizes the equilibrium theory 2-players game to find the optimal map. There have already been many articles introducing the structure of GAN with comparing GAN to the confrontation between counterfeiters and discriminators. However, understanding the basic mathemathical form of GAN is very important which can tell us why the equilibrium point can achieve the complex real data distribution $x\sim p_{data}$ without making any assumptions on the analytical form of $p_{data}$.
+
+
+
+
+
 
 Given the discriminator $D$ and the generator $G$, the nash equilibrium point of the 2-players game 
 
