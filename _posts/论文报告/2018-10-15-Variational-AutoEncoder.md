@@ -109,17 +109,17 @@ $$
 
 $$
 \text{在高斯分布假设下满足:}
--log(p(X\vert z))=C_1 + C_2*\Vert f(z,\theta)-X\Vert_2^2
+-\log (p(X\vert z))=C_1 + C_2*\Vert f(z,\theta)-X\Vert_2^2
 $$
 
-因此最小化$-log(P(X\vert z))$等价于最小化$X$与$f(z,\theta)$的二范数。如果高斯分布不满足，比如$P(X\vert z)$是一个Dirac delta function，那么我们就没有办法最大化概率函数，因为此时$f(z;\theta)$所预测的并不是均值，而是以概率1收敛到$P(X\vert z)$的预测，此时我们没有办法定义梯度。
+因此最小化$-\log (P(X\vert z))$等价于最小化$X$与$f(z,\theta)$的二范数。如果高斯分布不满足，比如$P(X\vert z)$是一个Dirac delta function，那么我们就没有办法最大化概率函数，因为此时$f(z;\theta)$所预测的并不是均值，而是以概率1收敛到$P(X\vert z)$的预测，此时我们没有办法定义梯度。
 
 #### 1.2.4 Bernoulli分布假设
 
 假设生成空间$X$是二值化的，那么$P(X\vert z)$可以进行Bernoulli分布假设，其参数为$f(z;\theta)$，此时最大似然如下：
 
 $$
-P(X\vert z)= log(\Pi p(x_{ij}\vert z))=\sum_{i,j}log(f(z,\theta)_{ij})
+P(X\vert z)= \log (\Pi p(x_{ij}\vert z))=\sum_{i,j}\log (f(z,\theta)_{ij})
 $$
 
 此时同样可以计算梯度并用梯度下降法优化模型。
@@ -138,7 +138,7 @@ $$
 基于这两条假设，我们可以有:
 
 $$
-h(x)=-log_{2}p(x)
+h(x)=-\log _{2}p(x)
 $$
 
 我们沿用香农信息论的记号，以2作为对数基底。
@@ -340,32 +340,32 @@ $$
 我们从$P(z\vert X)$与$Q(z\vert X)$的关系展开，研究这两个分布关系的工具为KL散度($\mathcal{D}$)，关于$\mathcal{D}$的知识背景可以回顾1.3.5节。
 
 $$
-\mathcal{D}[Q(z\vert X)\Vert P(z\vert X)]=E_{z\sim Q}[log(Q(z\vert X))-log( P(z\vert X))]\tag{2}
+\mathcal{D}[Q(z\vert X)\Vert P(z\vert X)]=E_{z\sim Q}[\log (Q(z\vert X))-\log ( P(z\vert X))]\tag{2}
 $$
 
 注意$P(z\vert X)=\frac{P(X\vert z)P(z)}{P(X)}$，将该等式代入$(2)$式，得到$(3)$式：
 
 $$
-\mathcal{D}[Q(z\vert X)\Vert P(z\vert X)]=E_{z\sim Q}[log(Q(z\vert X))-log(P(X\vert z))-log( P(z))]+log(P(X))\tag{3}
+\mathcal{D}[Q(z\vert X)\Vert P(z\vert X)]=E_{z\sim Q}[\log (Q(z\vert X))-\log (P(X\vert z))-\log ( P(z))]+\log (P(X))\tag{3}
 $$
 
 简单调换次序我们有:
 
 $$
-log(P(X))-\mathcal{D}[Q(z\vert X)\Vert P(z\vert X)]=E_{z\sim Q}[log(P(X\vert z))]-\mathcal{D}[Q(z\vert X)\Vert P(z)]\tag{4}
+\log (P(X))-\mathcal{D}[Q(z\vert X)\Vert P(z\vert X)]=E_{z\sim Q}[\log (P(X\vert z))]-\mathcal{D}[Q(z\vert X)\Vert P(z)]\tag{4}
 $$
 
-公式$(4)$为VAE的核心，我们可以深入研究$(4)$所表达的意思。公式$(4)$的左边包含我们想要优化的两个部分，第一部分是最大化似然概率$log(P(X))$，第二部分是最小化$\mathcal{D}[Q(z\vert X)\Vert P(z\vert X)]$,它使得$g(X)$对最有可能生成一个待估计样本$X$的潜变量分布$P(z\vert X)$的预测$Q(z\vert X)$尽量靠谱。公式$(4)$的右边是可以用随机梯度下降法来进行优化的目标，它乍一看非常像自动编码器，$Q$将$X$编码到潜变量空间$z$，而$P$将潜变量$z$解码重生成$X$，这也就回答了VAE中用"AutoEncoder"一词进行描述的理由，我们后面将对这一种直观联系进行细节分析。注意到$\mathcal{D}[Q(z\vert X)\Vert P(z\vert X)]\geq 0$，因此公式$(4)$右边可以看作是$log(P(X))$的下界。给定一个$X$，公式$(4)$的右边下界可以作为一个粗略的估计，展现我们的模型对样本$X$的信息的捕捉程度(在多大程度上能够生成与$X$相似的结果)。
+公式$(4)$为VAE的核心，我们可以深入研究$(4)$所表达的意思。公式$(4)$的左边包含我们想要优化的两个部分，第一部分是最大化似然概率$\log (P(X))$，第二部分是最小化$\mathcal{D}[Q(z\vert X)\Vert P(z\vert X)]$,它使得$g(X)$对最有可能生成一个待估计样本$X$的潜变量分布$P(z\vert X)$的预测$Q(z\vert X)$尽量靠谱。公式$(4)$的右边是可以用随机梯度下降法来进行优化的目标，它乍一看非常像自动编码器，$Q$将$X$编码到潜变量空间$z$，而$P$将潜变量$z$解码重生成$X$，这也就回答了VAE中用"AutoEncoder"一词进行描述的理由，我们后面将对这一种直观联系进行细节分析。注意到$\mathcal{D}[Q(z\vert X)\Vert P(z\vert X)]\geq 0$，因此公式$(4)$右边可以看作是$\log (P(X))$的下界。给定一个$X$，公式$(4)$的右边下界可以作为一个粗略的估计，展现我们的模型对样本$X$的信息的捕捉程度(在多大程度上能够生成与$X$相似的结果)。
 
-因此，我们采用公式$(4)$作为目标函数时需要最大化$log(P(X))$同时最小化$\mathcal{D}[Q(z\vert X)\Vert P(z\vert X)]$。当潜变量空间的条件预测$Q(z\vert X)$尽量接近条件概率分布$P(z\vert X)$时，目标函数转换为直接最大化$log(P(X))$，此时难以估计的分布$P(z\vert X)$可以用$Q(z\vert  X)$进行简单地计算。
+因此，我们采用公式$(4)$作为目标函数时需要最大化$\log (P(X))$同时最小化$\mathcal{D}[Q(z\vert X)\Vert P(z\vert X)]$。当潜变量空间的条件预测$Q(z\vert X)$尽量接近条件概率分布$P(z\vert X)$时，目标函数转换为直接最大化$\log (P(X))$，此时难以估计的分布$P(z\vert X)$可以用$Q(z\vert  X)$进行简单地计算。
 
 ##### 另一种目标函数的构造方法(笔者注)
 
-上文中基于$\mathcal{D}[Q(z\vert X)\Vert P(z\vert X)]$构造了目标函数，构造过程非常精巧，但是直接想到用$\mathcal{D}[Q(z\vert X)\Vert P(z\vert X)]$进行构造并不是一件直观而容易的事情，这里我们直接从$log(P(X))$出发展开构造如下：
+上文中基于$\mathcal{D}[Q(z\vert X)\Vert P(z\vert X)]$构造了目标函数，构造过程非常精巧，但是直接想到用$\mathcal{D}[Q(z\vert X)\Vert P(z\vert X)]$进行构造并不是一件直观而容易的事情，这里我们直接从$\log (P(X))$出发展开构造如下：
 
 $$
 \begin{aligned}
-   L=log(P(X))=\sum_zQ(z\vert X)log(p(X))\\ = \sum_zQ(z\vert X)log(\frac{p(z,X)}{P(z\vert X)}) \\=\sum_zQ(z\vert X)log(\frac{p(z,X)}{Q(z\vert X)})+\sum_z Q(z\vert X)log(\frac{Q(z\vert X)}{P(z\vert X)})\\
+   L=\log (P(X))=\sum_zQ(z\vert X)\log (p(X))\\ = \sum_zQ(z\vert X)\log (\frac{p(z,X)}{P(z\vert X)}) \\=\sum_zQ(z\vert X)\log (\frac{p(z,X)}{Q(z\vert X)})+\sum_z Q(z\vert X)\log (\frac{Q(z\vert X)}{P(z\vert X)})\\
    =L^V+\mathcal{D}[Q(z\vert X)\Vert P(z\vert X)]
 \end{aligned}
 $$
@@ -374,41 +374,54 @@ $$
 
 $$
 \begin{aligned}
-    L^V=\sum_z Q(z\vert X)log(\frac{P(z)}{Q(z\vert X)})+\sum_zQ(z\vert X)log(P(X\vert z))\\ =-\mathcal{D}(Q(z\vert X)\vert \vert P(z))+E_{z\sim Q}[logP(X\vert z)]
+    L^V=\sum_z Q(z\vert X)\log (\frac{P(z)}{Q(z\vert X)})+\sum_zQ(z\vert X)\log (P(X\vert z))\\ =-\mathcal{D}(Q(z\vert X)\vert \vert P(z))+E_{z\sim Q}[\log P(X\vert z)]
 \end{aligned}
 $$
 
 这个过程比较自然。
+##### Jensen-Inequality 分析
+了解了细节以后，我们可以从 *Jensen-Inequality*出发给出一个非常简洁的期望表达形式
+
+$$
+\log  p(X) = \log \int_{z}p(X,z)dz = \log \int_{z}q_{\phi}(z\vert X)\frac{p(X,z)}{q_{\phi}(z\vert X)}dz\\
+=\log E_{z\sim q_{\phi}(z\vert X)}\frac{p(X,z)}{q_{\phi}(z\vert X)} \geq  E_{z\sim q_{\phi}(z\vert X)}\log \frac{p(X,z)}{q_{\phi}(z\vert X)} = L^{V} = (4)
+$$
+
+这里等号成立当且仅当 
+
+$$
+q_{\phi}(z\vert X) = p(z\vert X)
+$$
 
 #### 2.2.2 优化目标函数
 
 本章解决目标函数的优化问题，即如何采用随机梯度下降法优化公式$(4)$的右半部分:
 
 $$
-E_{z\sim Q}[log(P(X\vert z))]-\mathcal{D}[Q(z\vert X)\Vert P(z)]\tag{5}
+E_{z\sim Q}[\log (P(X\vert z))]-\mathcal{D}[Q(z\vert X)\Vert P(z)]\tag{5}
 $$
 
 ##### 2.2.2.1 计算$\mathcal{D}[Q(z\vert X)\Vert P(z)]$
 
 首先我们需要对$Q(z\vert X)$的分布形式进行假设，一般我们选择$Q(z\vert X)\sim N(z \vert \mu(X;\theta),\Sigma(X;\theta))$，这里正态分布的参数$\mu,\Sigma$都是由$\theta$所确定的函数，参数$\theta$可以从数据中学到(因此为书写方便起见，我们将隐藏$\theta$)，在实际使用中，我们用深度神经网络来学习$\mu,\Sigma$，同时令$\Sigma$是一个对角矩阵。正态假设与对角矩阵假设方便了对$(5)$进行计算，因为此时$Q(z\vert X)$与$p(z)$都是多元正态分布随机变量，而$\mathcal{D}[Q(z\vert X)\Vert P(z)]$可以由[正态分布的KL散度公式](https://fenghz.github.io/KL-Divergency-Description/#%E8%AE%A1%E7%AE%97%E4%B8%A4%E4%B8%AA%E5%A4%9A%E5%85%83%E6%AD%A3%E6%80%81%E5%88%86%E5%B8%83%E7%9A%84kl%E6%95%A3%E5%BA%A6)进行计算。
 
-##### 2.2.2.2 计算$E_{z\sim Q}[log(P(X\vert z))]$
+##### 2.2.2.2 计算$E_{z\sim Q}[\log (P(X\vert z))]$
 
-计算$E_{z\sim Q}[log(P(X\vert z))]$需要一些技巧。我们可以使用采样方法来估计$E_{z\sim Q}[log(P(X\vert z))]$，但是要得到一个好的估计需要对$z$进行多次采样，并经过$f$进行多次计算，这样计算量比较大。在工程中，在训练集中取定一个样本$X$，我们一般基于$Q(z\vert x)$对$z$进行一次采样，然后计算$P(X\vert z)$并以之作为期望的估计。
+计算$E_{z\sim Q}[\log (P(X\vert z))]$需要一些技巧。我们可以使用采样方法来估计$E_{z\sim Q}[\log (P(X\vert z))]$，但是要得到一个好的估计需要对$z$进行多次采样，并经过$f$进行多次计算，这样计算量比较大。在工程中，在训练集中取定一个样本$X$，我们一般基于$Q(z\vert x)$对$z$进行一次采样，然后计算$P(X\vert z)$并以之作为期望的估计。
 
 注意给定一个训练集$D$，对于$D$中的所有样本，我们最大化目标函数的期望，即：
 
 $$
-E_{X\sim D}[E_{z\sim Q}[log(P(X\vert z))]-\mathcal{D}[Q(z\vert X)\Vert P(z)]]\tag{6}
+E_{X\sim D}[E_{z\sim Q}[\log (P(X\vert z))]-\mathcal{D}[Q(z\vert X)\Vert P(z)]]\tag{6}
 $$
 
 对$(6)$式进行梯度计算时，得到的梯度也必然是期望的形式。给定一个$D$中的样本$X$，我们可以利用$Q(z\vert X)$进行采样$z$，然后计算
 
 $$
-log(P(X\vert z))-\mathcal{D}[Q(z\vert X)\Vert P(z)]\tag{7}
+\log (P(X\vert z))-\mathcal{D}[Q(z\vert X)\Vert P(z)]\tag{7}
 $$
 
-作为$(6)$式的估计，同时它的梯度也可以计算梯度作为对$(6)$式梯度的期望的估计，因此我们可以考虑选取多组$(X,z)$进行估计，并求平均，之后结果将以中心极限定理收敛到$(6)$式的梯度。注意在$(6)$式中求$log(P(X\vert z))$依赖于分布$Q$，但是这个依赖关系在$(7)$式中消失了，这使得在实际计算过程中$P,Q$可以进行一定程度上的分离。这种计算流程可以总结为图四(左)的流程。但是，这个流程没有解决反向传播的问题，因为从分布$Q(z\vert X)$对z进行采样的操作并不是一个"连续"的操作，同时也不能计算梯度。随机梯度下降法可以处理随机输入的问题，但是不能处理神经网络中的随机模块，因此我们需要用"重参数化技巧"(reparameterization trick)来解决这个问题。给定分布$Q(z\vert X)$的参数$\mu(X),\Sigma(X)$，将原采样过程$z=sample(N(\mu(X),\Sigma(X)))$重参数化为:
+作为$(6)$式的估计，同时它的梯度也可以计算梯度作为对$(6)$式梯度的期望的估计，因此我们可以考虑选取多组$(X,z)$进行估计，并求平均，之后结果将以中心极限定理收敛到$(6)$式的梯度。注意在$(6)$式中求$\log (P(X\vert z))$依赖于分布$Q$，但是这个依赖关系在$(7)$式中消失了，这使得在实际计算过程中$P,Q$可以进行一定程度上的分离。这种计算流程可以总结为图四(左)的流程。但是，这个流程没有解决反向传播的问题，因为从分布$Q(z\vert X)$对z进行采样的操作并不是一个"连续"的操作，同时也不能计算梯度。随机梯度下降法可以处理随机输入的问题，但是不能处理神经网络中的随机模块，因此我们需要用"重参数化技巧"(reparameterization trick)来解决这个问题。给定分布$Q(z\vert X)$的参数$\mu(X),\Sigma(X)$，将原采样过程$z=sample(N(\mu(X),\Sigma(X)))$重参数化为:
 
 $$
 z=\mu(X)+\Sigma^{\frac{1}{2}}(X)*\epsilon,\epsilon\sim N(0,I)
@@ -426,7 +439,7 @@ $$
 
 #### 2.2.4 对目标函数的深度理解与解释
 
-看到这里，读者应该有一个观念是VAE的学习过程是$well-defined$，同时VAE的训练目标为对训练集中的任意$X$，最大化$log(P(X))$。但是VAE的损失函数中并不仅有$log(P(X))$这一项，因此本节旨在对"目标函数是如何工作的"这一任务进行深度分析，我们将从以下三个角度进行展开:
+看到这里，读者应该有一个观念是VAE的学习过程是$well-defined$，同时VAE的训练目标为对训练集中的任意$X$，最大化$\log (P(X))$。但是VAE的损失函数中并不仅有$\log (P(X))$这一项，因此本节旨在对"目标函数是如何工作的"这一任务进行深度分析，我们将从以下三个角度进行展开:
 
 * 是否存在目标函数能够最大化$P(X)$，同时令$\mathcal{D}[Q(z\vert X)\Vert P(z\vert X)]=0$
 * 如何从信息论角度解释损失函数
@@ -434,7 +447,7 @@ $$
 
 ##### 2.2.4.1 最优目标函数的存在性
 
-VAE模型很大程度上依赖于假设$Q(z\vert X)$服从高斯分布，其均值$\mu(X)$，方差$\Sigma(X)$都是$X$的函数。最大化公式$(4)$的左半部分要求最大化$P(X)$的同时令${D}[Q(z\vert X)\Vert P(z\vert X)]=0$。然而，${D}[Q(z\vert X)\Vert P(z\vert X)]=0$并不一定成立，这是因为任取编码函数$z=g(X)$，$P(z\vert X)$并不一定是高斯分布，也就是说此时${D}[Q(z\vert X)\Vert P(z\vert X)]$永远不为0。因此，我们需要一对潜变量空间分布参数预测函数$g$和生成函数$f$，$(f,g)$在最大化似然函数$log(P(X))$的同时，将$X$映射到服从高斯分布的潜变量空间，从而使得${D}[Q(z\vert X)\Vert P(z\vert X)]=0$。
+VAE模型很大程度上依赖于假设$Q(z\vert X)$服从高斯分布，其均值$\mu(X)$，方差$\Sigma(X)$都是$X$的函数。最大化公式$(4)$的左半部分要求最大化$P(X)$的同时令${D}[Q(z\vert X)\Vert P(z\vert X)]=0$。然而，${D}[Q(z\vert X)\Vert P(z\vert X)]=0$并不一定成立，这是因为任取编码函数$z=g(X)$，$P(z\vert X)$并不一定是高斯分布，也就是说此时${D}[Q(z\vert X)\Vert P(z\vert X)]$永远不为0。因此，我们需要一对潜变量空间分布参数预测函数$g$和生成函数$f$，$(f,g)$在最大化似然函数$\log (P(X))$的同时，将$X$映射到服从高斯分布的潜变量空间，从而使得${D}[Q(z\vert X)\Vert P(z\vert X)]=0$。
 
 那么，对于任意生成空间上的分布函数$P_{gt}(X)$，是否总能存在一组$(f,g)$，满足${D}[Q(z\vert X)\Vert P(z\vert X)]=0$，同时$P(X)\rightarrow P_{gt}(X)$呢？我们可以证明，对于一维空间上的$X$而言，在$P(X)\sim N(u,\sigma)$，同时$Q(z\vert X)$服从高斯分布，其均值$\mu(X)$，方差$\Sigma(X)$都是$X$的函数这两条假设下，一定能找到一组$(f,g)$，使得当$\sigma\rightarrow 0$时,有:
 
@@ -450,7 +463,7 @@ $$
 假设$P_{gt}(X)$为任意一个一维随机变量$X$的分布函数，假设$P_{gt}>0,a.e.$，$P_{gt}$无限次可微，同时$\forall n,\exists M(n)\in R,\vert P_{gt}^{(n)} \vert<M(n)$，我们想要在VAE的假设下用VAE来进行估计$P_{gt}$。回顾VAE优化的目标函数:
 
 $$
-log(P_{\sigma}(X))-\mathcal{D}[Q_{\sigma}(z\vert X)\Vert P_{\sigma}(z\vert X)]\tag{2.4.1-1}
+\log (P_{\sigma}(X))-\mathcal{D}[Q_{\sigma}(z\vert X)\Vert P_{\sigma}(z\vert X)]\tag{2.4.1-1}
 $$
 
 这里:
@@ -475,7 +488,7 @@ $$
 \sigma \rightarrow 0,F(x)=\int_{-\infty}^{x}\int_{z}e^{-\frac{(x-F^{-1}(G(z))}{2\sigma^2}}\frac{1}{\sqrt{2\pi}\sigma}G'(z)dzdx \tag{2.4.1-3}
 $$
 
-这里笔者不直接给出它的分析形式的证明(其实就是笔者证明不出来，求求谁读了这篇Blog打救我一下谢谢)，但是笔者利用连续型随机变量分布函数利用采样方法拟合的过程进行近似证明如下(笔者要开始放飞自我了)：
+这里笔者不直接给出它的分析形式的证明(其实就是笔者证明不出来，求求谁读了这篇B\log 打救我一下谢谢)，但是笔者利用连续型随机变量分布函数利用采样方法拟合的过程进行近似证明如下(笔者要开始放飞自我了)：
 
 
 首先用$Fubini$定理交换式$(2.4.1-3)$的积分次序(笔者也不知道这里能不能用这个定理但是感觉反正都是有界可积连续函数应该可以用，不证了就当我是物理系的)：
@@ -572,7 +585,7 @@ $$
 
 ##### 2.2.4.2 信息论视角的解释
 
-我们可以用信息论视角来以及"最小编码长度"原则看待公式$(4)$，其实基于"最小编码长度"已经有很多编码器模型，如Boltzman Machine，深度信念网络，生物钟算法等。$log(P(X))$可以理解为在理想编码下重建$X$所需要的信息量(回顾1.3节)，公式$(4)$的右半部分$E_{z\sim Q}[log(P(X\vert z))]-\mathcal{D}[Q(z\vert X)\Vert P(z)]$可以理解为重构$X$的两个阶段。首先我们需要一些比特来编码$z$，回顾1.3节关于$KL$散度的信息论解释，我们用$\mathcal{D}[Q(z\vert X)\Vert P(z)]$来度量需要构造$z$的比特数，这是因为在我们的模型中，我们假设从$N(0,I)$中进行采样得到的$z$不包含$X$的任何信息，因此，$\mathcal{D}[Q(z\vert X)\Vert P(z)]$可以度量从$Q(z\vert X)$中进行采样所带来的关于$X$的额外信息量。$P(X\vert z)$度量了在最优编码下从$z$重构$X$所需要信息量。因此，在理想编码下所重建$X$需要的信息量$log(P(X))$可以看作是从$z$重构$X$所需要的信息量$P(X\vert z)$上从$Q(z\vert X)$中对$z$进行采样所带来的关于$X$的额外信息量，再减去我们用$Q$作为一个次优化编码器的编码代价$\mathcal{D}[Q(z\vert X)\Vert P(z\vert X)]$。注意这里$P(X\vert z)$并没有对$X$的不同维度信息的依赖关系进行编码，因此即使是最优编码器也需要对$X$的每一个维度进行独立地编码与重构。
+我们可以用信息论视角来以及"最小编码长度"原则看待公式$(4)$，其实基于"最小编码长度"已经有很多编码器模型，如Boltzman Machine，深度信念网络，生物钟算法等。$\log (P(X))$可以理解为在理想编码下重建$X$所需要的信息量(回顾1.3节)，公式$(4)$的右半部分$E_{z\sim Q}[\log (P(X\vert z))]-\mathcal{D}[Q(z\vert X)\Vert P(z)]$可以理解为重构$X$的两个阶段。首先我们需要一些比特来编码$z$，回顾1.3节关于$KL$散度的信息论解释，我们用$\mathcal{D}[Q(z\vert X)\Vert P(z)]$来度量需要构造$z$的比特数，这是因为在我们的模型中，我们假设从$N(0,I)$中进行采样得到的$z$不包含$X$的任何信息，因此，$\mathcal{D}[Q(z\vert X)\Vert P(z)]$可以度量从$Q(z\vert X)$中进行采样所带来的关于$X$的额外信息量。$P(X\vert z)$度量了在最优编码下从$z$重构$X$所需要信息量。因此，在理想编码下所重建$X$需要的信息量$\log (P(X))$可以看作是从$z$重构$X$所需要的信息量$P(X\vert z)$上从$Q(z\vert X)$中对$z$进行采样所带来的关于$X$的额外信息量，再减去我们用$Q$作为一个次优化编码器的编码代价$\mathcal{D}[Q(z\vert X)\Vert P(z\vert X)]$。注意这里$P(X\vert z)$并没有对$X$的不同维度信息的依赖关系进行编码，因此即使是最优编码器也需要对$X$的每一个维度进行独立地编码与重构。
 
 ##### 2.2.4.3 VAE与正则化参数
 
@@ -586,7 +599,7 @@ $$
 
 这样$\lambda$并没有起作用。
 
-我们也可以尝试在$P(X)$上下文章。注意到$P(X\vert z)\sim N(f(z),\sigma^2*I)$，此时$log(P(X\vert z)=C-\frac{1}{2}\Vert X-f(z)\Vert_2^2 /\sigma^2$，$C$是不依赖于$f$一个常数。在该公式中，$\sigma^2$可以看作是在$\Vert X-f(z)\Vert_2^2$与$\mathcal{D}[Q(z\vert X)\Vert P(z\vert X)]$之间的加权参数。注意到这一类正则化情况当且仅当我们给出$P(X\vert z)$的独立正态性假设才成立，而如果$X$是二值的，同时我们用Bernouli分布作为$P(X\vert z)$的分布假设，那么这种正则化情况就不存在了。
+我们也可以尝试在$P(X)$上下文章。注意到$P(X\vert z)\sim N(f(z),\sigma^2*I)$，此时$\log (P(X\vert z)=C-\frac{1}{2}\Vert X-f(z)\Vert_2^2 /\sigma^2$，$C$是不依赖于$f$一个常数。在该公式中，$\sigma^2$可以看作是在$\Vert X-f(z)\Vert_2^2$与$\mathcal{D}[Q(z\vert X)\Vert P(z\vert X)]$之间的加权参数。注意到这一类正则化情况当且仅当我们给出$P(X\vert z)$的独立正态性假设才成立，而如果$X$是二值的，同时我们用Bernouli分布作为$P(X\vert z)$的分布假设，那么这种正则化情况就不存在了。
 
 如何用信息论来解释上文中出现的正则化情况呢？我们可以认为，当$X$是二值的，我们可以直接计算编码$X$所需要的字节数，而公式$(4)$的右边也用同样的单位来计算编码字节。而当$X$是连续随机变量的时候，信息熵趋向于无穷(回顾1.3节，从离散随机变量到连续随机变量)，此时$\sigma$限制了我们对重建$X$的精确要求度(这是很好理解的，因为$\sigma$是正态分布随机变量的方差，它决定了概率密度函数的中心化程度)，这个限制使得信息熵可以有限可计算(就像$\Delta$一样)。
 
@@ -604,8 +617,8 @@ $$
 
 $$
 \begin{aligned}
-    \mathcal{D}[Q(z\vert  \vert Y,X)\Vert P(z\vert Y,X)]=E_{z\sim Q(.\vert X,Y)}[log(Q(z\vert Y,X))-log(P(z\vert Y,X))]\\
-    =E_{z\sim Q(.\vert X,Y)}[log(Q(z\vert Y,X)) - log(P(Y\vert z,X)) - log(P(z\vert X))]+log(P(Y\vert X))
+    \mathcal{D}[Q(z\vert  \vert Y,X)\Vert P(z\vert Y,X)]=E_{z\sim Q(.\vert X,Y)}[\log (Q(z\vert Y,X))-\log (P(z\vert Y,X))]\\
+    =E_{z\sim Q(.\vert X,Y)}[\log (Q(z\vert Y,X)) - \log (P(Y\vert z,X)) - \log (P(z\vert X))]+\log (P(Y\vert X))
 \end{aligned}
 $$
 
@@ -622,8 +635,8 @@ $$
 
 $$
 \begin{aligned}
-    log(P(Y \vert X))-\mathcal{D}[Q(z \vert Y,X)\Vert P(z \vert Y,X)]\\
-    =E_{z\sim Q(. \vert Y,X)}[log(P(Y \vert z,X))]-\mathcal{D}[Q(z \vert Y,X)\Vert P(z \vert X)]
+    \log (P(Y \vert X))-\mathcal{D}[Q(z \vert Y,X)\Vert P(z \vert Y,X)]\\
+    =E_{z\sim Q(. \vert Y,X)}[\log (P(Y \vert z,X))]-\mathcal{D}[Q(z \vert Y,X)\Vert P(z \vert X)]
 \end{aligned}
 $$
 
