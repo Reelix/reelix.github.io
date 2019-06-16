@@ -71,7 +71,7 @@ $$
 
 $$
 E_{\hat{p}(x)}[D_{KL}(q_{\phi}(z\vert x)\Vert p_{\theta}(z))]  = \int_{x} \hat{p}(x)\int_{z}q_{\phi}(z\vert x)\log \frac{q_{\phi}(z\vert x)}{p(z)} dz dx \\
-= \int_{x} \hat{p}(x)\int_{z}q_{\phi}(z\vert x)\log \frac{q_{\phi}(z\vert x)}{q_{\phi}(z)} dz dx +  \int_{x} \hat{p}(x)\int_{z}q_{\phi}(z\vert x)\log \frac{q_{\phi}(z)}{q_{\phi}(z)} dz dx \\
+= \int_{x} \hat{p}(x)\int_{z}q_{\phi}(z\vert x)\log \frac{q_{\phi}(z\vert x)}{q_{\phi}(z)} dz dx +  \int_{x} \hat{p}(x)\int_{z}q_{\phi}(z\vert x)\log \frac{q_{\phi}(z)}{p(z)} dz dx \\
 = \int_{x}\int_{z}q_{\phi}(z,x)\log \frac{q_{\phi}(z, x)}{q_{\phi}(z)\hat{p}(x)} dz dx + \mathcal{D}_{KL}(q_{\phi}(z)\Vert p(z)) \\
 =  I_{q_{\phi}}(x;z) + \mathcal{D}_{KL}(q_{\phi}(z)\Vert p(z))
 $$
