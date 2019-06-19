@@ -1,6 +1,6 @@
 ---
 layout: post
-title: A simple explaination of wasserstein distance
+title: A simple explanation of wasserstein distance
 date: 2019-1-13 20:10:00
 categories: 机器学习
 tags: "Probability Theory"
