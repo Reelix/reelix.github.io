@@ -546,7 +546,7 @@ $$
   
 * 指数分布族
   
-  对于指数分布族$p(\xi\vert \theta)=h(\xi)\exp(\eta(\theta)^T\phi(x)-A(\theta))$而言, 我们有以下公式成立
+  对于指数分布族$p(x\vert \theta)=h(x)\exp(\eta(\theta)^T\phi(x)-A(\theta))$而言, 我们有以下公式成立
 
   $$
   \nabla_{\theta}E_{p}[f(x)]=-E_{p}[\nabla_{x}[B(x;\theta)f(x)]]
