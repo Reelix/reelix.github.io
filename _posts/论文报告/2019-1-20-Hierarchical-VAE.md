@@ -549,7 +549,7 @@ $$
   对于指数分布族$p(x\vert \theta)=h(x)\exp(\eta(\theta)^T\phi(x)-A(\theta))$而言, 我们有以下公式成立
 
   $$
-  \nabla_{\theta}E_{p}[f(x)]=-E_{p}[\nabla_{x}[B(x;\theta)f(x)]]
+  \nabla_{\theta}E_{p}[f(x)]=-E_{p}[B(x;\theta)\nabla_{x}[f(x)]]
   $$
 
   其中
