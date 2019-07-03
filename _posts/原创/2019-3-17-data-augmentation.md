@@ -291,7 +291,11 @@ ImageEnhance.Sharpness(image).enhance(1.9)
 # AutoAugment
 
 AutoAugment方法主要将它提到的14种数据增广方法进行了离散化：
+
+
 ![image.png](/images/data_augmentation/3.png)
+
+
 对于每一个取值范围，文中都将其均匀划分为9份，取10个点作为10种策略并分别固定。用这些策略组成若干个Policy，每一个Policy由两个Action构成，每一个Action是一种数据增广方法，增广参数，以及做这种增广的概率。
 
 文中采用强化学习技术给出了`Cifar10`,`SVHN`以及`ImageNet`上的最佳数据增广策略：
