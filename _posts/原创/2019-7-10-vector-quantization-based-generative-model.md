@@ -1,9 +1,9 @@
 ---
 layout: post
 title: VQ-VAE & VQ-VAE2 - Vector Quantization Based AutoEncoders  
-date: 2019-3-29 12:32:00
+date: 2019-7-10 12:32:00
 categories: 机器学习
-tags: Deep-Learning, Visualization
+tags: Deep-Learning, VAE
 mathjax: true
 ---
 
