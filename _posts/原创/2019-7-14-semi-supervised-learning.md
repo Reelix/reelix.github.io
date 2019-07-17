@@ -1,7 +1,7 @@
 ---
 layout: post
 title: A Survey of Semi-supervised Deep Learning Method 
-date: 2019-7-10 12:32:00
+date: 2019-7-17 12:32:00
 categories: 机器学习
 tags: Deep-Learning, SSL
 mathjax: true
