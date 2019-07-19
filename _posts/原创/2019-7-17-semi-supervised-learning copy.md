@@ -95,17 +95,123 @@ mathjax: true
 
 ### Semi-supervised GAN
 
+基于对抗生成网络的半监督学习的基本思想非常简单，即将二分类判别器修改为*C+1*分类判别器, 损失函数要求来源于真实数据分布的输入被分为前*C*类，而生成器生成的数据则被分为*C+1*类，同时在训练判别器时要求将输入的有标签数据进行正确分类. 文献[7]指出训练出好的半监督结果与好的生成模型不可兼得，并给出了用GAN做半监督的最好结果(*14.41\% in Cifar10 and 4.25\% in SVHN*).
+
 ### Semi-supervised VAE
+
+Waiting To Be Complete
 
 ## 基于差异学习的半监督学习算法
 
-深度半监督学习算法的另外一个套路是人为制造我们不想看到的差异，并对差异施加正则化约束从而让网络在训练过程中减小该差异，并证明这种差异学习可以提高网络在(纯)半监督学习任务上的泛化性能。
+深度半监督学习算法的另外一个套路是人为制造我们不想看到的差异，并对差异施加正则化约束从而让网络在训练过程中减小该差异，并证明这种差异学习可以提高网络在(纯)半监督学习任务上的泛化性能。 
 
-### Data Augmentation Method
+### Data Augmentation Based Method
 
-### Consistency Regularization Method
+数据增广是一种增加泛化性, 避免过拟合的手段. 我们可以通过对无标注数据$\mathcal{D}_u$采样数据增广方法*AutoAugment*构造差异性, 并通过消除预测差异性来进行半监督学习, 其构造的半监督损失函数如下
 
-### Mixup Method
+$$
+L_{u} = \sum _{x',x''\sim AutoAugment(x)}\Vert f(x')-f(x'')\Vert_2^2
+$$
+
+数据增广有不同的方法，我们可以直接进行数据增广，也可以采用
+
+#### Direct Unsupervised Data Augmentation. 
+
+基于减少数据增广差异的半监督学习策略依赖于数据增广方式选择, 文献[5]采用的数据增广策略取得了最好的结果(*Cifar10 from 7.66\% to 5.27%*). 该数据增广策略是用强化学习对各个数据集学出的最佳策略, 我们已经在[Data Augmentation 一文中](https://fenghz.github.io/data-augmentation/)做了详细介绍(这里吐槽一下谷歌真是家大业大, 前面用350块GPU做NAS, 这里用300块GPU做*Data Augmentation*的强化学习).
+
+文献[5]还针对有标注与无标注数据标注量不均衡时提出了缓解模型对有标注数据过拟合的方法. 简单而言, 就是在每一轮训练时设置一个置信度阈值, 对于有标注数据的预测值高于该阈值的数据计算损失的权重设置为0, 这样可以避免在那些已经分类正确的样本上过份拟合。文中提出了基于指数的置信度设置方法
+
+$$
+\eta(\text{epoch})=\text{exp}(-5*(1-\frac{\text{epoch}}{\text{max epoch}}))*(1-\frac{1}{C})+\frac{1}{C}
+$$
+
+其中*C*代表类别个数.注意到这种权重调整策略也常用作标注样本损失与无标注样本损失之间的平衡系数.
+
+#### $\Pi$-model
+
+与直接用数据增广法类似, $\Pi$-model[9]结合Dropout与数据增广方法进行差异构造, 这种算法的一个简单伪代码表述如下
+
+
+   ![4.png](/images/semi-supervised/4.png)
+
+同时, 注意到此时产生正则化损失的目标 $z_i,\tilde{z}_i$都会导致梯度计算, 最终使得结果向$\frac{z_i+\tilde{z}_i}{2}$靠拢, 这在具体的工程实践中是有害的(亲测被这个问题坑过很多次), 一个工程上的解决方法是在每一个epoch中固定$\tilde{z}_i$作为不计算梯度的*target*, 而迫使网络预测**逼近** *target*. 这个思路在之后的诸多半监督学习方法中都有使用, 如后文提到的*MixMatch*方法采用多次计算取平均来生成*target*, *Mean Teacher*方法产生*Teacher*与*Student*两个网络来生成*Target*. $\Pi$-model 同样给出了用滑动平均方法生成*target*的策略, 即对于样本$x_i$, 在第k个epoch中的*target* $\tilde{z}_i^{(k)}$ 可以由计算生成的$z_i^{(k)}$以及上一轮所用的 $\tilde{z}_i^{(k-1)}$经过滑动平均生成
+
+$$
+\tilde{z}_i^{(k)} = \alpha \tilde{z}_i^{(k-1)} + (1-\alpha) z_i^{(k)} \\
+\tilde{z}_i^{(k)} = \tilde{z}_i^{(k)}/\text{sum}(\tilde{z}_i^{(k)})
+$$
+
+#### Mixup Method
+
+Mixup是一种数据增广方法，它通过对输入数据与标签进行成对插值，从而让模型学习到数据之间的连续变化与对应标签的连续变化，提高模型的泛化性。我们已经在[这篇post中系统介绍了mixup方法并开源了我们的详细实现代码](https://fenghz.github.io/mixp/)
+
+Mixup方法可以作为半监督训练中的差异产生器用于提升模型的半监督训练性能，记有标签数据为$\mathcal{D}_l$,无标签数据为$\mathcal{D}_u$, 则算法伪代码如下:
+
+1. **Input:** 
+   
+   Batch of labeled examples and their one-hot labels 
+
+   $$
+   (x_b,l_b)\in \mathcal{D}_l;b\in (1,\ldots,B)
+   $$
+
+   Batch of unlabeled exmaples
+
+   $$
+   u_b \in \mathcal{D}_u;b\in (1,\ldots,B)
+   $$
+
+   Beta distribution parameter $\alpha$ for *Mixup*, weight $\gamma$ between the supervised loss and mixup loss
+
+   Network model *f* as well as its parameter *w*
+
+2. for b in 1 to B do:
+
+    $xp_b=f(x_b)$
+
+    *supervised_loss* = *CrossEntropy*($xp_b,l_b$)
+
+    $up_b = f(u_b)$
+
+    $m_b,mp_b$ = *Mixup*($u_b,up_b$)
+
+    *mixup_loss* = *MSE*($f(m_b),mp_b$)
+
+    *loss* = *supervised_loss* + $\lambda *$*mixup_loss*
+
+    *loss.backward()*
+
+    **update** *w* by gradient 
+
+#### MixMatch
+
+基于Mixup的半监督学习方法已经取得了很出色的成果，在我们的Github实现中，对于*Cifar10*数据集，仅用10\%标注就实现了*93.06\%*的精度, 离全监督的精度仅差3\%.
+
+但是, Mixup在半监督学习的应用潜力仍有待于进一步挖掘。2019年5月, 混合了 *DataAugmentation* 与 *Mixup* 方法的 *MixMatch*[6] 刷新了各大半监督学习问题的精度上界，我们在这里特意强调一下这种方法。
+
+简单而言, *MixMatch*方法在原有的Mixup方法的基础上增加了*DataAugmentation*操作，使得其对无标注数据的预测更加准确，同时对无标注数据的伪标签$up_b$做了中心化操作，使得预测伪标签更加接近于*one-hot*编码，信息熵更小。其算法细节如下：
+
+![2.png](/images/semi-supervised/2.png)
+
+得到$\mathcal{X',U'}$后, 分别计算*CrossEntropy*以及*MSE*即可. 
+
+[在实现代码中, 有以下两点值得注意](https://github.com/gan3sh500/mixmatch-pytorch/blob/master/mixmatch_utils.py)
+
+1. Augment由7个策略组成, 每次随机挑选策略与参数进行. 7个策略包括左右翻转, 高斯模糊, 对比度正则化, 高斯噪声, 通道随机增强/减弱, 仿射变换.
+2. 注意到生成$\mathcal{X'}$的时候*Mixup*的对象给包含了无标注数据, 因此在*Mixup*时需要让$\mathcal{X'}$的标签占据主导. 实际实现过程中, 我们取$\alpha=0.75$, 这是一种概率质量集中于两头的*Beta*分布.  同时在$\hat{X}$前的权重一般取生成的$\lambda \sim Beta(\alpha,\alpha)$ 中 $\max (\lambda,1-\lambda)$ 的值.
+
+### Virtual Adversarial Training
+
+对训练数据进行扭曲/加入噪声/Dropout都是针对于输入空间/中间特征空间的先验增广, 而这些增广对于深度学习特征而言未必是可靠的. 基于深度学习可以被对抗攻击这一特点, 一个很自然的想法是, 我们人为构造令标签变化最大的扰动, 然后对该扰动构造标签的正则化项作为差异学习目标。文献[8]首先提出了该算法, 一个简单的生成正则化损失函数的算法如下
+
+![3.png](/images/semi-supervised/3.png)
+
+结合分类损失便构成了整个半监督学习算法。该方法在*Cifar10*上达到了*13.13\%*的误差, 在*SVHN*上达到了*5.63\%*的误差.
+
+### Mean-Teacher Method
+
+Mean-Teacher[10]方法其实是受$\Pi$-model所启发, 但是它把滑动平均法扩展到了整个模型, 因此我们单独拿出来讨论。
+
 
 ## 基于图模型的半监督学习算法
 
@@ -135,3 +241,15 @@ mathjax: true
 [3] Kingma D P, Welling M. Auto-encoding variational bayes[J]. arXiv preprint arXiv:1312.6114, 2013.
 
 [4] Salimans T, Karpathy A, Chen X, et al. Pixelcnn++: Improving the pixelcnn with discretized logistic mixture likelihood and other modifications[J]. arXiv preprint arXiv:1701.05517, 2017.
+
+[5] Xie Q, Dai Z, Hovy E, et al. Unsupervised data augmentation[J]. arXiv preprint arXiv:1904.12848, 2019.
+
+[6] Berthelot D, Carlini N, Goodfellow I, et al. Mixmatch: A holistic approach to semi-supervised learning[J]. arXiv preprint arXiv:1905.02249, 2019.
+
+[7] Dai Z, Yang Z, Yang F, et al. Good semi-supervised learning that requires a bad gan[C]//Advances in neural information processing systems. 2017: 6510-6520.
+
+[8] Miyato T, Maeda S, Koyama M, et al. Virtual adversarial training: a regularization method for supervised and semi-supervised learning[J]. IEEE transactions on pattern analysis and machine intelligence, 2018, 41(8): 1979-1993.
+
+[9] Laine S, Aila T. Temporal ensembling for semi-supervised learning[J]. arXiv preprint arXiv:1610.02242, 2016.
+
+[10] Tarvainen A, Valpola H. Mean teachers are better role models: Weight-averaged consistency targets improve semi-supervised deep learning results[C]//Advances in neural information processing systems. 2017: 1195-1204.
