@@ -128,7 +128,13 @@ In this part, we introduce a coarse-grained gradient-based activation map. The r
 
 Notice that the convolution network is translation-invariant, and the last feature will preserve both the semantic level feature and the activated position information. So if we calculate gradient of the bottom feature space instead of the input space, we may get the coarse-grained level gradient activation combined with the position information. 
 
-For the last feature $\mathbf{F}\in R^{C\times H\times W}$, we calculate the gradient $\mathbf{G}_{k,h,w} = \frac{\partial y_c}{\partial \mathbf{F}_{k,h,w}}$ and use $\mathbf{G}$ to get the weight for each channel in the last feature, just as the following figure illustrates
+For the last feature $\mathbf{F}\in R^{C\times H\times W}$, we calculate the gradient 
+
+$$
+\mathbf{G}_{k,h,w} = \frac{\partial y_c}{\partial \mathbf{F}_{k,h,w}}
+$$
+
+and use $\mathbf{G}$ to get the weight for each channel in the last feature, just as the following figure illustrates
 
 ![figure-5](/images/cnn_visual/figure_5.png)
 
