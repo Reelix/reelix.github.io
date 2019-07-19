@@ -99,7 +99,7 @@ mathjax: true
 
 ### Semi-supervised VAE
 
-Waiting To Be Complete
+Waiting To Be Completed
 
 ## 基于差异学习的半监督学习算法
 
@@ -113,7 +113,7 @@ $$
 L_{u} = \sum _{x',x''\sim AutoAugment(x)}\Vert f(x')-f(x'')\Vert_2^2
 $$
 
-数据增广有不同的方法，我们可以直接进行数据增广，也可以采用
+数据增广有不同的方法，我们可以直接进行数据增广，也可以[采用Dropout进行等价增广](https://arxiv.org/abs/1506.08700)，甚至可以采用Mixup方法进行线性增广. 
 
 #### Direct Unsupervised Data Augmentation. 
 
@@ -200,7 +200,7 @@ Mixup方法可以作为半监督训练中的差异产生器用于提升模型的
 1. Augment由7个策略组成, 每次随机挑选策略与参数进行. 7个策略包括左右翻转, 高斯模糊, 对比度正则化, 高斯噪声, 通道随机增强/减弱, 仿射变换.
 2. 注意到生成$\mathcal{X'}$的时候*Mixup*的对象给包含了无标注数据, 因此在*Mixup*时需要让$\mathcal{X'}$的标签占据主导. 实际实现过程中, 我们取$\alpha=0.75$, 这是一种概率质量集中于两头的*Beta*分布.  同时在$\hat{X}$前的权重一般取生成的$\lambda \sim Beta(\alpha,\alpha)$ 中 $\max (\lambda,1-\lambda)$ 的值.
 
-### Virtual Adversarial Training
+### Virtual Adversarial Training(VAT)
 
 对训练数据进行扭曲/加入噪声/Dropout都是针对于输入空间/中间特征空间的先验增广, 而这些增广对于深度学习特征而言未必是可靠的. 基于深度学习可以被对抗攻击这一特点, 一个很自然的想法是, 我们人为构造令标签变化最大的扰动, 然后对该扰动构造标签的正则化项作为差异学习目标。文献[8]首先提出了该算法, 一个简单的生成正则化损失函数的算法如下
 
@@ -210,11 +210,30 @@ Mixup方法可以作为半监督训练中的差异产生器用于提升模型的
 
 ### Mean-Teacher Method
 
-Mean-Teacher[10]方法其实是受$\Pi$-model所启发, 但是它把滑动平均法扩展到了整个模型, 因此我们单独拿出来讨论。
+Mean-Teacher[10]方法其实是受$\Pi$-model所启发, 但是它把滑动平均法扩展到了整个模型, 因此我们单独拿出来讨论。Mean Teacher方法复制了两个相同的网络(不同初始化), 一个称为Student网络, 另外一个称为Teacher网络。在训练过程中, Student网络通过学习损失来更新参数, 而Teacher网络利用Student网络更新过的参数与上一轮Teacher网络的参数进行滑动平均来更新参数. 第k个epoch中, 正则化损失的*target*$\tilde{z}_i$由Teacher网络生成, 在前向计算的过程中, 模型在两个网络的输入层和中间特征层均加入噪声, 详细算法图解如下
+
+![5.png](/images/semi-supervised/5.png)
+
+作者指出, 最终Teacher网络可以学到更好的半监督效果, 该方法分别达到了*Cifar10 15.87\%, SVHN 5.65\%*的错误率(讲道理这种方法能work确实是见了鬼了, 玄学吧woc...).
+
+### Entropy Minimization
+
+文献[11]提出了基于最小化熵的差异正则化损失, 目的是让模型的预测所包含的不确定度更小, 这也是一个非常自然的想法, 它构造的正则化损失函数为:
+
+$$
+L_u = \sum_{x_i\in \mathcal{D}_u}H(f(x_i))
+$$
+
+这个当然现在一般是当半监督学习的损失挂件在用, 有些算法加上这一项以后效果变好了, 比如VAT模型加了这一项以后在*Cifar10*上提升了7个千分点.
+
+### Pseudo-Labeling[12]
+
+顾名思义, Pseudo-Labeling就是一个可以提供伪标签的算法. 简而言之, 就是对于无标签数据, 根据模型已经生成的预测选一些置信度比较高的预测并将这些预测*one-hot*化为伪标签训练无标注数据. 该方法真的非常直接, 不过训练trick比较多, 同时也引入了*Entropy Minimization*作为正则化项. 该方法的错误率为*Cifar10 17.78\%,SVHN 7.62\%*.
 
 
 ## 基于图模型的半监督学习算法
 
+To Be Done.
 
 
 
@@ -253,3 +272,7 @@ Mean-Teacher[10]方法其实是受$\Pi$-model所启发, 但是它把滑动平均
 [9] Laine S, Aila T. Temporal ensembling for semi-supervised learning[J]. arXiv preprint arXiv:1610.02242, 2016.
 
 [10] Tarvainen A, Valpola H. Mean teachers are better role models: Weight-averaged consistency targets improve semi-supervised deep learning results[C]//Advances in neural information processing systems. 2017: 1195-1204.
+
+[11] Grandvalet Y, Bengio Y. Semi-supervised learning by entropy minimization[C]//Advances in neural information processing systems. 2005: 529-536.
+
+[12] Lee D H. Pseudo-label: The simple and efficient semi-supervised learning method for deep neural networks[C]//Workshop on Challenges in Representation Learning, ICML. 2013, 3: 2.
