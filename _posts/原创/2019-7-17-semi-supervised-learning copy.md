@@ -177,7 +177,7 @@ Mixup方法可以作为半监督训练中的差异产生器用于提升模型的
 
     *mixup_loss* = *MSE*($f(m_b),mp_b$)
 
-    *loss* = *supervised_loss* + $\lambda *$*mixup_loss*
+    *loss* = *supervised_loss* + $\lambda$ * *mixup_loss*
 
     *loss.backward()*
 
