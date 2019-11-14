@@ -133,7 +133,7 @@ $$
 $$
 
 ## 从最优运输问题到**Wasserstein**距离
-从$(3)$式中我们可以很自然地推广到两个分布$X\sim P,Y\sim Q$之间的**Wasserstein**距离. 一个很自然的想法是，因为$X,Y$都是$R^n$空间，因此可以令$c(x,y)=\Vert x-y\Vert^p$,同时已知$P(x),Q(y)$的情况下我们可以有:
+从$(3)$式中我们可以很自然地推广到两个分布$X\sim P,Y\sim Q$之间的**Wasserstein**距离. 一个很自然的想法是，因为$X,Y$都是$R^d$空间，因此可以令$c(x,y)=\Vert x-y\Vert^p$,同时已知$P(x),Q(y)$的情况下我们可以有:
 
 $$
 W_p(P,Q)=(inf_{\gamma\in \Gamma(P,Q)}\int_{x}\int_{y} \Vert x-y\Vert^pd\gamma(x,y))^{\frac{1}{p}}\tag{4}
