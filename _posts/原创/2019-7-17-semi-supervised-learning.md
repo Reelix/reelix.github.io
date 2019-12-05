@@ -102,19 +102,27 @@ mathjax: true
 变分自编码器构建了一个由生成过程和推断过程两部分构成的概率模型，分别由参数 $\theta$ 和参数 $\phi$ 表示。概率模型基于潜变量假设，用于推断连续潜变量$z$与离散潜变量$c$的概率分布。模型对$z$与$c$分别作出了假设
 
 $$
-p(z) = \mathcal{N} ( z ; 0, I);\qquad p(c)=\text{Mult}(c;K,\bm{\pi});\qquad p_{\bm{\theta}}(X\vert z,c)=f(X;z,c,\theta)
+p(z) = \mathcal{N} ( z ; 0, I);\qquad p(c)=\text{Mult}(c;K,\pi);\qquad p_{\theta}(X\vert z,c)=f(X;z,c,\theta)
 $$
 
 并利用证据下界(ELBO)得到$q_{\phi}(z\vert X),q_{\phi}(c\vert X)$来对潜变量的后验分布$p(z\vert X),p(c\vert X)$进行近似推断如下
 
+
 $$
  \log p(X) \geq E_{q_{\phi}(z,c\vert X)} [\log p_{\theta}(X\vert z,c)]-\text{KL} ( q_{\phi}(z\vert X) \Vert p(z))-\text{KL} ( q_{\phi}(c\vert X) \Vert p(c) )=\text{ELBO}
 $$
+
+
 在半监督变分自编码器中[13]，我们将标签$y$视作离散潜变量$c$的真实后验分布$ p(c\vert X)=\text{Mult}(c;K,y)$,对于有标签的数据，将$y$代入固定采样，对于无标注的数据，我们采用无监督训练来对标签进行推断。同时，该文献发现，单纯用上述训练过程无法有效利用标签，因此其在训练有标注数据时额外增加了一项交叉熵，即
+
+
 $$
 -\text{ELBO}-\log q_{\phi}(y\vert X)
 $$
+
+
 值得注意的是，虽然半监督VAE的假设和理论更加符合数学直觉，但是半监督VAE的效果一直很差，同时，为什么要增加交叉熵项也没有很好的解释。[今年一篇文章](https://openreview.net/forum?id=S1ejj64YvS)针对这两个问题对VAE进行了改进，它通过一个近似等式，得出了交叉熵项实际上可以通过ELBO的形式通过一个近似所自然给出，同时结合VAE方法与下文中的Mixup方法提出了OSPOT-VAE，将VAE在半监督数据集上的表现进行了极大的增强，给出了利用VAE做半监督最好的结果(6.11\% in Cifar10, 25.30\% in Cifar100), 可惜被ICLR拒了。
+
 ## 基于差异学习的半监督学习算法
 
 深度半监督学习算法的另外一个套路是人为制造我们不想看到的差异，并对差异施加正则化约束从而让网络在训练过程中减小该差异，并证明这种差异学习可以提高网络在(纯)半监督学习任务上的泛化性能。 
