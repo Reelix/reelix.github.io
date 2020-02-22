@@ -17,6 +17,25 @@ mathjax: true
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 在本文中，我采用开源内网穿透工具[frp](https://github.com/fatedier/frp/blob/master/README_zh.md)对上述问题进行解决，从而实现内网服务器的公网ssh操作与公网访问。
 
 ### 用Frp实现内网穿透
