@@ -3,15 +3,19 @@ layout: post
 title: 深度学习服务器配置——解决内网穿透问题
 date: 2020-02-16 10:49:00
 categories: 实用工具
-tags: Deep Learning
+tags: Deep-Learning
 mathjax: true
 ---
 
 * content
 {:toc}
 
+**FengHZ‘s Blog首发原创**
 
 笔者长期负责实验室深度学习服务器的管理与维护，本文是对服务器管理维护过程中遇到的一些典型问题的一揽子解决方案。深度学习服务器主要由若干CPU(通常是2块CPU，共48-64进程)与若干GPU(2-8块GPU，通常为1080Ti，2080Ti，TITAN xp，Tesla V100等)组成，可以用于深度学习模型的训练。这些服务器往往放置于内网中，在外网无法通过ssh进行直接访问，需要通过麻烦的VPN验证进入内网方能进行访问。笔者还遇到的特殊问题是，管理的4台服务器位于不同的内网，换机登陆极其麻烦。此外，深度学习任务中还需要用到很多基于web服务的工具，如`jupyter notebook`，`tensorboard`等工具，这些web服务的配置也需要一些技巧。在本文中，我采用开源内网穿透工具[frp](https://github.com/fatedier/frp/blob/master/README_zh.md)对上述问题进行解决，从而实现内网服务器的公网ssh操作与公网访问。
+
+
+
 
 
 
