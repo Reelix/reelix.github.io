@@ -1,7 +1,7 @@
 ---
 layout: post
 title: 深度学习服务器配置——解决内网穿透问题
-date: 2020-02-16 10:49:00
+date: 2019-02-16 10:49:00
 categories: 实用工具
 tags: Deep-Learning
 mathjax: true
