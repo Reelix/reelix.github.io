@@ -53,5 +53,12 @@ $$
 \text{MCE}(k)=\max_{m\in \{1,...,m\}}\vert  \text{Conf}(B_m)-\text{Acc}(B_m)\vert
 $$
 
+## 降低ECE与MCE
+
+在实验过程中，一个很显著的现象是，深度学习模型的交叉熵损失降低并不代表ECE与MEC也在降低。如下图所示，在Cifar100的loss降低的过程中，其ECE与MEC反而增加了。
+
+![ECE](/images/ECE,MCE/1.png)
+
+降低ECE与MEC，有两个很有用的方法，分别是为softmax增加中心化的温度系数，以及[标签平滑化](https://zhuanlan.zhihu.com/p/101553787?utm_source=com.tencent.tim&utm_medium=social&utm_oi=562558995055980544)。这两种方法都是通过让自己的网络较为自信(预测向两端集中)，同时又不至于过于自信(避免one-hot导致的极端1-0)，从而增加网络对自己预测的置信度。
 
 
