@@ -58,7 +58,7 @@ $$
 d_{\mathcal{H}}(\mathcal{D}_S,\mathcal{D}_T)=2 \sup_{h\in \mathcal{H}}\vert \Pr_{\mathcal{D}_S}(I(h))-\Pr_{\mathcal{D}_T}(I(h))\vert \tag{4}
 $$
 
-其中，$\mathcal{H}$是我们模型训练出的所有可能假设$h$的集合，我们可以把它看成是模型容量。$I(h)=\{\mathbf{x}:h(\mathbf{x})=1,\mathbf{x}\in \mathcal{X}\}$是$\mathcal{X}$的一个子集，但是与$h$有关。通过$(4)$的定义，我们就把数据集的距离与目标假设联系在一起了。
+其中，$\mathcal{H}$是我们模型训练出的所有可能假设$h$的集合，我们可以把它看成是模型容量，$I(h)=\{\mathbf{x}:h(\mathbf{x})=1,\mathbf{x}\in \mathcal{X}\}$是$\mathcal{X}$的一个子集，但是与$h$有关。通过$(4)$的定义，我们就把数据集的距离与目标假设联系在一起了。
 
 ## Domain Adaptation：几个重要的Bound
 从Domain Adaptation的一系列定义中，我们大概已经有了一种感觉，即Domain Adaptation主要目的是想通过一系列手段，使得优化$\epsilon_S(h)$所得到的模型$h$同样能在$\epsilon_T(h)$上得到很好的表现。为此，我们需要建立这两者的联系，以得到以下形式的Bound：
@@ -104,7 +104,7 @@ $$
 \vert \epsilon_T(h) - \epsilon_S(h,f_T) \vert = \vert \int_{\mathcal{X}}\vert h(\mathbf{x})-f_T(\mathbf{x})\vert (\phi_{T}(\mathbf{x})-\phi_{S}(\mathbf{x}))dx\vert
 $$
 
-取$\mathcal{X}=\mathcal{X}_1\cup\mathcal{X}_2$，其中$\mathcal{X}_1=\{\mathbf{x}:\phi_{T}(\mathbf{x})>\phi_{S}(\mathbf{x}))\}$，$\mathcal{X}_2=\{\mathbf{x}:\phi_{T}(\mathbf{x})\leq\phi_{S}(\mathbf{x}))\}$。我们可以用$\mathcal{X}$的拆分将上述等式右边转化为
+取 $\mathcal{X}=\mathcal{X}_{1}\cup\mathcal{X}_{2}$，其中$\mathcal{X}_1=\{\mathbf{x}:\phi_{T}(\mathbf{x})>\phi_{S}(\mathbf{x}))\},\mathcal{X}_2=\{\mathbf{x}:\phi_{T}(\mathbf{x})\leq\phi_{S}(\mathbf{x}))\}$。我们可以用 $\mathcal{X}$ 的拆分将上述等式右边转化为
 
 $$
 \vert \int_{\mathcal{X}}\vert h(\mathbf{x})-f_T(\mathbf{x})\vert (\phi_{T}(\mathbf{x})-\phi_{S}(\mathbf{x}))dx\vert =\\
@@ -120,7 +120,7 @@ $$
 
 那么上述不等式得证，而系数2的来历，则是源于我们对原始输入集合$\mathcal{X}$进行的两阶段拆分。
 ### 通过VC维构建Bound计算$d_{\mathcal{H}}(\mathcal{D}_S,\mathcal{D}_T)$
-我们在上文中提到，距离$d_1(\mathcal{D}_S,\mathcal{D}_T)$是无法计算的，而针对某一具体的任务，我们提到了用$d_{\mathcal{H}}(\mathcal{D}_S,\mathcal{D}_T)$来代替。显而易见的是，$d_{\mathcal{H}}(\mathcal{D}_S,\mathcal{D}_T)\leq d_1(\mathcal{D}_S,\mathcal{D}_T)$是一个下界。那么，两个重要的问题是，如何计算$d_{\mathcal{H}}$，以及如何通过$d_{\mathcal{H}}$构建$\epsilon_T(h)$与$\epsilon_S(h)$之间的关系。本节中，我们先介绍如何通过经验样本计算$d_{\mathcal{H}}$。假如我们对源域与目标域的数据分布分别采样相同的个数$m$个，构成样本集$U_S,U_T$，那么$d_{\mathcal{H}}$的经验表达形式为
+我们在上文中提到，距离 $d_1(\mathcal{D}_S,\mathcal{D}_T)$ 是无法计算的，而针对某一具体的任务，我们提到了用 $d_{\mathcal{H}}(\mathcal{D}_S,\mathcal{D}_T)$ 来代替。显而易见的是，$d_{\mathcal{H}}(\mathcal{D}_S,\mathcal{D}_T)\leq d_1(\mathcal{D}_S,\mathcal{D}_T)$是一个下界。那么，两个重要的问题是，如何计算$d_{\mathcal{H}}$，以及如何通过$d_{\mathcal{H}}$构建$\epsilon_T(h)$与$\epsilon_S(h)$之间的关系。本节中，我们先介绍如何通过经验样本计算$d_{\mathcal{H}}$。假如我们对源域与目标域的数据分布分别采样相同的个数$m$个，构成样本集$U_S,U_T$，那么$d_{\mathcal{H}}$的经验表达形式为
 
 $$
 \hat{d}_{\mathcal{H}}(\mathcal{D}_S,\mathcal{D}_T)=2\sup_{h \in \mathcal{H}}\vert \frac{1}{m}\sum_{i=1}^{m}\mathbf{I}[h(\mathbf{x_i})=1]-\frac{1}{m}\sum_{i=1}^{m}\mathbf{I}[h(\mathbf{x_i})=1]\vert \tag{4}
@@ -151,6 +151,7 @@ $$
 
 关于VC-dimension，我们推荐[这篇Tutorial](https://tangshusen.me/2018/12/09/vc-dimension/)。但是一般而言，在大部分文章中，等式$(6)$只是作为一个常规充门面的工作，而具体模型的VC-dimension也没什么特别大的作用，所以该Bound只是为了理论严谨性而提出的，实际Practice中没有那么有用。
 ### 通过构建Bound寻找Domain Adaptation的适用条件
+我们在
 
 
 
