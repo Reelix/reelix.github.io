@@ -111,6 +111,7 @@ $$
 \vert \int_{\mathcal{X}_1}\vert h(\mathbf{x})-f_T(\mathbf{x})\vert (\phi_{T}(\mathbf{x})-\phi_{S}(\mathbf{x}))dx + \int_{\mathcal{X}_2}\vert h(\mathbf{x})-f_T(\mathbf{x})\vert (\phi_{T}(\mathbf{x})-\phi_{S}(\mathbf{x}))dx\vert\\
 \leq \vert \int_{\mathcal{X}_1}\vert h(\mathbf{x})-f_T(\mathbf{x})\vert (\phi_{T}(\mathbf{x})-\phi_{S}(\mathbf{x}))dx\vert +\vert \int_{\mathcal{X}_2}\vert h(\mathbf{x})-f_T(\mathbf{x})\vert (\phi_{S}(\mathbf{x})-\phi_{T}(\mathbf{x}))dx\vert
 $$
+
 注意到$\vert h(\mathbf{x})-f_T(\mathbf{x})\vert\leq 1$，那么我们可以把不等式扩展到
 
 $$
@@ -153,7 +154,14 @@ $$
 关于VC-dimension，我们推荐[这篇Tutorial](https://tangshusen.me/2018/12/09/vc-dimension/)。但是一般而言，在大部分文章中，等式$(6)$只是作为一个常规充门面的工作，而具体模型的VC-dimension也没什么特别大的作用，所以该Bound只是为了理论严谨性而提出的，实际Practice中没有那么有用。
 ### 通过构建Bound寻找Domain Adaptation的适用条件
 
-我们在前面两节中先给出了刻画 $\epsilon_S(h),\epsilon_T(h)$ 的基本
+我们在前面两节中先刻画了 $\epsilon_S(h),\epsilon_T(h)$ 的基本关系，定义了两个Domain的距离，对距离度量 $d_{\mathcal{H}}(\mathcal{D}_S,\mathcal{D}_T)$给出了计算方法。在本节中，我们关心以下问题：首先，两个满足什么条件的域是可以进行域适应(Domain Adaptation)的呢？其次，如何利用可计算的距离$d_{\mathcal{H}}(\mathcal{D}_S,\mathcal{D}_T)$来刻画 $\epsilon_S(h),\epsilon_T(h)$的关系呢？
+
+首先，我们引入
+
+
+## 特征域适应：在特征空间上控制数据差异、
+
+
 
 
 
