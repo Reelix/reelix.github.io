@@ -120,6 +120,7 @@ $$
 
 那么上述不等式得证，而系数2的来历，则是源于我们对原始输入集合$\mathcal{X}$进行的两阶段拆分。
 ### 通过VC维构建Bound计算$d_{\mathcal{H}}(\mathcal{D}_S,\mathcal{D}_T)$
+
 我们在上文中提到，距离 $d_1(\mathcal{D}_S,\mathcal{D}_T)$ 是无法计算的，而针对某一具体的任务，我们提到了用 $d_{\mathcal{H}}(\mathcal{D}_S,\mathcal{D}_T)$ 来代替。显而易见的是，$d_{\mathcal{H}}(\mathcal{D}_S,\mathcal{D}_T)\leq d_1(\mathcal{D}_S,\mathcal{D}_T)$是一个下界。那么，两个重要的问题是，如何计算$d_{\mathcal{H}}$，以及如何通过$d_{\mathcal{H}}$构建$\epsilon_T(h)$与$\epsilon_S(h)$之间的关系。本节中，我们先介绍如何通过经验样本计算$d_{\mathcal{H}}$。假如我们对源域与目标域的数据分布分别采样相同的个数$m$个，构成样本集$U_S,U_T$，那么$d_{\mathcal{H}}$的经验表达形式为
 
 $$
@@ -141,9 +142,9 @@ $$
 
 同时注意到，需要的条件是$U_S,U_T$的采样数目相同，不然该等式是不成立的(实际使用的过程中，一般选择每个batch采样的数目相同)。根据等式$(5)$，我们可以通过交叉熵损失来训练分类器，然后拿最后得到的分类器来计算$h(\mathbf{x})$，从而计算$(5)$。一般而言，交叉熵损失越小，则说明$\hat{d}_{\mathcal{H}}(\mathcal{D}_S,\mathcal{D}_T)$越小，说明两个数据集在整个假设空间(分类器空间)上的差距没那么大。
 
-此外，还有一点我们需要考虑的，是用经验误差$\hat{d}$来度量分布距离$d$所产生的偏差。这里我们不加证明地给出$d_{\mathcal{H}}(\mathcal{D}_S,\mathcal{D}_T)$与$\hat{d}_{\mathcal{H}}(\mathcal{D}_S,\mathcal{D}_T)$的偏差：
+此外，还有一点我们需要考虑的，是用经验误差 $\hat{d}$ 来度量分布距离$d$所产生的偏差。这里我们不加证明地给出 $d_{\mathcal{H}}(\mathcal{D}_S,\mathcal{D}_T)$ 与 $\hat{d}_{\mathcal{H}}(\mathcal{D}_S,\mathcal{D}_T)$ 的偏差：
 
-假设$\mathcal{H}$是所有基于从输入集$\mathcal{X}$到标签集$\{0,1\}$的分类器$h$的假设空间，同时我们采用的分类器模型具有VC-dimension $d$，那么我们用采样数为$m$的经验距离$\hat{d}_{\mathcal{H}}(\mathcal{D}_S,\mathcal{D}_T)$来估计$d_{\mathcal{H}}(\mathcal{D}_S,\mathcal{D}_T)$，这个估计的偏差满足，对于任意的$\delta \in (0,1)$，以下Bound在至少$1-\delta$的概率下成立
+假设$\mathcal{H}$是所有基于从输入集 $\mathcal{X}$ 到标签集 $\{0,1\}$ 的分类器 $h$ 的假设空间，同时我们采用的分类器模型具有VC-dimension $d$，那么我们用采样数为$m$的经验距离 $\hat{d}_{\mathcal{H}}(\mathcal{D}_S,\mathcal{D}_T)$ 来估计 $d_{\mathcal{H}}(\mathcal{D}_S,\mathcal{D}_T)$，这个估计的偏差满足，对于任意的 $\delta \in (0,1)$ ，以下Bound在至少$1-\delta$的概率下成立
 
 $$
 d_{\mathcal{H}}(\mathcal{D}_S,\mathcal{D}_T)\leq \hat{d}_{\mathcal{H}}(\mathcal{D}_S,\mathcal{D}_T)+4\sqrt{\frac{d\log(2m)+\log(\frac{2}{\delta})}{m}} \tag{6}
@@ -151,7 +152,8 @@ $$
 
 关于VC-dimension，我们推荐[这篇Tutorial](https://tangshusen.me/2018/12/09/vc-dimension/)。但是一般而言，在大部分文章中，等式$(6)$只是作为一个常规充门面的工作，而具体模型的VC-dimension也没什么特别大的作用，所以该Bound只是为了理论严谨性而提出的，实际Practice中没有那么有用。
 ### 通过构建Bound寻找Domain Adaptation的适用条件
-我们在
+
+我们在前面两节中先给出了刻画 $\epsilon_S(h),\epsilon_T(h)$ 的基本
 
 
 
