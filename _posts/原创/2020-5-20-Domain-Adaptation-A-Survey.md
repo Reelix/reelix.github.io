@@ -61,8 +61,96 @@ $$
 其中，$\mathcal{H}$是我们模型训练出的所有可能假设$h$的集合，我们可以把它看成是模型容量。$I(h)=\{\mathbf{x}:h(\mathbf{x})=1,\mathbf{x}\in \mathcal{X}\}$是$\mathcal{X}$的一个子集，但是与$h$有关。通过$(4)$的定义，我们就把数据集的距离与目标假设联系在一起了。
 
 ## Domain Adaptation：几个重要的Bound
-从Domain Adaptation的一系列定义中，我们大概已经有了一种感觉，就是
+从Domain Adaptation的一系列定义中，我们大概已经有了一种感觉，即Domain Adaptation主要目的是想通过一系列手段，使得优化$\epsilon_S(h)$所得到的模型$h$同样能在$\epsilon_T(h)$上得到很好的表现。为此，我们需要建立这两者的联系，以得到以下形式的Bound：
 
+$$
+\epsilon_T(h)\leq \epsilon_S(h)+A+B+C
+$$
+
+在上文中，我们已经通过$(3)$给出了一个重要的Bound，它表明，$\epsilon_T(h)$的上确界与优化$\epsilon_S(h)$有关，同时也与数据集之间的差异，以及数据集的标签函数$f_S,f_T$之间的差异有关。但是，$(3)$所刻画的Bound固然具有良好的分析形式，却并不实用，其中涉及到$d_1(\mathcal{D}_S,\mathcal{D}_T),f_S,f_T$这几项更是无法得到。因此，我们需要一些能过计算的Bound来提供实践指导。同时，在列举出这些Bound的同时，我们同样给出了这些Bound的证明，它可以帮我们理解为什么要如此定义距离。
+
+### Bound$(3)$回顾与证明
+我们看到$(2)$,$(4)$两个距离的时候，应当产生的一个疑惑是，为什么这些距离前面都有一个系数2。在这里，我们通过回顾证明Bound$(3)$来解决这一问题。
+
+$$
+\epsilon_T(h)\leq \epsilon_S(h)+d_1(\mathcal{D}_S,\mathcal{D}_T) +\min \{\mathbf{E}_{\mathcal{D}_S}\vert f_S(\mathbf{x})-f_T(\mathbf{x})\vert,\\ \mathbf{E}_{\mathcal{D}_T}\vert f_S(\mathbf{x})-f_T(\mathbf{x})\vert \} \tag{3}
+$$
+
+证明：
+
+$$
+\epsilon_T(h) = \epsilon_T(h) + \epsilon_S(h) - \epsilon_S(h) +\epsilon_S(h,f_T) - \epsilon_S(h,f_T)\\
+\leq \epsilon_S(h) +\vert \epsilon_S(h,f_T)-\epsilon_S(h) \vert + \vert \epsilon_T(h) - \epsilon_S(h,f_T) \vert 
+$$
+
+首先
+
+$$
+\vert \epsilon_S(h,f_T)-\epsilon_S(h) \vert =\vert \mathbf{E}_{\mathcal{D}_S}[\vert h-f_T\vert -\vert h-f_S\vert ]\vert \\
+\leq \mathbf{E}_{\mathcal{D}_S}\vert\vert h-f_T\vert -\vert h-f_S\vert \vert 
+$$
+
+注意到 $h(\mathbf{x})\in \{0,1\}$，同时$f_S(\mathbf{x}),f_T(\mathbf{x})\in [0,1]$，因此$\vert\vert h-f_T\vert -\vert h-f_S\vert \vert$可以简化为$\vert f_T-f_S\vert$。(Note:分别考虑$h(\mathbf{x})=0,1$的两种情况代入即可。)
+
+其次，我们来证明 
+
+$$
+\vert \epsilon_T(h) - \epsilon_S(h,f_T) \vert \leq d_1(\mathcal{D}_S,\mathcal{D}_T)
+$$
+
+我们有
+
+$$
+\vert \epsilon_T(h) - \epsilon_S(h,f_T) \vert = \vert \int_{\mathcal{X}}\vert h(\mathbf{x})-f_T(\mathbf{x})\vert (\phi_{T}(\mathbf{x})-\phi_{S}(\mathbf{x}))dx\vert
+$$
+
+取$\mathcal{X}=\mathcal{X}_1\cup\mathcal{X}_2$，其中$\mathcal{X}_1=\{\mathbf{x}:\phi_{T}(\mathbf{x})>\phi_{S}(\mathbf{x}))\}$，$\mathcal{X}_2=\{\mathbf{x}:\phi_{T}(\mathbf{x})\leq\phi_{S}(\mathbf{x}))\}$。我们可以用$\mathcal{X}$的拆分将上述等式右边转化为
+
+$$
+\vert \int_{\mathcal{X}}\vert h(\mathbf{x})-f_T(\mathbf{x})\vert (\phi_{T}(\mathbf{x})-\phi_{S}(\mathbf{x}))dx\vert =\\
+\vert \int_{\mathcal{X}_1}\vert h(\mathbf{x})-f_T(\mathbf{x})\vert (\phi_{T}(\mathbf{x})-\phi_{S}(\mathbf{x}))dx + \int_{\mathcal{X}_2}\vert h(\mathbf{x})-f_T(\mathbf{x})\vert (\phi_{T}(\mathbf{x})-\phi_{S}(\mathbf{x}))dx\vert\\
+\leq \vert \int_{\mathcal{X}_1}\vert h(\mathbf{x})-f_T(\mathbf{x})\vert (\phi_{T}(\mathbf{x})-\phi_{S}(\mathbf{x}))dx\vert +\vert \int_{\mathcal{X}_2}\vert h(\mathbf{x})-f_T(\mathbf{x})\vert (\phi_{S}(\mathbf{x})-\phi_{T}(\mathbf{x}))dx\vert
+$$
+注意到$\vert h(\mathbf{x})-f_T(\mathbf{x})\vert\leq 1$，那么我们可以把不等式扩展到
+
+$$
+\leq \vert \Pr_{\mathcal{D_S}}(\mathcal{X}_1)-\Pr_{\mathcal{D_T}}(\mathcal{X}_1)\vert +\vert \Pr_{\mathcal{D_S}}(\mathcal{X}_2)-\Pr_{\mathcal{D_T}}(\mathcal{X}_2)\vert\\
+\leq d_1(\mathcal{D}_S,\mathcal{D}_T)
+$$
+
+那么上述不等式得证，而系数2的来历，则是源于我们对原始输入集合$\mathcal{X}$进行的两阶段拆分。
+### 通过VC维构建Bound计算$d_{\mathcal{H}}(\mathcal{D}_S,\mathcal{D}_T)$
+我们在上文中提到，距离$d_1(\mathcal{D}_S,\mathcal{D}_T)$是无法计算的，而针对某一具体的任务，我们提到了用$d_{\mathcal{H}}(\mathcal{D}_S,\mathcal{D}_T)$来代替。显而易见的是，$d_{\mathcal{H}}(\mathcal{D}_S,\mathcal{D}_T)\leq d_1(\mathcal{D}_S,\mathcal{D}_T)$是一个下界。那么，两个重要的问题是，如何计算$d_{\mathcal{H}}$，以及如何通过$d_{\mathcal{H}}$构建$\epsilon_T(h)$与$\epsilon_S(h)$之间的关系。本节中，我们先介绍如何通过经验样本计算$d_{\mathcal{H}}$。假如我们对源域与目标域的数据分布分别采样相同的个数$m$个，构成样本集$U_S,U_T$，那么$d_{\mathcal{H}}$的经验表达形式为
+
+$$
+\hat{d}_{\mathcal{H}}(\mathcal{D}_S,\mathcal{D}_T)=2\sup_{h \in \mathcal{H}}\vert \frac{1}{m}\sum_{i=1}^{m}\mathbf{I}[h(\mathbf{x_i})=1]-\frac{1}{m}\sum_{i=1}^{m}\mathbf{I}[h(\mathbf{x_i})=1]\vert \tag{4}
+$$
+
+但是，这个经验表达形式仍然涉及一个上确界问题，如何通过某种办法找到合适的$h$,从而进行计算呢？首先，考虑如何计算在某个假设空间上$\mathcal{D}_S,\mathcal{D}_T$的距离。我们知道，$d_1(\mathcal{D}_S,\mathcal{D}_T)$距离的本质是在分布函数上去找两个数据集"差异最大的地方"。那么，对于某一类假设空间(分类器空间)$\mathcal{H}$，如果这个空间上，存在分类器完全无法区分数据是来源于$\mathcal{D}_S$还是$\mathcal{D}_T$，说明这个假设空间对于两个数据集的距离 "很小"。依据这种思路，我们可以给$\mathcal{D}_S$打上标签0，$\mathcal{D}_T$打上标签1，然后在整个假设空间上去找一个分类器，这个分类器尽量区分输入的数据是来自于源域分布$\mathcal{D}_S$还是来自于目标域分布$\mathcal{D}_T$。这样的分类器是很好找的，因为这本质是一个二分类问题，可以用交叉熵做损失函数，找到分类器后，我们可以用它来计算距离，那么这样就涉及到了下面的等式：
+
+$$
+\hat{d}_{\mathcal{H}}(\mathcal{D}_S,\mathcal{D}_T) =2(1-\min_{h\in\mathcal{H}}[\frac{1}{m}\sum_{\mathbf{x}:h(\mathbf{x})=0}\mathbf{I}[\mathbf{x}\in U_S]-\frac{1}{m}\sum_{\mathbf{x}:h(\mathbf{x})=1}\mathbf{I}[\mathbf{x}\in U_T]]) \tag{5}
+$$
+
+这里的证明不难，只需要注意
+
+$$
+1=\frac{1}{2m}[\sum_{\mathbf{x}:h(\mathbf{x})=0}\mathbf{I}[\mathbf{x}\in U_S]+\sum_{\mathbf{x}:h(\mathbf{x})=1}\mathbf{I}[\mathbf{x}\in U_S]+\\
+\sum_{\mathbf{x}:h(\mathbf{x})=0}\mathbf{I}[\mathbf{x}\in U_T]+\sum_{\mathbf{x}:h(\mathbf{x})=1}\mathbf{I}[\mathbf{x}\in U_T]
+$$
+
+同时注意到，需要的条件是$U_S,U_T$的采样数目相同，不然该等式是不成立的(实际使用的过程中，一般选择每个batch采样的数目相同)。根据等式$(5)$，我们可以通过交叉熵损失来训练分类器，然后拿最后得到的分类器来计算$h(\mathbf{x})$，从而计算$(5)$。一般而言，交叉熵损失越小，则说明$\hat{d}_{\mathcal{H}}(\mathcal{D}_S,\mathcal{D}_T)$越小，说明两个数据集在整个假设空间(分类器空间)上的差距没那么大。
+
+此外，还有一点我们需要考虑的，是用经验误差$\hat{d}$来度量分布距离$d$所产生的偏差。这里我们不加证明地给出$d_{\mathcal{H}}(\mathcal{D}_S,\mathcal{D}_T)$与$\hat{d}_{\mathcal{H}}(\mathcal{D}_S,\mathcal{D}_T)$的偏差：
+
+假设$\mathcal{H}$是所有基于从输入集$\mathcal{X}$到标签集$\{0,1\}$的分类器$h$的假设空间，同时我们采用的分类器模型具有VC-dimension $d$，那么我们用采样数为$m$的经验距离$\hat{d}_{\mathcal{H}}(\mathcal{D}_S,\mathcal{D}_T)$来估计$d_{\mathcal{H}}(\mathcal{D}_S,\mathcal{D}_T)$，这个估计的偏差满足，对于任意的$\delta \in (0,1)$，以下Bound在至少$1-\delta$的概率下成立
+
+$$
+d_{\mathcal{H}}(\mathcal{D}_S,\mathcal{D}_T)\leq \hat{d}_{\mathcal{H}}(\mathcal{D}_S,\mathcal{D}_T)+4\sqrt{\frac{d\log(2m)+\log(\frac{2}{\delta})}{m}} \tag{6}
+$$
+
+关于VC-dimension，我们推荐[这篇Tutorial](https://tangshusen.me/2018/12/09/vc-dimension/)。但是一般而言，在大部分文章中，等式$(6)$只是作为一个常规充门面的工作，而具体模型的VC-dimension也没什么特别大的作用，所以该Bound只是为了理论严谨性而提出的，实际Practice中没有那么有用。
+### 通过构建Bound寻找Domain Adaptation的适用条件
 
 
 
