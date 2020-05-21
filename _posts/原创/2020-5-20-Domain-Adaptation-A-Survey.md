@@ -156,10 +156,86 @@ $$
 
 我们在前面两节中先刻画了 $\epsilon_S(h),\epsilon_T(h)$ 的基本关系，定义了两个Domain的距离，对距离度量 $d_{\mathcal{H}}(\mathcal{D}_S,\mathcal{D}_T)$给出了计算方法。在本节中，我们关心以下问题：首先，两个满足什么条件的域是可以进行域适应(Domain Adaptation)的呢？其次，如何利用可计算的距离$d_{\mathcal{H}}(\mathcal{D}_S,\mathcal{D}_T)$来刻画 $\epsilon_S(h),\epsilon_T(h)$的关系呢？
 
-首先，我们引入
+首先，我们引入一个定义，理想化联合假设(ideal joint hypothesis)，它被定义为能最小化源域与目标域的联合预测错误的假设
 
+$$
+h^*=\arg \min_{h\in \mathcal{H}}\epsilon_S(h)+\epsilon_T(h)
+$$
 
-## 特征域适应：在特征空间上控制数据差异、
+同时，我们记在理想化联合假设 $h^*$的作用下，联合预测错误的值为
+
+$$
+\lambda = \epsilon_S(h^*)+\epsilon_T(h^*)
+$$
+
+给定两个domain$<\mathcal{D}_S,f_S>$和$<\mathcal{D}_T,f_T>$，以及假设空间$\mathcal{H}$后，$\lambda$也被确定下来，它应该是一个常数。在我们期望能过进行域适应的任务上，这个常数应该总体而言"不会很大"，否则域适应的理论根本不能用。如果对假设空间的任何一个假设$h$而言，都没办法在两个Domain上得到不错的结果，那么整个问题就是不存在的(当然，这里要求是在两个Domain上得到不错的结果，Transfer Learning就放开了这一限制，我们可以先在$\epsilon_S(h)$上得到不错的结果，然后再在$\epsilon_T(h)$上进行微调。[一般神经网络微调后，在原数据集上都会表现很差](https://www.zhihu.com/question/360374828/answer/1225597056)，这个叫做神经网络的灾难性遗忘问题)。
+
+在域适应领域内，我们先假设$\lambda$是一个比较小的值，为了联系两个domain的误差关系，我们再给出一个定义，对称差异假设空间$\mathcal{H}\Delta\mathcal{H}$，这个定义是基于异或的思想，有点奇怪，但是我们之后就能看到它的威力
+
+$$
+g\in \mathcal{H}\Delta\mathcal{H} \Leftrightarrow \exist h,h'\in \mathcal{H},g(\mathbf{x})= h(\mathbf{x}) \oplus h'(\mathbf{x})
+$$
+
+$\oplus$是异或操作，简单而言，对于任意$g\in \mathcal{H}\Delta\mathcal{H}$，它的映射结果都代表了都是原假设空间$\mathcal{H}$中两个假设的"不一致"。为什么要引入这种对称假设空间呢？因为我们需要刻画$h^*$与普通$h$的关系，并用$\lambda$作为一个上界。
+
+下面，我们先用第一个不等式来揭示一下它的威力：对于任意两个假设$h,h'\in \mathcal{H}$, 我们有
+
+$$
+\vert \epsilon_{S}(h,h')-\epsilon_{T}(h,h')\vert \leq \frac{1}{2}d_{\mathcal{H}\Delta\mathcal{H}}(\mathcal{D}_S,\mathcal{D}_T) \tag{7}
+$$
+
+证明：
+
+$$
+d_{\mathcal{H}\Delta\mathcal{H}}(\mathcal{D}_S,\mathcal{D}_T) = 2\sup_{h,h'\in \mathcal{H}}\vert E_{\mathcal{D}_S}\vert h(\mathbf{x})-h'(\mathbf{x})\vert- E_{\mathcal{D}_T}\vert h(\mathbf{x})-h'(\mathbf{x})\vert \vert \\
+=2\sup \vert\epsilon_{S}(h,h')-\epsilon_{T}(h,h')\vert
+$$
+
+同时，我们建立 $d_{\mathcal{H}\Delta\mathcal{H}}(\mathcal{D}_S,\mathcal{D}_T)$ 与 $d_{\mathcal{H}}(\mathcal{D}_S,\mathcal{D}_T)$的关系如下
+
+$$
+\frac{1}{2}d_{\mathcal{H}\Delta\mathcal{H}}(\mathcal{D}_S,\mathcal{D}_T)\leq d_{\mathcal{H}}(\mathcal{D}_S,\mathcal{D}_T)
+$$
+
+证明：
+
+$$
+\frac{1}{2}d_{\mathcal{H}\Delta\mathcal{H}}(\mathcal{D}_S,\mathcal{D}_T) = \sup_{h,h'}\vert E_{\mathcal{D}_S}\vert h-h'\vert -E_{\mathcal{D}_T}\vert h-h'\vert\vert\\
+\leq  \sup_{h,h'}\vert E_{\mathcal{D}_S}\vert h\vert +E_{\mathcal{D}_S}\vert h^*\vert -E_{\mathcal{D}_T}\vert h\vert-E_{\mathcal{D}_T}\vert h^*\vert\vert \\
+\leq 2\sup_{h\in \mathcal{H}}\vert E_{\mathcal{D}_S}\vert h\vert -E_{\mathcal{D}_T}\vert h\vert\vert =d_{\mathcal{H}}(\mathcal{D}_S,\mathcal{D}_T)
+$$
+
+因此，我们有以下的关系式
+
+$$
+\epsilon_{T}(h)\leq \epsilon_{S}(h)+\lambda + d_{\mathcal{H}}(\mathcal{D}_S,\mathcal{D}_T)
+$$
+
+证明：
+
+$$
+\epsilon_{T}(h)\leq \epsilon_{T}(h^*)+\epsilon_{T}(h,h^*)\\
+\leq \epsilon_{T}(h^*) + \epsilon_{S}(h,h^*) + \vert \epsilon_{S}(h,h^*) -\epsilon_{T}(h,h^*) \vert \\
+\leq \epsilon_{T}(h^*) + \epsilon_{S}(h^*)+ \epsilon_{S}(h) + \frac{1}{2}d_{\mathcal{H}\Delta\mathcal{H}}(\mathcal{D}_S,\mathcal{D}_T) \\
+\leq \epsilon_{S}(h)+\lambda + d_{\mathcal{H}}(\mathcal{D}_S,\mathcal{D}_T)
+$$
+
+在实际计算中，我们往往优化的是 $\hat{\epsilon}_{S}(h)$，并用上文所述的 $\hat{d}_{\mathcal{H}}(\mathcal{D}_S,\mathcal{D}_T)$ 来进行距离估计。按VC-dimension理论，我们与$(6)$类似，不加证明地给出下面的不等式，即对于任意的 $\delta \in (0,1)$ ，如果给定的有标注的数据集采样为$m'$,以下Bound在至少$1-\delta$的概率下成立
+
+$$
+\epsilon_{S}(h) \leq \hat{\epsilon}_{S}(h) +\sqrt{\frac{4}{m'}(d\log \frac{2em'}{d}+\log \frac{4}{\delta})} \tag{8}
+$$
+
+结合$(1)-(8)$，我们可以给出在几乎所有论文中都出现过的核心公式：
+
+$$
+\epsilon_{T}(h)\leq \hat{\epsilon}_{S}(h)+\lambda + \hat{d}_{\mathcal{H}}(\mathcal{D}_S,\mathcal{D}_T) \\
+ +\sqrt{\frac{4}{m'}(d\log \frac{2em'}{d}+\log \frac{4}{\delta})} + 4\sqrt{\frac{d\log(2m)+\log(\frac{2}{\delta})}{m}}
+$$
+
+以后基本看到这个公式，就是这种算法。
+
+## 特征对抗域适应：在特征空间上控制数据差异
 
 
 
