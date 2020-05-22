@@ -230,16 +230,110 @@ $$
 
 $$
 \epsilon_{T}(h)\leq \hat{\epsilon}_{S}(h)+\lambda + \hat{d}_{\mathcal{H}}(\mathcal{D}_S,\mathcal{D}_T) \\
- +\sqrt{\frac{4}{m'}(d\log \frac{2em'}{d}+\log \frac{4}{\delta})} + 4\sqrt{\frac{d\log(2m)+\log(\frac{2}{\delta})}{m}}
+ +\sqrt{\frac{4}{m'}(d\log \frac{2em'}{d}+\log \frac{4}{\delta})} + 4\sqrt{\frac{d\log(2m)+\log(\frac{2}{\delta})}{m}} \tag{9}
 $$
 
 以后基本看到这个公式，就是这种算法。
 
-## 特征对抗域适应：在特征空间上控制数据差异
+## 从理论到实践：实际使用中work的三种域适应算法
+### 特征对抗域适应：在特征空间上控制数据差异
+
+从$(9)$中我们知道，对于在源域训练好的假设$h$，它在目标域的表现$\epsilon_{T}(h)$取决于源域的验证表现$\hat{\epsilon}_{S}(h)$，假设空间的合理程度$\lambda$，以及域之间的距离$\hat{d}_{\mathcal{H}}(\mathcal{D}_S,\mathcal{D}_T)$。其中，假设空间$\mathcal{H}$一旦给定，$\lambda$就固定下来。那么，有没有办法让域之间的距离变得尽可能小呢？一个很自然的想法是通过特征空间过渡，如果我们设计两个映射，第一个映射将源域与目标域都映射到一个特征空间，在这个特征空间上，源域与目标域无法区分。然后我们再在特征空间上构造分类器，这样就能有效解决域适应问题。
+
+与上文一致，我们同样对这个"特征空间"给出严格的数学定义。特征映射$r$是一个从输入空间$\mathcal{X}$到特征空间$\mathcal{Z}$的函数，给定一个模型，所有特征映射所组成的集合我们记作$\mathcal{R}$。此时，对一个给定域$<\mathcal{D},f>$假设$h$是一个从特征空间$\mathcal{Z}$到标签$\{0,1\}$的映射，我们定义特征空间的标签函数$\tilde{f}$为
+
+$$
+\tilde{f}(\mathbf{z})=\mathbf{E}_{\mathbf{x}\sim\mathcal{D},r(\mathbf{x})=\mathbf{z}}[f(\mathbf{x})]
+$$
+
+简单而言，对于一个给定特征$\mathbf{z}$，它的标签函数可以如下计算。我们找出分布为$\mathcal{D}$的输入空间上，所有映射到特征$\mathbf{z}$的点$\mathbf{x}$，再计算这些点的标签函数$f(\mathbf{x})$的期望即可。同样，对一个给定域$<\mathcal{D},f>$，我们定义特征空间上的分布函数为
+
+$$
+\Pr_{\tilde{\mathcal{D}}}[B]=\Pr_{\mathcal{D}}[r^{-1}(B)],\forall B \sub \mathcal{Z}
+$$
+
+通过以上两个定义，我们就可以得到域适应的基本表示形式
+
+$$
+\epsilon_{S}(h)=\mathbf{E}_{\mathbf{z}\sim \tilde{D}_{S}}\vert \tilde{f}(\mathbf{z})-h(\mathbf{z}) \vert;\\
+d_{\mathcal{H}}(\tilde{D}_{S},\tilde{D}_{T})=2\sup_{h\in \mathcal{H}}\vert \Pr_{\tilde{D}_S}[I(h)] -  \Pr_{\tilde{D}_T}[I(h)]\vert 
+$$
+
+有了数学表达就给了我们用于水文章的很好理由，那么，具体实践过程中怎么用呢？一个最著名的方法是[对抗域迁移模型](https://arxiv.org/abs/1505.07818)，它的模型可以用一张图来解释
 
 
+![dav](/images/domain-adaptation/1.png)
 
+输入$x$后，模型先通过一个特征提取层(绿色)将输入映射到特征空间，得到特征。然后，模型将特征输入紫色的分类器，用于我们的目标任务分类，这一部分是用于训练模型的$\hat{\epsilon}_{S}(h)$。此外，还有一个并行的红色结构，它也是一个分类器，只不过是用来区分输入的特征是属于源域还是属于目标域的，简单而言，红色的部分用于计算$\hat{d}_{\mathcal{H}}(\mathcal{D}_S,\mathcal{D}_T)$。在训练过程中，我们希望红色的分类器足够强，从而得到准确的$\hat{d}_{\mathcal{H}}(\mathcal{D}_S,\mathcal{D}_T)$，同时又希望特征空间上源域特征与目标域特征尽量接近，从而混肴红色分类器，这就是一个对抗的思想。
 
+但是模型在训练过程中并没有采用对抗的思想，而是采用一种"逆梯度"(inverse gradient)的策略进行训练。简单而言，红色部分计算域分类损失，并用梯度下降法对参数进行更新。但是当该部分损失传到绿色的特征提取网络参数时，我们固定红色部分参数，用域分类损失所得到梯度的负数(inverse gradient)作为更新参数的梯度，目的在于增大域分类损失，混肴分类器。通过这样的训练过程，我们就能得到源域与目标域"差别不大"的特征空间了。
 
+### 联邦特征域适应：多个Source Domain的联邦学习落地
 
+联邦学习，即保护隐私的分布式学习方法，是一个很热的话题。在分布式学习任务中，我们往往会遇到多个源域的问题。比如，我们可以获取100个县的某个调研数据，但是这100个县的数据是分开存储的，彼此无法访问，同时有分布偏差，因此就组成了100个Source Domain，而我们只能通过联邦的方式对这100个Source Domain进行学习。同时，中心节点可以拿到很多无标签的数据，并希望模型在这些数据上得到很好的结果，这些数据组成了Target Domain，我们希望模型从Source domain 迁移到 Target Domain。对于这个问题，[联邦域适应模型](https://arxiv.org/abs/1911.02054)将联邦学习与对抗域适应联系在一起了。假如我们一共有$N$个域，对于某一个域$S_i$上训练的模型为$h_i$，那么对于任意域$S_i,i=1,\ldots, N$，仿照$(9)$式，我们都有
 
+$$
+\epsilon_{T}(h_{i})\leq \hat{\epsilon}_{S_i}(h_i)+\lambda_i + \hat{d}_{\mathcal{H}}(\mathcal{D}_{S_i},\mathcal{D}_T)+C
+$$
+
+如果我们把联邦学习得到的模型$h_T$看作是不同源域上训练的模型$h_i$的参数聚合，比如$h_T =\sum_{i=1}^{N}\alpha_ih_i$，那么我们可以得到联邦学习的特征域适应基本不等式
+
+$$
+\epsilon_{T}(h_T)\leq \sum_{i=1}^N\alpha_{i}(\hat{\epsilon}_{S_i}(h_i)+\lambda_i + \hat{d}_{\mathcal{H}}(\mathcal{D}_{S_i},\mathcal{D}_T))+C
+$$
+
+基于该数学表达，我们可以得到联邦域迁移的基本流程图
+
+![fdav](/images/domain-adaptation/2.png)
+
+首先，对于每一个域，在联邦学习的框架下我们都能得到Target Domain以及该域对应的Source Domain数据，这样我们就可以用对抗域迁移的方法，对某个域训练特征提取器$G_i$，同时对抗训练分类器以最小化$\hat{d}_{\mathcal{H}}(\mathcal{D}_{S_i},\mathcal{D}_T))$。在训练具体任务方面，注意到联邦学习框架下，Source Domain与Target Domain不再是一一对应的关系，而是一个典型的多对一的关系，因此在分类任务上，模型引入了常用的"域无关特征"与"对应域特征"，如图中的红色与灰色部分。为了将输入特征分离为域无关特征，减少域偏差对分类的影响，模型用了一个解纠缠器进行特征解耦，用得到的"域无关特征"用于完成目标任务，得到的"域相关特征"用于混肴目标任务，同时为了保证两个特征的独立性，我们通过最小化两个特征的互信息作为损失函数
+
+其次，在联邦学习的过程中，如何从每个域的模型参数到联邦模型参数呢？这就是联邦学习里面如何加权平均的办法了。文中的思想很简单，如果我的Source Domain特征在与Target Domain特征进行对抗叠代的时候，Source Domain的特征对于目标的k分类任务而言变好了，那么这个Domain的权重就应该比较大，反之则小。在具体实践中，我们对第$S_i$个Domain的特征进行聚类，然后计算两次叠代前后该类的*Info Gain*，最后用所有Domain的*Info Gain*的softmax归一化进行评分(Note: 联邦学习的参数更新策略不是本文的重点，但是我觉得似乎有必要做一个综述)。
+
+综合上述观点，文中的Federated Domain Adaptation的算法就自然给出了：
+
+![fdav-alg](/images/domain-adaptation/3.png)
+
+### 基于生成模型的域迁移：两阶段对抗训练
+
+我们上文中提到，虽然现在我们说的域迁移模型往往是基于"对抗"的，但是实际上我们并没有用GAN的两阶段对抗网络进行，而是用了负梯度方法加以代替，这种方法的好处是可以"End-to-End"，但是却失去了GAN的二阶段对抗的神奇魔力。这里介绍最近比较著名的基于Cycle-GAN的域迁移模型：[CYCADA](https://arxiv.org/abs/1711.03213)。该模型用于分类任务，以及语义分割任务的域迁移中，基本框架如下：
+
+![CYCADA](/images/domain-adaptation/4.png)
+
+这个框架可以如下理解：首先，我们用GAN训练两个从Source Domain到Target Domain，再从Target Domain到Source Domain的生成模型$G_{S\rightarrow T},G_{T\rightarrow S}$。模型中的各个模块解释如下:
+
+1. 为了保证我训练的这个模型保留了图像的对应关系，我最小化输入图像经过循环生成前后的误差
+
+$$
+\vert G_{T\rightarrow S}(G_{S\rightarrow T}(\mathbf{x}_S))-\mathbf{x}_S\vert \\
+\vert G_{S\rightarrow T}(G_{T\rightarrow S}(\mathbf{x}_T))-\mathbf{x}_T\vert 
+$$
+
+2. 为了保证我的模型在从Source Domain转化到Target Domain的过程中没有丢失分类语义信息，我需要最小化分类误差
+
+$$
+CE(f_{S}(G_{S\rightarrow T}(\mathbf{x}_S)),label)\\
+CE(f_{S}(G_{T\rightarrow S}(\mathbf{x}_T)),label)
+$$
+
+3. 为了保证我的模型在从Source Domain转化到Target Domain的过程中没有丢失语义分割信息，我需要最小化语义分割误差
+
+$$
+Seg(f_{T}(G_{S\rightarrow T}(\mathbf{x}_S)),label_{S})
+$$
+
+4. 为了保证我们生成器$G_{S\rightarrow T}$得到目标域图像的语义分割结果与直接用目标域图像$\mathbf{x}_T$进行语义分割的结果也属于同一目标域，我们设计一个GAN，用语义分割结果作为输入，从而进行特征对齐
+
+$$
+GAN(f_{T}(G_{S\rightarrow T}(\mathbf{x}_S)),f_{T}(\mathbf{x}_T)))
+$$
+
+然后把这些loss加起来即可
+
+![CYCADA-loss](/images/domain-adaptation/5.png)
+
+这个模型是纯视觉模型，没有什么严谨的数学，一切趋向于实用主义。
+
+## 展望
+
+本文主要梳理了域适应问题的基本知识，基础数学表达与实用的一些算法。接下来，我们希望能将变分自编码器的一些知识与域适应问题结合，从而得到更好的特征空间。同时，在代码方面，我们希望接下来能自己实现一些论文的算法，看看这个领域是算法奏效，还是trick奏效。此外，联邦域适应算法是一个比较能落地的东西，它的理论研究与更work的算法都是蓝海，非常值得水文章。
