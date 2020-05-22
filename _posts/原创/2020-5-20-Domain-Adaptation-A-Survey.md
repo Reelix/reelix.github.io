@@ -166,9 +166,11 @@ $$
 
 同时注意到，需要的条件是$U_S,U_T$的采样数目相同，不然该等式是不成立的(实际使用的过程中，一般选择每个batch采样的数目相同)。根据等式$(5)$，我们可以通过交叉熵损失来训练分类器，然后拿最后得到的分类器来计算$h(\mathbf{x})$，从而计算$(5)$。一般而言，交叉熵损失越小，则说明$\hat{d}_{\mathcal{H}}(\mathcal{D}_S,\mathcal{D}_T)$越小，说明两个数据集在整个假设空间(分类器空间)上的差距没那么大。
 
-此外，还有一点我们需要考虑的，是用经验误差 $\hat{d}$ 来度量分布距离$d$所产生的偏差。这里我们不加证明地给出 $d_{\mathcal{H}}(\mathcal{D}_S,\mathcal{D}_T)$ 与 $\hat{d}_{\mathcal{H}}(\mathcal{D}_S,\mathcal{D}_T)$ 的偏差：
+此外，还有一点我们需要考虑的，是用经验误差 $\hat{d}$ 来度量分布距离$d$所产生的偏差。这里我们不加证明地给出$d_{\mathcal{H}}(\mathcal{D}_S,\mathcal{D}_T) \text{ 与 }\hat{d}_{\mathcal{H}}(\mathcal{D}_S,\mathcal{D}_T)$的偏差：
 
-假设$\mathcal{H}$是所有基于从输入集 $\mathcal{X}$ 到标签集 $\{0,1\}$ 的分类器 $h$ 的假设空间，同时我们采用的分类器模型具有VC-dimension $d$，那么我们用采样数为$m$的经验距离 $\hat{d}_{\mathcal{H}}(\mathcal{D}_S,\mathcal{D}_T)$ 来估计 $d_{\mathcal{H}}(\mathcal{D}_S,\mathcal{D}_T)$，这个估计的偏差满足，对于任意的 $\delta \in (0,1)$ ，以下Bound在至少$1-\delta$的概率下成立
+假设$\mathcal{H}$是所有基于从输入集 $\mathcal{X}$ 到标签集 $\{0,1\}$ 的分类器 $h$ 的假设空间，同时我们采用的分类器模型具有VC-dimension $d$，那么我们用采样数为m的经验距离$\hat{d}_{\mathcal{H}}(\mathcal{D}_S,\mathcal{D}_T)$ 来估计 $d_{\mathcal{H}}(\mathcal{D}_S,\mathcal{D}_T)$。
+
+这个估计的偏差满足，对于任意的 $\delta \in (0,1)$ ，以下Bound在至少$1-\delta$的概率下成立：
 
 $$
 d_{\mathcal{H}}(\mathcal{D}_S,\mathcal{D}_T)\leq \hat{d}_{\mathcal{H}}(\mathcal{D}_S,\mathcal{D}_T)+4\sqrt{\frac{d\log(2m)+\log(\frac{2}{\delta})}{m}} \tag{6}
