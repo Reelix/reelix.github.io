@@ -166,9 +166,27 @@ $$
 
 同时注意到，需要的条件是$U_S,U_T$的采样数目相同，不然该等式是不成立的(实际使用的过程中，一般选择每个batch采样的数目相同)。根据等式$(5)$，我们可以通过交叉熵损失来训练分类器，然后拿最后得到的分类器来计算$h(\mathbf{x})$，从而计算$(5)$。一般而言，交叉熵损失越小，则说明$\hat{d}_{\mathcal{H}}(\mathcal{D}_S,\mathcal{D}_T)$越小，说明两个数据集在整个假设空间(分类器空间)上的差距没那么大。
 
-此外，还有一点我们需要考虑的，是用经验误差 $\hat{d}$ 来度量分布距离$d$所产生的偏差。这里我们不加证明地给出$d_{\mathcal{H}}(\mathcal{D}_S,\mathcal{D}_T) \text{ 与 }\hat{d}_{\mathcal{H}}(\mathcal{D}_S,\mathcal{D}_T)$的偏差：
+此外，还有一点我们需要考虑的，是用经验误差 $\hat{d}$ 来度量分布距离d所产生的偏差。这里我们不加证明地给出用
 
-假设$\mathcal{H}$是所有基于从输入集 $\mathcal{X}$ 到标签集 $\{0,1\}$ 的分类器 $h$ 的假设空间，同时我们采用的分类器模型具有VC-dimension $d$，那么我们用采样数为m的经验距离$\hat{d}_{\mathcal{H}}(\mathcal{D}_S,\mathcal{D}_T)$ 来估计 $d_{\mathcal{H}}(\mathcal{D}_S,\mathcal{D}_T)$。
+$$
+d_{\mathcal{H}}(\mathcal{D}_S,\mathcal{D}_T)$$ 
+
+来预测 
+
+$$
+\hat{d}_{\mathcal{H}}(\mathcal{D}_S,\mathcal{D}_T)
+$$
+
+的偏差。假设$\mathcal{H}$是所有基于从输入集 $\mathcal{X}$ 到标签集 $\{0,1\}$ 的分类器 $h$ 的假设空间，同时我们采用的分类器模型具有VC-dimension $d$，那么我们用采样数为m的经验距离
+
+$$
+\hat{d}_{\mathcal{H}}(\mathcal{D}_S,\mathcal{D}_T)
+$$ 
+
+来估计 
+
+$$
+d_{\mathcal{H}}(\mathcal{D}_S,\mathcal{D}_T)$$
 
 这个估计的偏差满足，对于任意的 $\delta \in (0,1)$ ，以下Bound在至少$1-\delta$的概率下成立：
 
@@ -179,7 +197,19 @@ $$
 关于VC-dimension，我们推荐[这篇Tutorial](https://tangshusen.me/2018/12/09/vc-dimension/)。但是一般而言，在大部分文章中，等式$(6)$只是作为一个常规充门面的工作，而具体模型的VC-dimension也没什么特别大的作用，所以该Bound只是为了理论严谨性而提出的，实际Practice中没有那么有用。
 ### 通过构建Bound寻找Domain Adaptation的适用条件
 
-我们在前面两节中先刻画了 $\epsilon_S(h),\epsilon_T(h)$ 的基本关系，定义了两个Domain的距离，对距离度量 $d_{\mathcal{H}}(\mathcal{D}_S,\mathcal{D}_T)$给出了计算方法。在本节中，我们关心以下问题：首先，两个满足什么条件的域是可以进行域适应(Domain Adaptation)的呢？其次，如何利用可计算的距离$d_{\mathcal{H}}(\mathcal{D}_S,\mathcal{D}_T)$来刻画 $\epsilon_S(h),\epsilon_T(h)$的关系呢？
+我们在前面两节中先刻画了 $\epsilon_S(h),\epsilon_T(h)$ 的基本关系，定义了两个Domain的距离，对距离度量 
+
+$$
+d_{\mathcal{H}}(\mathcal{D}_S,\mathcal{D}_T)
+$$
+
+给出了计算方法。在本节中，我们关心以下问题：首先，两个满足什么条件的域是可以进行域适应(Domain Adaptation)的呢？其次，如何利用可计算的距离
+
+$$
+d_{\mathcal{H}}(\mathcal{D}_S,\mathcal{D}_T)
+$$
+
+来刻画 $\epsilon_S(h),\epsilon_T(h)$的关系呢？
 
 首先，我们引入一个定义，理想化联合假设(ideal joint hypothesis)，它被定义为能最小化源域与目标域的联合预测错误的假设
 
