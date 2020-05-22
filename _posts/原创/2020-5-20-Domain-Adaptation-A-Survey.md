@@ -228,7 +228,7 @@ $$
 在域适应领域内，我们先假设$\lambda$是一个比较小的值，为了联系两个domain的误差关系，我们再给出一个定义，对称差异假设空间$\mathcal{H}\Delta\mathcal{H}$，这个定义是基于异或的思想，有点奇怪，但是我们之后就能看到它的威力
 
 $$
-g\in \mathcal{H}\Delta\mathcal{H} \Leftrightarrow \exist h,h'\in \mathcal{H},g(\mathbf{x})= h(\mathbf{x}) \oplus h'(\mathbf{x})
+g\in \mathcal{H}\Delta\mathcal{H} \Leftrightarrow \exists  h,h'\in \mathcal{H},g(\mathbf{x})= h(\mathbf{x}) \oplus h'(\mathbf{x})
 $$
 
 $\oplus$是异或操作，简单而言，对于任意$g\in \mathcal{H}\Delta\mathcal{H}$，它的映射结果都代表了都是原假设空间$\mathcal{H}$中两个假设的"不一致"。为什么要引入这种对称假设空间呢？因为我们需要刻画$h^*$与普通$h$的关系，并用$\lambda$作为一个上界。
@@ -246,7 +246,12 @@ d_{\mathcal{H}\Delta\mathcal{H}}(\mathcal{D}_S,\mathcal{D}_T) = 2\sup_{h,h'\in \
 =2\sup \vert\epsilon_{S}(h,h')-\epsilon_{T}(h,h')\vert
 $$
 
-同时，我们建立 $d_{\mathcal{H}\Delta\mathcal{H}}(\mathcal{D}_S,\mathcal{D}_T)$ 与 $d_{\mathcal{H}}(\mathcal{D}_S,\mathcal{D}_T)$的关系如下
+同时，我们建立 
+
+$$d_{\mathcal{H}\Delta\mathcal{H}}(\mathcal{D}_S,\mathcal{D}_T),d_{\mathcal{H}}(\mathcal{D}_S,\mathcal{D}_T)
+$$
+
+的关系如下
 
 $$
 \frac{1}{2}d_{\mathcal{H}\Delta\mathcal{H}}(\mathcal{D}_S,\mathcal{D}_T)\leq d_{\mathcal{H}}(\mathcal{D}_S,\mathcal{D}_T)
@@ -275,7 +280,13 @@ $$
 \leq \epsilon_{S}(h)+\lambda + d_{\mathcal{H}}(\mathcal{D}_S,\mathcal{D}_T)
 $$
 
-在实际计算中，我们往往优化的是 $\hat{\epsilon}_{S}(h)$，并用上文所述的 $\hat{d}_{\mathcal{H}}(\mathcal{D}_S,\mathcal{D}_T)$ 来进行距离估计。按VC-dimension理论，我们与$(6)$类似，不加证明地给出下面的不等式，即对于任意的 $\delta \in (0,1)$ ，如果给定的有标注的数据集采样为$m'$,以下Bound在至少$1-\delta$的概率下成立
+在实际计算中，我们往往优化的是
+
+$$
+\hat{\epsilon}_{S}(h)
+$$
+
+并用上文所述的 $\hat{d}_{\mathcal{H}}(\mathcal{D}_S,\mathcal{D}_T)$ 来进行距离估计。按VC-dimension理论，我们与$(6)$类似，不加证明地给出下面的不等式，即对于任意的 $\delta \in (0,1)$ ，如果给定的有标注的数据集采样为$m'$,以下Bound在至少$1-\delta$的概率下成立
 
 $$
 \epsilon_{S}(h) \leq \hat{\epsilon}_{S}(h) +\sqrt{\frac{4}{m'}(d\log \frac{2em'}{d}+\log \frac{4}{\delta})} \tag{8}
