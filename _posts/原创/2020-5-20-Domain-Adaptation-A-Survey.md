@@ -104,7 +104,13 @@ $$
 \vert \epsilon_T(h) - \epsilon_S(h,f_T) \vert = \vert \int_{\mathcal{X}}\vert h(\mathbf{x})-f_T(\mathbf{x})\vert (\phi_{T}(\mathbf{x})-\phi_{S}(\mathbf{x}))dx\vert
 $$
 
-取 $\mathcal{X}=\mathcal{X}_{1}\cup\mathcal{X}_{2}$，其中$\mathcal{X}_1=\{\mathbf{x}:\phi_{T}(\mathbf{x})>\phi_{S}(\mathbf{x}))\},\mathcal{X}_2=\{\mathbf{x}:\phi_{T}(\mathbf{x})\leq\phi_{S}(\mathbf{x}))\}$。我们可以用 $\mathcal{X}$ 的拆分将上述等式右边转化为
+取
+
+$$
+\mathcal{X}=\mathcal{X}_{1}\cup\mathcal{X}_{2}
+$$
+
+其中$\mathcal{X}_1=\{\mathbf{x}:\phi_{T}(\mathbf{x})>\phi_{S}(\mathbf{x}))\},\mathcal{X}_2=\{\mathbf{x}:\phi_{T}(\mathbf{x})\leq\phi_{S}(\mathbf{x}))\}$。我们可以用 $\mathcal{X}$ 的拆分将上述等式右边转化为
 
 $$
 \vert \int_{\mathcal{X}}\vert h(\mathbf{x})-f_T(\mathbf{x})\vert (\phi_{T}(\mathbf{x})-\phi_{S}(\mathbf{x}))dx\vert =\\
