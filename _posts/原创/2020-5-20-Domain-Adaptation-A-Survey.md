@@ -113,7 +113,9 @@ $$
 其中
 
 $$
-\mathcal{X}_1=\{\mathbf{x}:\phi_{T}(\mathbf{x})>\phi_{S}(\mathbf{x}))\},\mathcal{X}_2=\{\mathbf{x}:\phi_{T}(\mathbf{x})\leq\phi_{S}(\mathbf{x}))\}$$
+\mathcal{X}_1=\{\mathbf{x}:\phi_{T}(\mathbf{x})>\phi_{S}(\mathbf{x}))\},\mathcal{X}_2=\{\mathbf{x}:\phi_{T}(\mathbf{x})\leq\phi_{S}(\mathbf{x}))\}
+$$
+
 
 我们可以用 $\mathcal{X}$ 的拆分将上述等式右边转化为
 
@@ -169,7 +171,8 @@ $$
 此外，还有一点我们需要考虑的，是用经验误差 $\hat{d}$ 来度量分布距离d所产生的偏差。这里我们不加证明地给出用
 
 $$
-d_{\mathcal{H}}(\mathcal{D}_S,\mathcal{D}_T)$$ 
+d_{\mathcal{H}}(\mathcal{D}_S,\mathcal{D}_T)
+$$
 
 来预测 
 
@@ -181,12 +184,13 @@ $$
 
 $$
 \hat{d}_{\mathcal{H}}(\mathcal{D}_S,\mathcal{D}_T)
-$$ 
+$$
 
 来估计 
 
 $$
-d_{\mathcal{H}}(\mathcal{D}_S,\mathcal{D}_T)$$
+d_{\mathcal{H}}(\mathcal{D}_S,\mathcal{D}_T)
+$$
 
 这个估计的偏差满足，对于任意的 $\delta \in (0,1)$ ，以下Bound在至少$1-\delta$的概率下成立：
 
@@ -195,6 +199,7 @@ d_{\mathcal{H}}(\mathcal{D}_S,\mathcal{D}_T)\leq \hat{d}_{\mathcal{H}}(\mathcal{
 $$
 
 关于VC-dimension，我们推荐[这篇Tutorial](https://tangshusen.me/2018/12/09/vc-dimension/)。但是一般而言，在大部分文章中，等式$(6)$只是作为一个常规充门面的工作，而具体模型的VC-dimension也没什么特别大的作用，所以该Bound只是为了理论严谨性而提出的，实际Practice中没有那么有用。
+
 ### 通过构建Bound寻找Domain Adaptation的适用条件
 
 我们在前面两节中先刻画了 $\epsilon_S(h),\epsilon_T(h)$ 的基本关系，定义了两个Domain的距离，对距离度量 
@@ -248,7 +253,8 @@ $$
 
 同时，我们建立 
 
-$$d_{\mathcal{H}\Delta\mathcal{H}}(\mathcal{D}_S,\mathcal{D}_T),d_{\mathcal{H}}(\mathcal{D}_S,\mathcal{D}_T)
+$$
+d_{\mathcal{H}\Delta\mathcal{H}}(\mathcal{D}_S,\mathcal{D}_T),d_{\mathcal{H}}(\mathcal{D}_S,\mathcal{D}_T)
 $$
 
 的关系如下
@@ -313,24 +319,18 @@ $$
 其中，假设空间$\mathcal{H}$一旦给定，$\lambda$就固定下来。那么，有没有办法让域之间的距离变得尽可能小呢？一个很自然的想法是通过特征空间过渡，如果我们设计两个映射，第一个映射将源域与目标域都映射到一个特征空间，在这个特征空间上，源域与目标域无法区分。然后我们再在特征空间上构造分类器，这样就能有效解决域适应问题。
 
 与上文一致，我们同样对这个"特征空间"给出严格的数学定义。特征映射$r$是一个从输入空间$\mathcal{X}$到特征空间$\mathcal{Z}$的函数，给定一个模型，所有特征映射所组成的集合我们记作$\mathcal{R}$。此时，对一个给定域$<\mathcal{D},f>$假设$h$是一个从特征空间$\mathcal{Z}$到标签$\{0,1\}$的映射，我们定义特征空间的标签函数$\tilde{f}$为
-
 $$
 \tilde{f}(\mathbf{z})=\mathbf{E}_{\mathbf{x}\sim\mathcal{D},r(\mathbf{x})=\mathbf{z}}[f(\mathbf{x})]
 $$
-
 简单而言，对于一个给定特征$\mathbf{z}$，它的标签函数可以如下计算。我们找出分布为$\mathcal{D}$的输入空间上，所有映射到特征$\mathbf{z}$的点$\mathbf{x}$，再计算这些点的标签函数$f(\mathbf{x})$的期望即可。同样，对一个给定域$<\mathcal{D},f>$，我们定义特征空间上的分布函数为
-
 $$
 \Pr_{\tilde{\mathcal{D}}}[B]=\Pr_{\mathcal{D}}[r^{-1}(B)],\forall B \subset \mathcal{Z}
 $$
-
 通过以上两个定义，我们就可以得到域适应的基本表示形式
-
 $$
 \epsilon_{S}(h)=\mathbf{E}_{\mathbf{z}\sim \tilde{D}_{S}}\vert \tilde{f}(\mathbf{z})-h(\mathbf{z}) \vert;\\
 d_{\mathcal{H}}(\tilde{D}_{S},\tilde{D}_{T})=2\sup_{h\in \mathcal{H}}\vert \Pr_{\tilde{D}_S}[I(h)] -  \Pr_{\tilde{D}_T}[I(h)]\vert 
 $$
-
 有了数学表达就给了我们用于水文章的很好理由，那么，具体实践过程中怎么用呢？一个最著名的方法是[对抗域迁移模型](https://arxiv.org/abs/1505.07818)，它的模型可以用一张图来解释
 
 
@@ -345,27 +345,21 @@ $$
 ### 联邦特征域适应：多个Source Domain的联邦学习落地
 
 联邦学习，即保护隐私的分布式学习方法，是一个很热的话题。在分布式学习任务中，我们往往会遇到多个源域的问题。比如，我们可以获取100个县的某个调研数据，但是这100个县的数据是分开存储的，彼此无法访问，同时有分布偏差，因此就组成了100个Source Domain，而我们只能通过联邦的方式对这100个Source Domain进行学习。同时，中心节点可以拿到很多无标签的数据，并希望模型在这些数据上得到很好的结果，这些数据组成了Target Domain，我们希望模型从Source domain 迁移到 Target Domain。对于这个问题，[联邦域适应模型](https://arxiv.org/abs/1911.02054)将联邦学习与对抗域适应联系在一起了。假如我们一共有$N$个域，对于某一个域$S_i$上训练的模型为$h_i$，那么对于任意域$S_i,i=1,\ldots, N$，仿照$(9)$式，我们都有
-
 $$
 \epsilon_{T}(h_{i})\leq \hat{\epsilon}_{S_i}(h_i)+\lambda_i + \hat{d}_{\mathcal{H}}(\mathcal{D}_{S_i},\mathcal{D}_T)+C
 $$
-
 如果我们把联邦学习得到的模型$h_T$看作是不同源域上训练的模型$h_i$的参数聚合，比如$h_T =\sum_{i=1}^{N}\alpha_ih_i$，那么我们可以得到联邦学习的特征域适应基本不等式
-
 $$
 \epsilon_{T}(h_T)\leq \sum_{i=1}^N\alpha_{i}(\hat{\epsilon}_{S_i}(h_i)+\lambda_i + \hat{d}_{\mathcal{H}}(\mathcal{D}_{S_i},\mathcal{D}_T))+C
 $$
-
 基于该数学表达，我们可以得到联邦域迁移的基本流程图
 
 ![fdav](/images/domain-adaptation/2.png)
 
 首先，对于每一个域，在联邦学习的框架下我们都能得到Target Domain以及该域对应的Source Domain数据，这样我们就可以用对抗域迁移的方法，对某个域训练特征提取器$G_i$，同时对抗训练分类器以最小化
-
 $$
 \hat{d}_{\mathcal{H}}(\mathcal{D}_{S_i},\mathcal{D}_T))
 $$
-
 在训练具体任务方面，注意到联邦学习框架下，Source Domain与Target Domain不再是一一对应的关系，而是一个典型的多对一的关系，因此在分类任务上，模型引入了常用的"域无关特征"与"对应域特征"，如图中的红色与灰色部分。为了将输入特征分离为域无关特征，减少域偏差对分类的影响，模型用了一个解纠缠器进行特征解耦，用得到的"域无关特征"用于完成目标任务，得到的"域相关特征"用于混肴目标任务，同时为了保证两个特征的独立性，我们通过最小化两个特征的互信息作为损失函数
 
 其次，在联邦学习的过程中，如何从每个域的模型参数到联邦模型参数呢？这就是联邦学习里面如何加权平均的办法了。文中的思想很简单，如果我的Source Domain特征在与Target Domain特征进行对抗叠代的时候，Source Domain的特征对于目标的k分类任务而言变好了，那么这个Domain的权重就应该比较大，反之则小。在具体实践中，我们对第$S_i$个Domain的特征进行聚类，然后计算两次叠代前后该类的*Info Gain*，最后用所有Domain的*Info Gain*的softmax归一化进行评分(Note: 联邦学习的参数更新策略不是本文的重点，但是我觉得似乎有必要做一个综述)。
@@ -383,27 +377,20 @@ $$
 这个框架可以如下理解：首先，我们用GAN训练两个从Source Domain到Target Domain，再从Target Domain到Source Domain的生成模型$G_{S\rightarrow T},G_{T\rightarrow S}$。模型中的各个模块解释如下:
 
 1. 为了保证我训练的这个模型保留了图像的对应关系，我最小化输入图像经过循环生成前后的误差
-
 $$
 \vert G_{T\rightarrow S}(G_{S\rightarrow T}(\mathbf{x}_S))-\mathbf{x}_S\vert \\
 \vert G_{S\rightarrow T}(G_{T\rightarrow S}(\mathbf{x}_T))-\mathbf{x}_T\vert 
 $$
-
 2. 为了保证我的模型在从Source Domain转化到Target Domain的过程中没有丢失分类语义信息，我需要最小化分类误差
-
 $$
 CE(f_{S}(G_{S\rightarrow T}(\mathbf{x}_S)),label)\\
 CE(f_{S}(G_{T\rightarrow S}(\mathbf{x}_T)),label)
 $$
-
 3. 为了保证我的模型在从Source Domain转化到Target Domain的过程中没有丢失语义分割信息，我需要最小化语义分割误差
-
 $$
 Seg(f_{T}(G_{S\rightarrow T}(\mathbf{x}_S)),label_{S})
 $$
-
 4. 为了保证我们生成器$G_{S\rightarrow T}$得到目标域图像的语义分割结果与直接用目标域图像$\mathbf{x}_T$进行语义分割的结果也属于同一目标域，我们设计一个GAN，用语义分割结果作为输入，从而进行特征对齐
-
 $$
 GAN(f_{T}(G_{S\rightarrow T}(\mathbf{x}_S)),f_{T}(\mathbf{x}_T)))
 $$
