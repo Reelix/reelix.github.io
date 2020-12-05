@@ -24,6 +24,28 @@ mathjax: true
 
 ## 域泛化问题的基本定义与误差界
 
+我们用如下形式刻画在二分类问题上的域泛化过程。首先，我们将输入空间记作$\mathcal{X}$，将预测的标签空间记作$\mathcal{Y}$，其中$\mathcal{Y}=\{0,1\}$。为了突破“源域未知”这一限制，我们引入在输入空间与标签空间的直积上的概率分布的集合，记作$\mathcal{B}_{\mathcal{X}\times \mathcal{Y}}$，$\mathcal{B}_{\mathcal{X}\times \mathcal{Y}}$中的每一个元素$P_{\mathbf{X}\mathbf{Y}}\in \mathcal{B}_{\mathcal{X}\times \mathcal{Y}}$都代表着输入空间与标签空间的一种可能的联合分布，而不同的联合分布对应着训练过程中的不同域。为方便起见，我们记$\mathcal{B}_{\mathcal{X}}$为输入空间$\mathcal{X}$上所有可能的概率分布集合，而记$\mathcal{B}_{\mathcal{Y}\vert \mathcal{X}}$为给定观测$\mathbf{X}$后标签空间的条件后验分布。同样的，我们有$P_{\mathbf{X}\mathbf{Y}}=P_{\mathbf{X}}\cdot P_{\mathbf{Y\vert X}}$，其中$P_{\mathbf{X}}\in \mathcal{B}_{\mathcal{X}}$，$P_{\mathbf{Y\vert X}}\in \mathcal{B}_{\mathcal{Y\vert X}}$。
+
+假设在$\mathcal{B}_{\mathcal{X}\times \mathcal{Y}}$上存在一类分布，记作$\mu$，而我们观察到的$N$个域（也就是$N$个概率分布）都是对$\mu$的独立同分布采样，即
+
+$$
+P_{\mathbf{X}\mathbf{Y}}^{(1)},\ldots,P_{\mathbf{X}\mathbf{Y}}^{(N)}\sim^{\text{i.i.d}}\mu
+$$
+
+
+我们考虑域泛化问题的目标函数如下。考虑在概率分布集合与输入空间上的联合映射
+$$
+f:\mathcal{B}_{\mathcal{X}}\times \mathcal{X}\rightarrow\mathbb{R}; \hat{\mathbf{Y}}=f(P_{\mathbf{X}},\mathbf{X})
+$$
+
+我们希望对于任意测试分布$P^{T}_{\mathbf{X}\mathbf{Y}}$，模型预测与真实标签的损失尽量小，即最小化
+
+$$
+\epsilon(f) :=\mathbb{E}_{P^{T}_{\mathbf{X}\mathbf{Y}}\sim \mu}\mathbb{E}_{(\mathbf{X}^T,\mathbf{Y}^T)\sim P^{T}_{\mathbf{X}\mathbf{Y}}}[l(f(P^T_{\mathbf{X}},\mathbf{X}^T),\mathbf{Y}^T)] \tag{1}
+$$
+
+然而，在实际的采样过程中，我们往往只能采样若干个测试域，而每个测试域也一般只能采样若干个样本。在这种情况下，我们在测试域上的泛化误差与公式(1)所述的理想泛化误差之间有一定的偏移。假设我们有$N$
+
 ## 基于元学习的域泛化
 
 ## 基于域无关特征的域泛化
