@@ -30,7 +30,7 @@ $$
 \mathcal{B}_{\mathcal{X}\times \mathcal{Y}}
 $$
 
-$\mathcal{B}_{\mathcal{X}\times \mathcal{Y}}$中的每一个元素$P_{\mathbf{X}\mathbf{Y}}\in \mathcal{B}_{\mathcal{X}\times \mathcal{Y}}$都代表着输入空间与标签空间的一种可能的联合分布，而不同的联合分布对应着训练过程中的不同域。为方便起见，我们记$\mathcal{B}_{\mathcal{X}}$为输入空间$\mathcal{X}$上所有可能的概率分布集合，而记$\mathcal{B}_{\mathcal{Y}\vert \mathcal{X}}$为给定观测$\mathbf{X}$后标签空间的条件后验分布。同样的，我们有$P_{\mathbf{X}\mathbf{Y}}=P_{\mathbf{X}}\cdot P_{\mathbf{Y\vert X}}$，其中$P_{\mathbf{X}}\in \mathcal{B}_{\mathcal{X}}$，$P_{\mathbf{Y\vert X}}\in \mathcal{B}_{\mathcal{Y\vert X}}$。
+$$\mathcal{B}_{\mathcal{X}\times \mathcal{Y}}$$中的每一个元素$P_{\mathbf{X}\mathbf{Y}}\in \mathcal{B}_{\mathcal{X}\times \mathcal{Y}}$都代表着输入空间与标签空间的一种可能的联合分布，而不同的联合分布对应着训练过程中的不同域。为方便起见，我们记$\mathcal{B}_{\mathcal{X}}$为输入空间$\mathcal{X}$上所有可能的概率分布集合，而记$\mathcal{B}_{\mathcal{Y}\vert \mathcal{X}}$为给定观测$\mathbf{X}$后标签空间的条件后验分布。同样的，我们有$P_{\mathbf{X}\mathbf{Y}}=P_{\mathbf{X}}\cdot P_{\mathbf{Y\vert X}}$，其中$P_{\mathbf{X}}\in \mathcal{B}_{\mathcal{X}}$，$P_{\mathbf{Y\vert X}}\in \mathcal{B}_{\mathcal{Y\vert X}}$。
 
 假设在$\mathcal{B}_{\mathcal{X}\times \mathcal{Y}}$上存在一类分布，记作$\mu$，而我们观察到的$N$个域（也就是$N$个概率分布）都是对$\mu$的独立同分布采样，即
 
@@ -50,7 +50,17 @@ $$
 \epsilon(f) :=\mathbb{E}_{P^{T}_{\mathbf{X}\mathbf{Y}}\sim \mu}\mathbb{E}_{(\mathbf{X}^T,\mathbf{Y}^T)\sim P^{T}_{\mathbf{X}\mathbf{Y}}}[l(f(P^T_{\mathbf{X}},\mathbf{X}^T),\mathbf{Y}^T)] \tag{1}
 $$
 
-然而，在实际的采样过程中，我们往往只能采样若干个测试域，而每个测试域也一般只能采样若干个样本。在这种情况下，我们在测试域上的泛化误差与公式(1)所述的理想泛化误差之间有一定的偏移。假设我们采样了$N$个测试域，记作$$，并在每个测试域中选取$n$个样本，
+然而，在实际的采样过程中，我们往往只能采样若干个测试域，而每个测试域也一般只能采样若干个样本。在这种情况下，我们在测试域上的泛化误差与公式(1)所述的理想泛化误差之间有一定的偏移。假设我们采样了$N$个测试域，记作
+
+$$
+P_{\mathbf{XY}}^{(1)},\ldots,P_{\mathbf{XY}}^{(N)}\sim \mu
+$$
+
+对于对采样的每一个测试域$P_{\mathbf{XY}}^{(i)}$，我们选取尺寸为$n$的样本集合$S_i$，其中
+
+$$
+S_i=(\mathbf{X}_{i,j},\mathbf{Y}_{i,j})_{}
+$$
 
 ## 基于元学习的域泛化
 
