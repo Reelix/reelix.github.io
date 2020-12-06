@@ -13,7 +13,7 @@ type: page
 
 I am studying for a Ph.D. in the State Key Lab of CAD&CG at Zhejiang University. I received my BS degree in Mathematics Statistics from Zhejiang University. My research interest includes machine learning / deep learning / probabilistic model / representation learning / federated learning.
 
-![myphoto](/images/about/fhz.jpg)
+![myphoto](/images/about/fhz-1.jpg)
 
 ****
 ### Education
