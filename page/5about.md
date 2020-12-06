@@ -8,43 +8,45 @@ type: page
 
 * content
 {:toc}
-## [关于我](https://fenghz.github.io/resume/)
+
+I am studying for a Ph.D. in the State Key Lab of CAD&CG at Zhejiang University. I received my BS degree in Mathematics Statistics from Zhejiang University. My research interest includes machine learning / deep learning / probabilistic model / representation learning / federated learning.
 
 ![myphoto](/images/about/fhz.jpg)
 
 
-### 教育经历
+### Education
 
 Mathematics & Statistics, Bachelor, Zhejiang University (2014-2018)
 
-Deep Learning, Machine Learning & Medical Image Analysis, PhD, State Key Lab of CAD & CG, Zhejiang University (2018-)
+Deep Learning, Representation Learning & Federated Learning, PhD, State Key Lab of CAD & CG, Zhejiang University (2018-)
 
-### 兴趣
+### Outside Interests
+
+* Violin
+
+* Classical Chinese literature & poetry
+
+* History
+
+* Philosophy(Existentialism,Communism)
+
+* Psychology
+
+* Swim & Photography
 
 
+### Publications (selected)
 
-`小提琴``中国古典文学&诗词``心理学``历史``哲学``旅游``摄影`
+[1]. Feng HZ, Zhang P, Xu Xinnan, et al. An Unsupervised Suggestive Annotation Algorithm for 3D CT Image Processing [J]. Journal of CAD, 2019, 31(2): 183-189.
 
-## 联系我
+[2]. Feng HZ, Kong K, Chen M, et al. SHOT-VAE: Semi-supervised Deep Generative Models With Label-aware ELBO Approximations[J]. arXiv preprint arXiv:2011.10684, 2020. **Accepted for presentation at AAAI 2021.**
+
+[3] Feng H Z, You Z, Chen M, et al. KD3A: Unsupervised Multi-Source Decentralized Domain Adaptation via Knowledge Distillation[J]. arXiv preprint arXiv:2011.09757, 2020.
+
+## Contact Me
 
 * GitHub：[FengHZ](https://github.com/FengHZ)
-* email：fenghaozhe1996@gmail.com
-* [知乎](https://www.zhihu.com/people/feng-hao-zhe-66)
+* Email：fenghaozhe1996@gmail.com
+* [Zhihu](https://www.zhihu.com/people/feng-hao-zhe-66)
 
-## Changes Log
-
-* **2018-01-31** 
-  * 添加了基于 github issues 的评论系统, 使用了 [Shiquan Sun](https://github.com/imsun/gitment) 的 **gitment** 项目.
-  * 首页摘要中增加图片显示功能, 在 post 中的开头使用 `figure: /images/xxx.png` 即可, 路径格式与 post 中插入图片的路径格式相同.
-
-* **2018-04-15**
-
-  * 保留**Jarvis**的log系统,movie与music板块，以期再学习进行个性化定制。
-
-
-  * 在[Jarvis](https://jarvis73.github.io/)的帮助与成果的基础上花了一个晚上就搭建了自己的blog。作为一个站在巨人肩膀上拥有了第一个自己的blog的人特此对**Jarvis 无私的帮助**致谢。
-
-* **2018-11-27**
-
-  * 修复Blog无法评论的Bug,将`https://imsun.github.io/gitment/dist/gitment.browser.js`语句替换为`https://www.wenjunjiang.win/js/gitment.js`即可。
 
