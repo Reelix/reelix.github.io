@@ -9,17 +9,25 @@ type: page
 * content
 {:toc}
 
+****
+
 I am studying for a Ph.D. in the State Key Lab of CAD&CG at Zhejiang University. I received my BS degree in Mathematics Statistics from Zhejiang University. My research interest includes machine learning / deep learning / probabilistic model / representation learning / federated learning.
 
 ![myphoto](/images/about/fhz.jpg)
 
-
+****
 ### Education
 
-Mathematics & Statistics, Bachelor, Zhejiang University (2014-2018)
 
-Deep Learning, Representation Learning & Federated Learning, PhD, State Key Lab of CAD & CG, Zhejiang University (2018-)
+#### Zhejiang University
 
+**Bachelor of Mathematics & Statistics • 2014 — 2018**
+
+#### Zhejiang University
+
+**Ph.D. of Computer Science • 2018 —**
+
+****
 ### Outside Interests
 
 * Violin
@@ -34,7 +42,7 @@ Deep Learning, Representation Learning & Federated Learning, PhD, State Key Lab 
 
 * Swim & Photography
 
-
+****
 ### Publications (selected)
 
 [1]. Feng HZ, Zhang P, Xu Xinnan, et al. An Unsupervised Suggestive Annotation Algorithm for 3D CT Image Processing [J]. Journal of CAD, 2019, 31(2): 183-189.
@@ -43,7 +51,8 @@ Deep Learning, Representation Learning & Federated Learning, PhD, State Key Lab 
 
 [3] Feng H Z, You Z, Chen M, et al. KD3A: Unsupervised Multi-Source Decentralized Domain Adaptation via Knowledge Distillation[J]. arXiv preprint arXiv:2011.09757, 2020.
 
-## Contact Me
+****
+### Contact Me
 
 * GitHub：[FengHZ](https://github.com/FengHZ)
 * Email：fenghaozhe1996@gmail.com
