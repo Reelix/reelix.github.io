@@ -178,13 +178,59 @@ $$
 
 ## 基于元学习的域泛化
 
-[元学习](https://drive.google.com/file/d/1DuHyotdwEAEhmuHQWwRosdiVBVGm8uYx/view)是一个**"learning to learn"**的机器学习领域，它的目的是期望我们所学到的特征能够容易地泛化到新的任务，新的数据集上去。基于域泛化问题中目标域的不可见，元学习可以应用于域泛化任务中。现有基于元学习的域泛化工作主要有三类：基于参数元学习的域泛化[3]，基于正则化器元学习的域泛化[4]，以及基于**episode-training**的域泛化[5]。
+[元学习](https://drive.google.com/file/d/1DuHyotdwEAEhmuHQWwRosdiVBVGm8uYx/view)是一个**"learning to learn"**的机器学习领域，它的目的是期望我们所学到的特征能够容易地泛化到新的任务，新的数据集上去。基于域泛化问题中目标域的不可见，元学习可以应用于域泛化任务中。现有基于元学习的域泛化工作主要有三类：基于参数元学习的域泛化[3]，基于正则化元学习的域泛化[4]，以及基于**episode-training**的域泛化[5]。
 
 **基于参数元学习的域泛化。**如何让模型学到**具有泛化能力**的特征呢？一个很自然的想法是在训练的过程中"模拟"泛化这一步骤，即对训练集进行重采样，将其分为若干训练-测试输入对，然后我们先模拟训练过程，用每一个输入对的训练部分更新模型参数，然后再用更新后的参数在测试部分进行模拟测试。最后，为了让模型参数学到"泛化"的能力，我们将测试的损失对原参数进行求导，再对原参数进行更新。其基本过程如下所示：
 
 ![Meta1](../../images/domain-generalization/meta1.png)
 
+首先，我们通过`Line 5-7`计算在构建的输入对的训练部分的损失，对原参数$$\Theta$$进行求导并更新。注意，这一步更新并不会终止计算图，即更新后的参数$$\Theta'$$可以认为是原参数的函数$$f(\Theta)$$，然后我们代入更新后的参数，计算在测试部分的损失$$\mathcal{G}(f(\Theta))$$，再用这一部分损失去对$$\Theta$$求梯度，然后进行更新即可。这种方法有一个缺点，即在计算模拟测试损失$$\mathcal{G}$$时，计算图会被扩大一倍，因此基于参数元学习的域泛化方法限于模型本身的大小而无法进行有效的推广。
 
+**基于正则化元学习的域泛化。**正如上文所述，直接采用元学习方法会使得计算图扩大，从而令方法受限于深度神经网络本身的参数量。一种解决思路是用模型正则化损失来代替测试部分的损失，减少参数量。此外，为了减少在元学习中所需要学习的参数，我们还可以把神经网络分为两个部分，即**Backbone**与**Classifier**，参数分别为$$\psi,\theta$$。此时模型可以表示为：
+$$
+M_{\Theta}(\mathbf{X})=(T_{\theta}\circ F_{\psi})(\mathbf{X})
+$$
+对参数量较少的$$\theta$$引入一个自适应的正则化损失如下，其参数为$$\phi$$：
+$$
+R_{\phi}(\theta)=\sum_{i}\phi_{i}\vert \theta_{i} \vert
+$$
+我们采样$$p$$个训练域与$$q$$个测试域，我们希望在训练域中得到的模型能够不经调整地泛化到测试域上。根据上文所述，训练算法可以描述为以下三部分：
+
+![meta2](../../images/domain-generalization/meta2.png)
+
+首先，我们对每一个训练域固定**Backbone**参数，而对后面的分类器参数进行区分，即参数空间为$$[\psi,\theta_1,\ldots,\theta_{p}]$$。在每一个训练的epoch中，我们都用$$p$$个训练域的数据以及对应的标签对整个参数空间进行训练，得到参数空间的良好初始化，如该算法中`Line 2-7`。然后，我们开始对训练域进行随机划分，模拟元学习的过程，如算法中的`Line 8-9`。接着，我们引入自适应的正则化工具，并采用联合损失，即
+$$
+L(\mathbf{X},\mathbf{y},\theta,\phi)=CE(\mathbf{X},\mathbf{y},\theta)+R_{\phi}(\theta)
+$$
+在训练集上更新后，得到更新参数$$\beta_l = f(\theta,\phi)$$，如`Line 9-14`。最后，我们在模拟的测试集上进行参数更新，此时我们并不直接更新$$\theta$$，而是更新正则化参数$$\phi$$，如`Line 15-16`。也就是说，整个元学习的过程由正则化部分完成。注意到对每一个训练域，我们都分配了一个独特的分类器参数$$\theta_{i}$$，因此，在最后测试的过程中，我们用每一个分类器参数进行预测，而对预测结果进行**ensemble**。
+
+**基于episode-training的域泛化。**相对于更广泛的元学习问题，域泛化有其特殊性，即源域与目标域的特征接近，且预测任务基本一致。基于这一特性，文献[5]提出了**episode-training**，它的基本思路分为两块，首先，对每一个训练域，模型构造独立的分类参数$$[\theta_i,\psi_i]$$。然后，分别采用每个训练域的数据对分类参数进行训练，得到*domain-specific*的$$[\theta_i,\psi_i]$$。最后，用这些*domain-specific*的$$[\theta_i,\psi_i]$$训练一个*domain-agnostic*的全局模型$$[\theta,\psi]$$。训练的方法分为三阶段：
+
+* Step 1. 全局训练
+  $$
+  \arg_{\theta,\psi}\min \text{CE}(\psi (\theta (\mathbf{X}),\mathbf{y})
+  $$
+
+* Step 2. Episodic training for $\theta$
+  $$
+  \arg_{\theta}\min \mathbb{E}_{i,j\sim[1,n],i\neq j}[\mathbb{E}_{(\mathbf{X}_i,\mathbf{y}_i)\sim S_i}[\text{CE}(\psi_j (\theta (\mathbf{X}_i),\mathbf{y}_i)]]
+  $$
+
+* 
+
+* Step 3. Episodic training for $\psi$
+  $$
+  \arg_{\psi}\min \mathbb{E}_{i,j\sim[1,n],i\neq j}[\mathbb{E}_{(\mathbf{X}_i,\mathbf{y}_i)\sim S_i}[\text{CE}(\psi (\theta_{j} (\mathbf{X}_i),\mathbf{y}_i)]]
+  $$
+
+其算法如下所述：
+
+![meta3](../../images/domain-generalization/meta3.png)
+
+此外，本文还探索了一种对异构域泛化问题的训练方案，即泛化任务与训练任务也不一致，基本思路是引入随机分类器来训练特征提取器：
+$$
+\arg_{\theta}\min \mathbb{E}_{i\sim[1,n]}[\mathbb{E}_{(\mathbf{X}_i,\mathbf{y}_i)\sim S_i}[\text{CE}(\psi_{\text{Random}} (\theta (\mathbf{X}_i),\mathbf{y}_i)]]
+$$
 
 ## 基于域无关特征的域泛化
 
