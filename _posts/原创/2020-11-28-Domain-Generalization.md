@@ -67,7 +67,7 @@ $$
 我们记通过采样集$$\{S_i\}_{i=1}^{N}$$所得的域泛化损失为
 
 $$
-\epsilon(f,\sum_{i=1}^{N}n_i):=\frac{1}{N}\sum_{i=1}^{N}\frac{1}{n_i}\sum_{j=1}^{n_i}\ [l(f(P^{(i)}_{\mathbf{X}},\mathbf{X}_{i,j}),\mathbf{Y}_{i,j})]\tag{2}
+\epsilon(f,\sum_{i=1}^{N}n_i):=\frac{1}{N}\sum_{i=1}^{N}\frac{1}{n_i}\sum_{j=1}^{n_i}\ [l(f(\hat{P}^{(i)}_{\mathbf{X}},\mathbf{X}_{i,j}),\mathbf{Y}_{i,j})]\tag{2}
 $$
 
 易得，当$$N\rightarrow \infty,n\rightarrow \infty$$时，通过$$(2)$$所计算出的泛化损失逼近于真实泛化损失$$(1)$$，因此我们也可以记$$(1)$$为$$\epsilon(f,\infty)$$。那么，一个很自然的问题是，我们通过$$(2)$$所估算的误差是否能收敛到真实误差$$\epsilon(f,\infty)$$，他们之间的距离是否可以用[PAC可学习理论](https://tangshusen.me/2018/12/09/vc-dimension/)进行表示。通过研究Reproducing Kernel Hilbert Space (RKHS)上的目标函数$$f$$，我们可以得到一个漂亮的理论上界。
@@ -113,7 +113,7 @@ $$
 考虑通过采样估计的经验分布$$(\hat{P}_{\mathbf{X}}^{(1)},\hat{P}_{\mathbf{X}}^{(2)})$$，代入$$(4)$$之后有如下等式：
 
 $$
-k_{P}(\hat{P}_{\mathbf{X}}^{(1)},\hat{P}_{\mathbf{X}}^{(2)}):=\sum_{i=1}^{n_1}\sum_{j=1}^{n_2}k'_{\mathbf{X}}(\mathbf{X}_{1,i},\mathbf{X}_{2,j})\tag{5}
+k_{P}(\hat{P}_{\mathbf{X}}^{(1)},\hat{P}_{\mathbf{X}}^{(2)}):=\frac{1}{n_1 * n_2}\sum_{i=1}^{n_1}\sum_{j=1}^{n_2}k'_{\mathbf{X}}(\mathbf{X}_{1,i},\mathbf{X}_{2,j})\tag{5}
 $$
 
 式$(5)$定义了最基本的分布距离计算的内积形式。如果我们扩展到二阶矩核函数，即
@@ -161,7 +161,7 @@ $$
 
 $$
 \sup_{\Vert f\Vert_2^2\leq R,f\in \mathcal{H}_{\bar{k}}}\vert \epsilon(f,\sum_{i=1}^{N}n_i)-\epsilon(f,\infty)\vert\leq \\
-c(RB_{k}L_{l}(B_{k'}L_{\mathcal{T}}(\frac{\log N+\log\delta^{-1}}{n})^{\frac{\alpha}{2}}+B_{\mathcal{T}}\frac{1}{\sqrt{N}})+B_{l}\sqrt\frac{\log\delta^{-1}}{N})
+c(RB_{k}L_{l}(B_{k'}L_{\mathcal{T}}(\frac{\log N+\log\delta^{-1}}{n})^{\frac{\alpha}{2}}+B_{\mathcal{T}}\frac{1}{\sqrt{N}})+B_{l}\sqrt\frac{\log\delta^{-1}}{N}) \tag{8}
 $$
 
 ### 对域泛化的采样方案与因果分析
@@ -242,6 +242,20 @@ $$
 $$
 
 ## 基于域无关特征的域泛化
+
+根据公式$$(8)$$所述的一致泛化误差定理，如果对于所有可能的域，它们在核空间上的分布距离都尽量接近，那么就意味着分布距离的上界$$B_{k'},B_{\mathcal{T}}$$以及$$L_{\mathcal{T}}$$都变得尽量小，同时泛化误差也会变小。将神经网络视作一个可以自主学习的核函数，一个从域迁移的工作中自然衍生到域泛化的思路为令不同训练域的输入在神经网络的输出特征层面不可分辨。那么，采用什么样的损失函数才能让所学的特征达到**不可分辨**的效果呢？我们首先回顾一下统计学中常用的方差分析(ANOVA)。
+
+模型所学的特征**不可分辨**，等价于检验模型对于不同域的数据所预测特征的分布一致。假如存在$$p$$个训练域，在每个训练域上，对$$\mathbf{X}_{i,j}$$所预测特征为$$\mu_{i,j}$$，域$$S_i$$特征的均值为$$\mu_i$$，所有域的平均特征为$$\mu$$。那么要令模型特征不可分辨，即验证以下假设成立：
+$$
+H_0:\mu_1=\mu_2=\cdots=\mu_p
+$$
+基于正态性假设，我们可以用平方和来计算$$H_0$$成立所需的统计量：
+$$
+\text{SS}_{T}=\sum_{i=1}^{N}\sum_{j=1}^{n_i}\Vert\mu_{i,j}-\mu\Vert_2^2\\
+\text{SS}_{E}=\sum_{i=1}^{N}\sum_{j=1}^{n_i}\Vert \mu_{i,j}-\mu_i\Vert_2^2\\
+\text{SS}_{A}=\sum_{i=1}^{N}\sum_{j=1}^{n_i}\Vert \mu_{i}-\mu\Vert_2^2
+$$
+根据方差分析表，当统计量$$F=\frac{\text{SS}_{A}}{\text{SS}_{E}}$$比较小时，模型在不同域上特征的均值统计量基本一致。基于域无关特征的域泛化方案可以根据这种思路进行设计，现有方法基本分为x类：
 
 ## 基于生成模型的域泛化
 
