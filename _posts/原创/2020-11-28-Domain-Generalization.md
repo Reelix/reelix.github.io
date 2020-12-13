@@ -261,6 +261,8 @@ $$
 
 根据方差分析表，当统计量$$F=\frac{\text{SS}_{A}}{\text{SS}_{E}}$$比较小时，模型在不同域上特征的均值统计量基本一致。基于域无关特征的域泛化方案可以根据这种思路进行设计，现有方法基本分为3类：基于核方法的域无关特征学习[6,7]；基于深度神经网络的域无关特征学习[8,9,10]；以及基于对抗训练的域无关特征学习[11]。
 
+**基于核方法学习域无关特征。**
+
 
 
 
@@ -288,6 +290,16 @@ $$
 [6] Hu S, Zhang K, Chen Z, et al. Domain generalization via multidomain discriminant analysis[C]//Uncertainty in Artificial Intelligence. PMLR, 2020: 292-302.
 
 [7] Li Y, Gong M, Tian X, et al. Domain generalization via conditional invariant representation[J]. arXiv preprint arXiv:1807.08479, 2018.
+
+[8] Li Y, Tian X, Gong M, et al. Deep domain generalization via conditional invariant adversarial networks[C]//Proceedings of the European Conference on Computer Vision (ECCV). 2018: 624-639.
+
+[9] Dou Q, Coelho de Castro D, Kamnitsas K, et al. Domain generalization via model-agnostic learning of semantic features[J]. Advances in Neural Information Processing Systems, 2019, 32: 6450-6461.
+
+[10] Motiian S , Piccirilli M , Adjeroh D A , et al. Unified Deep Supervised Domain Adaptation and Generalization[C]// International Conference on Computer Vision Iccv. 2017.
+
+[11] Li H , Pan S J , Wang S , et al. Domain Generalization with Adversarial Feature Learning[C]// CVPR 2018. 2018.
+
+
 
 
 
