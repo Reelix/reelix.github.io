@@ -259,7 +259,13 @@ $$
 \text{SS}_{A}=\sum_{i=1}^{N}\sum_{j=1}^{n_i}\Vert \mu_{i}-\mu\Vert_2^2
 $$
 
-根据方差分析表，当统计量$$F=\frac{\text{SS}_{A}}{\text{SS}_{E}}$$比较小时，模型在不同域上特征的均值统计量基本一致。基于域无关特征的域泛化方案可以根据这种思路进行设计，现有方法基本分为3类：基于核方法的域无关特征提取，基于
+根据方差分析表，当统计量$$F=\frac{\text{SS}_{A}}{\text{SS}_{E}}$$比较小时，模型在不同域上特征的均值统计量基本一致。基于域无关特征的域泛化方案可以根据这种思路进行设计，现有方法基本分为3类：基于核方法的域无关特征学习[6,7]；基于深度神经网络的域无关特征学习[8,9,10]；以及基于对抗训练的域无关特征学习[11]。
+
+
+
+
+
+
 
 ## 基于生成模型的域泛化
 
@@ -278,4 +284,10 @@ $$
 [4] Balaji Y, Sankaranarayanan S, Chellappa R. Metareg: Towards domain generalization using meta-regularization[C]//Advances in Neural Information Processing Systems. 2018: 998-1008.
 
 [5] Li D, Zhang J, Yang Y, et al. Episodic training for domain generalization[C]//Proceedings of the IEEE International Conference on Computer Vision. 2019: 1446-1455.
+
+[6] Hu S, Zhang K, Chen Z, et al. Domain generalization via multidomain discriminant analysis[C]//Uncertainty in Artificial Intelligence. PMLR, 2020: 292-302.
+
+[7] Li Y, Gong M, Tian X, et al. Domain generalization via conditional invariant representation[J]. arXiv preprint arXiv:1807.08479, 2018.
+
+
 
