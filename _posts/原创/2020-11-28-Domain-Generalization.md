@@ -259,14 +259,62 @@ $$
 \text{SS}_{A}=\sum_{i=1}^{N}\sum_{j=1}^{n_i}\Vert \mu_{i}-\mu\Vert_2^2
 $$
 
-根据方差分析表，当统计量$$F=\frac{\text{SS}_{A}}{\text{SS}_{E}}$$比较小时，模型在不同域上特征的均值统计量基本一致。基于域无关特征的域泛化方案可以根据这种思路进行设计，现有方法基本分为3类：基于核方法的域无关特征学习[6,7]；基于深度神经网络的域无关特征学习[8,9,10]；以及基于对抗训练的域无关特征学习[11]。
+根据方差分析表，当统计量$$F=\frac{\text{SS}_{A}}{\text{SS}_{E}}$$比较小时，模型在不同域上特征的均值统计量基本一致。基于域无关特征的域泛化方案可以根据这种思路进行设计，现有方法基本分为3类：基于核方法的域无关特征学习[6,7]；基于深度神经网络的域无关特征学习[9,10]；以及基于对抗训练的域无关特征学习[8,11]。
 
-**基于核方法学习域无关特征。**
+**基于核方法学习域无关特征。**对于一个分类任务$$f:\mathbf{X}\rightarrow \mathbf{Y}$$，我们先用核函数$$\phi$$将样本$$\mathbf{X}_{i,j}$$映射到核空间，记为$$\mu_{i,j}=\phi(\mathbf{X})$$。在核空间内，我们期望来自不同域的特征$$\mu_{i,j}$$与标签$$\mathbf{Y}$$的联合分布基本一致，从而令模型能学习域无关的特征，即我们希望学习的特征满足
+$$
+p(\phi(\mathbf{X}),\mathbf{Y})=p(\phi(\mathbf{X}))\cdot p(\mathbf{Y}\vert\phi(\mathbf{X}))
+$$
 
+因此，如果对于不同的域$$S_{i}$$，如果满足
+$$
+p^{(i)}(\phi(\mathbf{X}))=p^{(j)}(\phi(\mathbf{X})) \tag{9}
+$$
+且
+$$
+p^{(i)}(\mathbf{Y}\vert\phi(\mathbf{X}))=p^{(j)}(\mathbf{Y}\vert\phi(\mathbf{X}))\tag{10}
+$$
+那么我们可以说模型可以学习域无关的特征。之前经典的域泛化工作基本都是令特征空间最小化不同的域之间特征分布的差异，如最小化$$(6)$$。这些工作都是假设标注$$\mathbf{Y}$$的条件分布不随域的改变而改变，即$$(10)$$式自然成立。然而，在实际场景下，由于不同域之间目标的相似度会发生变化（如在油画和简笔画中，橙子可能在油画更好分辨，而在简笔画中可能和猕猴桃混肴)，因此这个假设往往是很难满足的。但是，对于数据量足够大的相似domain，我们一般可以认为标注空间的边缘分布，即$$p(\mathbf{Y})$$差异不大。此时，我们可以采用如下条件分布公式来对$$p(\mathbf{Y}\vert\phi(\mathbf{X}))$$进行如下限制：
+$$
+p(\mathbf{Y}\vert\phi(\mathbf{X}))=\frac{p(\phi(\mathbf{X})\vert\mathbf{Y})\cdot p(\mathbf{Y})}{p(\phi(\mathbf{X}))}
+$$
+因此，为了满足$$(10)$$的限制，我们可以令来自不同域的类别条件分布彼此相等，即
+$$
+p^{(i)}(\phi(\mathbf{X})\vert\mathbf{Y})=p^{(j)}(\phi(\mathbf{X})\vert\mathbf{Y})
+$$
+为了达成这一目的，我们应该通过类别进行分组，要求相同类别不同域的特征尽量相似，并且要求不同类别的特征尽量有差异。根据这一直觉，可以将我们的$$m$$个训练域采样集$$\{S_i\}_{i=1}^{m}$$按$$C$$个类别进行子集划分，即$$S_i=\cup_{c=1}^{C}S_{i}^{(c)}$$。依据这种划分，文献[6,7]提出了以下四个指标：
 
+1. Average domain discrepancy. 该指标要求在每一个类别内部，不同域特征的**MMD**距离尽量小，即
+   $$
+   \min \Psi^{add}(\{S_i\}_{i=1}^{m}):=\frac{1}{\tbinom{m}{2}}\sum_{c=1}^{C}\sum_{1\leq j< j'\leq m}\hat{\text{MMD}}(S_{j}^{(c)},S_{j'}^{(c)})
+   $$
 
+2. 
 
+2. Multi-domain within-class scatter. 该指标要求在所有域上，属于相同类别个体的类内特征差异尽量小，即
+   $$
+   \min \Psi^{mws}(\{S_i\}_{i=1}^{m}):=\frac{1}{N}\sum_{c=1}^{C}\sum_{j=1}^{m}\sum_{i=1}^{n_j^s}I[\mathbf{X}_{i,j}\in S_{i}^{(c)}]*\text{dist}(\phi(\mathbf{X}_{i,j}),\mu_c)
+   $$
+   其中，$$\mu_c$$为所有域上属于第$$c$$类的输入所对应的特征的期望，可以通过均值计算。
 
+3. Average class discrepancy. 该指标要求以类别对$$\{S_i\}_{i=1}^{m}$$进行划分，即
+   $$
+   T_{c}=\cup_{i=1}^{m}S_i^{(c)}
+   $$
+   要求不同类别的特征差异尽量大，即
+   $$
+   \max \Psi^{acd}(\{S_i\}_{i=1}^{m}):\frac{1}{\tbinom{C}{2}}\sum_{1\leq c<c'\leq C}\hat{\text{MMD}}(T_c,T_{c'})
+   $$
+
+4. Multi-domain between-class scatter. 该指标要求在所有域上，属于不同类别个体的类间特征差异尽量大，即
+   $$
+   \max \Psi^{mbs}(\{S_i\}_{i=1}^{m}):=\frac{1}{N}\sum_{c=1}^{C}\vert T_{c}\vert \Vert\mu_{c}-\bar{\mu}\Vert_2^2
+   $$
+
+综合以上四个指标，我们的模型目标函数为
+$$
+\arg\max\frac{\Psi^{acd}+\Psi^{mbs}}{\Psi^{add}+\Psi^{mws}}
+$$
 
 
 ## 基于生成模型的域泛化
