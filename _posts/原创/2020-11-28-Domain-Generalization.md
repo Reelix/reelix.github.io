@@ -296,7 +296,7 @@ $$
 1. Average domain discrepancy. 该指标要求在每一个类别内部，不同域特征的**MMD**距离尽量小，即
    
    $$
-   \min \Psi^{add}(\{S_i\}_{i=1}^{m}):=\frac{1}{\tbinom{m}{2}}\sum_{c=1}^{C}\sum_{1\leq j< j'\leq m}\hat{\text{MMD}}(S_{j}^{(c)},S_{j'}^{(c)})
+   \min \Psi^{add}(\{S_i\}_{i=1}^{m}):=\frac{1}{\tbinom{m}{2}}\sum_{c=1}^{C}\sum_{1\leq i< i'\leq m}\hat{\text{MMD}}(S_{i}^{(c)},S_{i'}^{(c)})
    $$
 
 
@@ -304,7 +304,7 @@ $$
 2. Multi-domain within-class scatter. 该指标要求在所有域上，属于相同类别个体的类内特征差异尽量小，即
    
    $$
-   \min \Psi^{mws}(\{S_i\}_{i=1}^{m}):=\frac{1}{N}\sum_{c=1}^{C}\sum_{j=1}^{m}\sum_{i=1}^{n_j^s}I[\mathbf{X}_{i,j}\in S_{i}^{(c)}]*\text{dist}(\phi(\mathbf{X}_{i,j}),\mu_c)
+   \min \Psi^{mws}(\{S_i\}_{i=1}^{m}):=\frac{1}{N}\sum_{c=1}^{C}\sum_{i=1}^{m}\sum_{j=1}^{n_j^s}I[\mathbf{X}_{i,j}\in S_{i}^{(c)}]*\text{dist}(\phi(\mathbf{X}_{i,j}),\mu_c)
    $$
    其中，$$\mu_c$$为所有域上属于第$$c$$类的输入所对应的特征的期望，可以通过均值计算。
 
@@ -323,7 +323,7 @@ $$
 4. Multi-domain between-class scatter. 该指标要求在所有域上，属于不同类别个体的类间特征差异尽量大，即
    
    $$
-   \max \Psi^{mbs}(\{S_i\}_{i=1}^{m}):=\frac{1}{N}\sum_{c=1}^{C}\vert T_{c}\vert \Vert\mu_{c}-\bar{\mu}\Vert_2^2
+   \max \Psi^{mbs}(\{S_i\}_{i=1}^{m}):=\frac{1}{N}\sum_{c=1}^{C}\vert T_{c}\vert *\Vert\mu_{c}-\bar{\mu}\Vert_2^2
    $$
 
 综合以上四个指标，我们的模型目标函数为
@@ -332,12 +332,59 @@ $$
 \arg\max\frac{\Psi^{acd}+\Psi^{mbs}}{\Psi^{add}+\Psi^{mws}}
 $$
 
+**基于神经网络的域无关特征学习**用神经网络作为一个良好的非线性核函数，其目标函数与核方法的函数类似。我们记一个深度神经网络由两部分组成，特征提取器和特征分类器，记作$$f=h\circ g$$，那么对于相同类别的个体，我们要求不同域的特征尽量接近，即
+
+$$
+\min_{g} \frac{1}{N}\sum_{c=1}^{C}\sum_{1\leq i < i'\leq m}\sum_{j=1}^{n_j^s}I[\mathbf{X}_{i,j}\in S_{i}^{(c)}]*I[\mathbf{X}_{i',j}\in S_{i'}^{(c)}]*\text{dist}(g(\mathbf{X}_{i,j}),g(\mathbf{X}_{i',j}))
+$$
+
+此外，我们还要求对于不同分类的数据，它们的距离尽量疏远
+
+$$
+\max_{g} \frac{1}{N}\sum_{1\leq c <c' \leq C} \sum _{\mathbf{X}_{i,j}\in T_c\\\mathbf{X}_{i',j'}\in T_{c'}}\text{dist}(g(\mathbf{X}_{i,j}),g(\mathbf{X}_{i',j'}))
+$$
+
+一般而言，我们可以用指数距离，或者$$\Vert\cdot\Vert_2^2$$来计算特征距离。文献[10]提出了一种度量学习的方案，通过一个度量学习网络(记作$$\phi$$)来进行距离计算，损失函数为一个*triplet loss*
+
+$$
+l_{\text{tri}}^{a,p,n}=\max\{0,d_{\phi}(\mathbf{z}_a,\mathbf{z}_p)^2-d_{\phi}(\mathbf{z}_a,\mathbf{z}_n)^2+\xi\}
+$$
+
+其算法用了*meta-learning*的思想，对模型进行模拟的训练-测试集划分，先在训练集上用标注对模型进行训练，然后再用更新后的参数在测试集上训练域无关特征，算法如下图所述：
+
+![meta4](../../images/domain-generalization/meta4.png)
+
+**基于对抗训练的域无关特征学习**用对抗生成模型使得不同域数据在特征空间上的分布"不可分辨"。文献[8]构造了一个全局的域分类器，以及$$C$$个基于不同类别先验的条件域分类器，全局域分类器对输入的样本属于哪一个域进行正确分类，同时特征提取模型$$g$$在训练的过程中混肴全局域分类器。条件域分类器与全局域分类器一致，但是输入的样本是属于同一个类别的不同域的样本数据。在对抗方式上，该模型采用逆梯度的方法(reverse gradient)进行对抗训练。
+
+![AD1](../../images/domain-generalization/AD1.png)
+
+文献[11]混合了MMD距离与GAN，它在通过最小化域之间的MMD距离，从而使得模型学到合适的全局特征的同时，将来自不同域的特征求均值，并认为在最优条件下，这个均值向量应当服从正态分布。基于该直觉，模型采用一个GAN网络，令均值向量逼近正态分布生成的向量，如下图所述：
+
+![AD2](../../images/domain-generalization/AD2.png)
 
 ## 基于生成模型的域泛化
+
+除了在低维空间上令特征分布无法分辨以外，一个更直观的方法是基于当前这些源域直接生成与当前源域风格差异巨大，但是语义差异（分类特征）类似的图像，常用方法有基于Robust Adversarial Training的生成模型[12,13]，基于全卷积神经网络的生成模型[14]，以及基于Cycle-GAN的生成模型[15]。
+
+**基于Robust Adversarial Training的生成模型**目的是通过梯度对抗训练，得到一个新的样本，该样本与当前目标域差距较大，但是又能保留基本的语义特征。文献[12]提出了对抗数据增广方法，通过得到一个与当前数据差异足够大的新样本训练神经网络，使之能够学到更多数据特征，算法如下所述：
+
+![AA1](../../images/domain-generalization/AA1.png)
+
+在`Line7-10`，模型通过对抗的方法得到与原数据空间差异尽量大的新样本。文献[13]扩展了该思路，它指出我们生成的新样本也要保留语义特征，并设计了两个独立的分类器，一个为类别分类器，另一个为域分类器。在每次生成中，模型对于一个输入$$\mathbf{X}$$分别生成两个新样本，一个新样本能够混肴域分类器，记为$$\mathbf{X}_d$$。另一个新样本混肴类别分类器，记为$$\mathbf{X}_l$$。在训练过程中，类别分类器的训练采用$$\mathbf{X}_d$$作为增广数据，而域分类器则采用$$\mathbf{X}_l$$进行数据增广，过程如下所述：
+
+![AA2](../../images/domain-generalization/AA2.png)
+
+**基于全卷积神经网络的生成模型**[14]将$$X$$输入到一个全卷积模型中，让模型学习一个变换$$T_{\theta}(\mathbf{X})$$，并构造新的样本为$$\tilde{\mathbf{X}}=\mathbf{X}+T_{\theta}(\mathbf{X})$$，要求该变换满足两个条件：能够尽量混肴域分类器，同时能够强调类别分类器的语义特征（即让类别分类损失尽量变小），其过程如下所述：
+
+![AA3](../../images/domain-generalization/AA3.png)
+
+**基于Cycle-GAN的生成模型**[15]构造一个*Cycle-GAN*，要求对输入$$\mathbf{X}$$所对应的生成样本$$\tilde{\mathbf{X}}$$具有如下特性：首先，生成样本$$\tilde{\mathbf{X}}$$在*GAN*的*Wasserstein*距离上与$$\mathbf{X}$$距离尽量远；其次，生成样本能够被正确的分类到与输入相同的类别。最后，经过循环生成$$G(G(\mathbf{X}))$$后得到的样本与输入尽量接近。训练好生成器后，我们就可以用生成器得到的样本扩充原来的数据空间。
 
 ## 基于自监督任务的域泛化
 
 ## 可用代码与模型验证
+
+现阶段比较广泛的可用代码为`Kaiyang Zhou`博士的[Dassl库](https://github.com/KaiyangZhou/Dassl.pytorch)。
 
 ## 参考文献
 
@@ -362,6 +409,10 @@ $$
 [10] Motiian S , Piccirilli M , Adjeroh D A , et al. Unified Deep Supervised Domain Adaptation and Generalization[C]// International Conference on Computer Vision Iccv. 2017.
 
 [11] Li H , Pan S J , Wang S , et al. Domain Generalization with Adversarial Feature Learning[C]// CVPR 2018. 2018.
+
+[12]  Volpi R, Namkoong H, Sener O, et al. Generalizing to unseen domains via adversarial data augmentation[C]//Advances in neural information processing systems. 2018: 5334-5344. 
+
+[13]  Shankar S, Piratla V, Chakrabarti S, et al. Generalizing across domains via cross-gradient training[J]. arXiv preprint arXiv:1804.10745, 2018. 
 
 
 
