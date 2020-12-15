@@ -382,6 +382,22 @@ $$
 
 ## 基于自监督任务的域泛化
 
+在上文中，我们介绍了基于元学习，基于域无关特征，以及基于生成模型的域泛化方法，这些方法都旨在令模型能够学到域无关的特征。此外，还有一类基于自监督任务的域泛化方法，它们通过构造经验式(empirical)的或是启发式(heuristic)的辅助自监督任务，让模型学到能泛化的特征。我们介绍该领域常用的三个方法——秩约束法[14]，*Jigsaw Puzzle*法[15]，以及Ensemble Learning[16]。
+
+秩约束法[14]提出对模型的参数进行限制，使得卷积神经网络模型的参数秩尽量小。此外，该文章也是第一个构造了常用的域泛化数据集**PACS**的文章。
+
+*Jigsaw Puzzle*法[15]构造了一个自监督的拼图任务让模型学习，并认为这个**域无关**的拼图任务可以弥合域之间的分布差异，其模型结构如下图所示：
+
+![ss1](../../images/domain-generalization/ss1.png)
+
+模型提前确定$$P$$个常用的拼图模型，对于每一个输入图像，我们构造一个**解拼图分类器**，使得它能够正确预测打乱的顺序，并通过该任务令特征提取网络学到共同的特征，这种方法在PACS上达到了80.51%的分类精度。
+
+Ensemble Learning[16]方法先独立让每一个源域训练分类器，作为每个域的专家。然后令专家之间进行学习，基本思路为令某专家的预测指标接近于其他专家预测的均值：
+
+![ss2](../../images/domain-generalization/ss2.png)
+
+其中，$$a(\cdot)$$与$$A(\cdot)$$分别表示两种数据增广方法，前者表示弱增广，后者表示强增广。
+
 ## 可用代码与模型验证
 
 现阶段比较广泛的可用代码为`Kaiyang Zhou`博士的[Dassl库](https://github.com/KaiyangZhou/Dassl.pytorch)。
@@ -414,6 +430,11 @@ $$
 
 [13]  Shankar S, Piratla V, Chakrabarti S, et al. Generalizing across domains via cross-gradient training[J]. arXiv preprint arXiv:1804.10745, 2018. 
 
+[14]  Li D, Yang Y, Song Y Z, et al. Deeper, broader and artier domain generalization[C]//Proceedings of the IEEE international conference on computer vision. 2017: 5542-5550.
+
+[15]  Carlucci F M, D'Innocente A, Bucci S, et al. Domain generalization by solving jigsaw puzzles[C]//Proceedings of the IEEE Conference on Computer Vision and Pattern Recognition. 2019: 2229-2238.
+
+[16]  Zhou K, Yang Y, Qiao Y, et al. Domain Adaptive Ensemble Learning[J]. arXiv preprint arXiv:2003.07325, 2020.
 
 
 
