@@ -25,6 +25,7 @@ mathjax: true
 
 
 
+[PPT资源](../../images/introduction-to-ml-and-dl/fenghz.pptx)
 
 ## 从数据分布模型到算法模型
 
