@@ -14,6 +14,9 @@ mathjax: true
 
 本文从回归方程出发对机器学习与深度学习的概念发展历史进行一段简单的介绍，旨在消除初学者无从下手的畏惧感，并对整个*AI*领域形成一种简洁而直观的理解。
 
+[PPT资源-人工智能简史](../../images/introduction-to-ml-and-dl/fenghz.pptx)
+[PPT资源-隐私保护的数据挖掘](../../images/introduction-to-ml-and-dl/FengHZ-Privacy-Preserving.pptx)
+
 本文主要参考资料为:
 
 * [Statistical Modeling: The Two Cultures](https://zhuanlan.zhihu.com/p/27263369)
@@ -25,7 +28,7 @@ mathjax: true
 
 
 
-[PPT资源](../../images/introduction-to-ml-and-dl/fenghz.pptx)
+
 
 ## 从数据分布模型到算法模型
 
