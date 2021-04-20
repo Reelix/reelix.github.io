@@ -39,6 +39,147 @@ $$
 
 在笔者自己的实验中，**Mixup**，**Label-smoothing**，**Knowledge** **distillation**这些概念往往在实践中都有千丝万缕的联系，它们的共同特点都是对标签空间进行了合理的“软化”。鉴于**Mixup**已经是我的常用涨点trick之一，对它进行全面的理论分析（然后看看能不能水文章）自然义不容辞。在本节中，我将以近年来Mixup上理论分析做的最深入的文献**On Mixup Regularization**[4]作为基础，对**Mixup**背后的理论进行介绍。
 
+正则化（Regularization）是深度学习中模型训练成功的关键。现有的正则化方法分为两种，一种是直接对模型施加显式的正则化约束，或者是利用数据增广的方法，通过数据层面对模型施加隐式正则化约束。显式的正则化约束包括：（1）对于参数施加惩罚，比如$$L_1,L_2$$正则化项，这往往在程序中采用*weight decay*的方法进行实现。（2）对于神经网络的表示空间（representation space）或是输出施加扰动或噪声，比如随机dropout，或分块dropout。（3）对于输出进行正则化，比如batch normalization，residual learning，或者是label smoothing（可以增加精度）。隐式正则化约束包括：（1）模型参数的共用（比如从全连接到CNN，出现了filter模块）。（2）优化算法的选择（比如SGD，Adam）。（3）数据增广方法。一般而言，显式的正则化帮助模型在鲁棒性与预测精度上取得优势，而隐式的正则化则增加模型的泛化性。一般而言，隐式正则化与显式正则化方法具有某种等效性，比如对数据施加噪声等价于岭回归$$(\mathbf{X}^T\mathbf{X}+\lambda \mathbf{I})^{-1}$$。此外，Dropout方法也与$$L_2$$正则化具有等价性。大量实验表明，**Mixup**方法可以提高模型对于对抗攻击的鲁棒性，同样可以提高模型的泛化能力和预测精度（ECE损失），但是它的原理却较难理解。一个很自然的想法是，**Mixup**能达成其他的正则化方法的优点，那么它们必然具有一定的等价性，将**Mixup**通过形式变换，如果能与其他正则化方法构建等价形式，就能够从理论上解释**Mixup**的作用。**On Mixup Regularization**[4]利用泰勒展开，将**Mixup**与*label-smoothing*，*Lipschitz*正则化，输入标准化（如$$\mathbf{X}-\bar{\mathbf{X}}$$)以及对输入的随机扰动(random perturbation)建立联系，对于**Mixup**进行理论分析。
+
+首先看**On Mixup Regularization**[4]的第一个定理。
+
+**Theorem 1. ** 对于**C**分类问题，记神经网络的输出为$$\mathbf{h}$$，标签为$$\mathbf{y}$$，基于*logsoftmax*的交叉熵损失为$$l(\mathbf{y},\mathbf{h})=\log{\sum_{i=1}^{C}\exp(\mathbf{h}_i)}-\mathbf{y}^T\mathbf{h}$$，对于有**N**个样本的训练集$$S=\{(\mathbf{X}_1,\mathbf{y}_1),\cdots,(\mathbf{X}_n,\mathbf{y}_n)\}$$，考虑随机变量$$\theta\sim\beta_{[\frac{1}{2},1]}(\alpha,\alpha),j\sim\text{Unif}([N])$$，基于**Mixup**方法的损失函数可以等价推导出如下形式：
+
+
+$$
+\xi^{\text{mixup}}(f)=\frac{1}{N}\sum_{i=1}^{N}\mathbb{E}_{\theta,j}l(\tilde{\mathbf{y_i}}+\epsilon_i,f(\tilde{\mathbf{X}}_i+\delta_i)) \tag{1}
+$$
+其中，$\tilde{\mathbf{y_i}},\epsilon_i,\tilde{\mathbf{X}}_i,\delta_i$满足
+$$
+\begin{cases}
+\tilde{\mathbf{X}}_i=\bar{\mathbf{X}}+\bar{\theta}(\mathbf{X}_i-\bar{\mathbf{X}});\\
+\tilde{\mathbf{y_i}}=\bar{\mathbf{y}}+\bar{\theta}(\mathbf{y}_i-\bar{\mathbf{y}});\\
+\delta_i=(\theta-\bar{\theta})\mathbf{X}_i+(1-\theta)\mathbf{X}_j-(1-\bar{\theta})\bar{\mathbf{X}};\\
+\epsilon_i = (\theta-\bar{\theta})\mathbf{y}_i+(1-\theta)\mathbf{y}_j-(1-\bar{\theta})\bar{\mathbf{y}}.
+\end{cases}
+$$
+它的推断流程如下所述：
+
+对于有**N**个样本的训练集$$S=\{(\mathbf{X}_1,\mathbf{y}_1),\cdots,(\mathbf{X}_n,\mathbf{y}_n)\}$$，令$$\lambda\sim\beta_{[0,1]}(\alpha,\alpha)$$，基于**Mixup**方法的经验损失函数 (empirical risk)为
+$$
+\xi^{\text{mixup}}(f)=\frac{1}{N^2}\sum_{i=1}^{N}\sum_{j=1}^{N}\mathbb{E}_{\lambda}l(\lambda\mathbf{y_i}+(1-\lambda)\mathbf{y_j},f(\lambda\mathbf{X_i}+(1-\lambda)\mathbf{X_j})) \tag{2}
+$$
+考虑$$\lambda$$的几个可能的分布函数（只需要观察$$\alpha=0.5,2$$的两种可能性）：
+
+![beta](../../images/mixup/beta_pdf.svg)
+
+一般而言，**Mixup**方法普遍选择$$\alpha=0.2,0.5$$，这也就意味着$$\lambda$$呈现对称分布，且分布值集中于$$0,1$$两头，这就意味着，在公式$$(2)$$中出现的$$\lambda\mathbf{y_i}+(1-\lambda)\mathbf{y_j}$$中，前面系数较小的一项可以看作是额外的扰动项，根据这个思路，我们可以将$$(2)$$拆分为主要项和扰动项，思路如下所述。首先，记
+$$
+m_{i,j}(\lambda)=l(\lambda\mathbf{y_i}+(1-\lambda)\mathbf{y_j},f(\lambda\mathbf{X_i}+(1-\lambda)\mathbf{X_j}))
+$$
+记$$\lambda=\pi\lambda_0+(1-\pi)\lambda_1,\lambda_0\sim\beta_{[0,\frac{1}{2}]}(\alpha,\alpha),\lambda_1\sim\beta_{[\frac{1}{2},1]}(\alpha,\alpha),\pi\sim\text{Ber}(\frac{1}{2})$$,那么$$(2)$$式可以写成
+$$
+\mathbb{E}_{\lambda}m_{i,j}(\lambda)=\mathbb{E}_{\lambda_0,\lambda_1,\pi}m_{i,j}(\pi\lambda_0+(1-\pi)\lambda_1)\\
+=\frac{1}{2}[\mathbb{E}_{\lambda_0}m_{i,j}(\lambda_0)+\mathbb{E}_{\lambda_1}m_{i,j}(\lambda_1)]
+$$
+注意到$$\lambda_1=1-\lambda_0$$，因此$$\mathbb{E}_{\lambda_0}m_{i,j}(\lambda_0)=\mathbb{E}_{\lambda_1}m_{j,i}(\lambda_1)$$,代入到$$(2)$$中，我们有：
+$$
+\xi^{\text{mixup}}(f)=\frac{1}{2N^2}\sum_{i=1}^{N}\sum_{j=1}^{N}[\mathbb{E}_{\lambda_1}m_{j,i}(\lambda_1)+\mathbb{E}_{\lambda_1}m_{i,j}(\lambda_1)]\tag{3}
+$$
+注意到在有限样本下，$$i,j$$的顺序可以调换，因此$$(3)$$写作
+$$
+\xi^{\text{mixup}}(f)=\frac{1}{N^2}\sum_{i=1}^{N}\sum_{j=1}^{N}\mathbb{E}_{\lambda_1}m_{i,j}(\lambda_1)\\=\frac{1}{N}\sum_{i=1}^N[\frac{1}{N}\sum_{j=1}^{N}\mathbb{E}_{\lambda_1}m_{i,j}(\lambda_1)]
+$$
+记$$l_i =\frac{1}{N}\sum_{j=1}^{N}\mathbb{E}_{\lambda_1}m_{i,j}(\lambda_1)$$,可以展开为
+$$
+l_i=\mathbb{E}_{\theta,j}l(\theta \mathbf{y_i}+(1-\theta)\mathbf{y_j},f(\theta\mathbf{X_i}+(1-\theta)\mathbf{X_j}))
+$$
+此外，注意到
+$$
+\mathbb{E}_{\theta,j}[\theta \mathbf{y_i}+(1-\theta)\mathbf{y_j}]=\bar{\mathbf{y}}+\bar{\theta}(\mathbf{y}_i-\bar{\mathbf{y}})\\
+\mathbb{E}_{\theta,j}[\theta \mathbf{X_i}+(1-\theta)\mathbf{X_j}]=\bar{\mathbf{X}}+\bar{\theta}(\mathbf{X}_i-\bar{\mathbf{X}}) \tag{4}
+$$
+通过这个变化，我们成功将$$\mathbf{y_j},\mathbf{X_j}$$这一项消除了，并藏在了均值中。因此，对$$l_i$$的一个简单的变换为
+$$
+\epsilon_i = \theta \mathbf{y_i}+(1-\theta)\mathbf{y_j}-\mathbb{E}_{\theta,j}[\theta \mathbf{y_i}+(1-\theta)\mathbf{y_j}];\\
+\delta_i=\theta \mathbf{X_i}+(1-\theta)\mathbf{X_j}-\mathbb{E}_{\theta,j}[\theta \mathbf{X_i}+(1-\theta)\mathbf{X_j}];\\
+\tilde{\mathbf{y_i}}=\bar{\mathbf{y}}+\bar{\theta}(\mathbf{y}_i-\bar{\mathbf{y}});\\
+\tilde{\mathbf{X}}_i=\bar{\mathbf{X}}+\bar{\theta}(\mathbf{X}_i-\bar{\mathbf{X}});\\
+l_i=l(\tilde{\mathbf{y_i}}+\epsilon_i,f(\tilde{\mathbf{X}}_i+\delta_i))
+$$
+这就得到了Theorem 1中的等价形式$$(1)$$。 根据这个等价形式，我们可以看到，**Mixup**策略可以看成是一种向着均值空间的收缩，即将原来的空间$$\mathcal{X,Y}$$通过$(4)$变换到另外一个空间$$\tilde{\mathcal{X}},\tilde{\mathcal{Y}}$$，在变换的过程中，采用一个范围为$$[\frac{1}{2},1]$$的系数进行压缩，如果$$\alpha=2,4$$，这个压缩系数会在$$0.6$$附近，压缩的程度比较大；而如果$$\alpha=0.2,0.5$$，这个压缩系数则会在$$0.9$$附近，等价于中心化。对于标签空间$$\mathcal{Y}$$而言，这种方法等价于**label-smooth**，在实验中，这种变换会使得预测的结果不至于太大。实验结果表明，在进行**Mixup**或**label-smooth**后，模型预测的最大概率$$\mathbf{p}$$的分布变小了，极限情况（如$$\mathbf{p}=1.0$$）也变小了。
+
+![label-smooth](../../images/mixup/label-smooth.png)
+
+此外，注意到在训练过程中，对于训练数据进行了变换，那么同样在测试过程中也应当进行相似的变换，即在输入的时候，应当将$$\mathbf{X}_{\text{test}}$$先变换进$$\tilde{\mathcal{X}}$$空间，即$$\tilde{\mathbf{X}}_{\text{test}}=\bar{\mathbf{X}}+\bar{\theta}(\mathbf{X}_{\text{test}}-\bar{\mathbf{X}})$$。得到模型对$$\tilde{\mathbf{X}}_{\text{test}}$$的预测$$\tilde{\mathbf{y}}_{\text{test}}$$之后，再将其变换到真实标注空间$$\tilde{\mathcal{Y}}$$，即$$\text{pred}_{f}(\mathbf{X}_{\text{test}})=\frac{1}{\bar{\theta}}(\tilde{\mathbf{y}}-\bar{\mathbf{y}})+\bar{\mathbf{y}}$$。**On Mixup Regularization**[4]发现，这种变换能够显著提高使用**Mixup**进行训练的模型的精度和准确性，并且精度的评估指标**ECE**也上升了。
+
+![mixup-rescale](../../images/mixup/mixup-rescale.png)
+
+到此，我们从靠近均值的中心化变换（space transform）以及标签平滑化（label-smooth）两个角度对**Mixup**进行了研究。注意到我们在式$$(1)$$中还引入了残差项$$\epsilon_i,\delta_i$$，显然，它们的期望为0，并且当$$\theta \rightarrow 1$$的时候，它们的取值范围也不会离0很远。因此，我们在$$\alpha=0.2,0.5$$这种条件下，将这些残差项视作微小扰动，通过泰勒展开研究**Mixup**在噪声正则化上的效果。
+
+先回顾在$$(\tilde{\mathbf{X}},\tilde{\mathbf{y}})$$附近的二阶(Quadric)泰勒展开公式：
+$$
+G_{Q}(\tilde{\mathbf{X}}+\delta,\tilde{\mathbf{y}}+\epsilon)=G(\tilde{\mathbf{X}},\tilde{\mathbf{y}})+\nabla_{\tilde{\mathbf{X}}}G(\tilde{\mathbf{X}},\tilde{\mathbf{y}})\delta+\nabla_{\tilde{\mathbf{y}}}G(\tilde{\mathbf{X}},\tilde{\mathbf{y}})\epsilon+\frac{1}{2}\delta^T\nabla_{\tilde{\mathbf{X}}\tilde{\mathbf{X}}}^2G(\tilde{\mathbf{X}},\tilde{\mathbf{y}})\delta\\+\frac{1}{2}\epsilon^T\nabla_{\tilde{\mathbf{y}}\tilde{\mathbf{y}}}^2G(\tilde{\mathbf{X}},\tilde{\mathbf{y}})\epsilon+\epsilon^T\nabla_{\tilde{\mathbf{X}}\tilde{\mathbf{y}}}^2G(\tilde{\mathbf{X}},\tilde{\mathbf{y}})\delta+\Delta(\delta,\epsilon)
+$$
+注意到$$\forall i\in[N],\mathbb{E}_{\theta,j}\delta_i=0,\mathbb{E}_{\theta,j}\epsilon_i=0$$，因此在$$\mathbb{E}_{\theta,j}l_{Q}(\tilde{\mathbf{y_i}}+\epsilon_i,f(\tilde{\mathbf{X}}_i+\delta_i))$$的二阶泰勒展开中，它们的一阶导数都可以忽略，此时我们利用泰勒公式将损失函数$$\xi^{\text{mixup}}(f)$$写成
+$$
+\mathbb{E}_{\theta,j}l_{Q}(\tilde{\mathbf{y_i}}+\epsilon_i,f(\tilde{\mathbf{X}}_i+\delta_i))=l(\tilde{\mathbf{y_i}},f(\tilde{\mathbf{X}}_i))+\frac{1}{2}\langle{\mathbb{E}_{\theta,j}\delta_i\delta_i^T,\nabla_{\tilde{\mathbf{X}}\tilde{\mathbf{X}}}^2G(\tilde{\mathbf{X}},\tilde{\mathbf{y}})}\rangle\\
++\frac{1}{2}\langle{\mathbb{E}_{\theta,j}\epsilon_i\epsilon_i^T,\nabla_{\tilde{\mathbf{y}}\tilde{\mathbf{y}}}^2G(\tilde{\mathbf{X}},\tilde{\mathbf{y}})}\rangle+\langle{\mathbb{E}_{\theta,j}\epsilon_i\delta_i^T,\nabla_{\tilde{\mathbf{y}}\tilde{\mathbf{X}}}^2G(\tilde{\mathbf{X}},\tilde{\mathbf{y}})}\rangle
+$$
+注意到，这里利用的结论为
+$$
+\mathbf{u}\in \mathbb{R}^{m\times 1},\mathbf{v}\in \mathbb{R}^{n\times 1},\mathbf{X}\in \mathbb{R}^{m\times n};\mathbf{u^TXv}=\langle \mathbf{uv^T},\mathbf{X}\rangle
+$$
+其中，$$\langle \mathbf{uv^T},\mathbf{X}\rangle$$表示把矩阵按行拉平，然后做内积，我们利用这个结论把$$\delta^T\nabla_{\tilde{\mathbf{X}}\tilde{\mathbf{X}}}^2G(\tilde{\mathbf{X}},\tilde{\mathbf{y}})\delta$$写成为$$\langle{\delta_i\delta_i^T,\nabla_{\tilde{\mathbf{X}}\tilde{\mathbf{X}}}^2G(\tilde{\mathbf{X}},\tilde{\mathbf{y}})}\rangle$$，同理可得后面两项，然后再将期望代入。此外，我们还要利用以下三条公式：
+$$
+\frac{\partial l(\tilde{\mathbf{y_i}},f(\tilde{\mathbf{X}}_i))}{\partial_{\tilde{\mathbf{X}}_i}}=\nabla_{\mathbf{h_i}}l(\tilde{\mathbf{y_i}},f(\tilde{\mathbf{X}}_i))\nabla f(\tilde{\mathbf{X}}_i)\\
+\nabla_{\tilde{\mathbf{X}}_i\tilde{\mathbf{X}}_i}^2l(\tilde{\mathbf{y_i}},f(\tilde{\mathbf{X}}_i))=\nabla f(\tilde{\mathbf{X}}_i)^{T}\nabla_{\mathbf{h_i}}l(\tilde{\mathbf{y_i}},f(\tilde{\mathbf{X}}_i))\nabla f(\tilde{\mathbf{X}}_i)+\nabla_{\mathbf{h_i}}l(\tilde{\mathbf{y_i}},f(\tilde{\mathbf{X}}_i))\nabla^2 f(\tilde{\mathbf{X}}_i)\\
+\nabla_{\tilde{\mathbf{y}}_i\tilde{\mathbf{X}}_i}^2l(\tilde{\mathbf{y_i}},f(\tilde{\mathbf{X}}_i))=\nabla_{\tilde{\mathbf{y}_i},\mathbf{h_i}}l(\tilde{\mathbf{y_i}},f(\tilde{\mathbf{X}}_i))\nabla f(\tilde{\mathbf{X}}_i)
+$$
+此外，我们记
+$$
+\mathbb{E}_{\theta,j}\delta_i\delta_i^T=\Sigma_{\tilde{\mathbf{X}}\tilde{\mathbf{X}}}^{(i)};\mathbb{E}_{\theta,j}\epsilon_i\epsilon_i^T=\Sigma_{\tilde{\mathbf{y}}\tilde{\mathbf{y}}}^{(i)};\mathbb{E}_{\theta,j}\epsilon_i\delta_i^T=\Sigma_{\tilde{\mathbf{y}}\tilde{\mathbf{X}}}^{(i)}
+$$
+注意
+$$
+\delta_i=(\theta-\bar{\theta})(\mathbf{X}_i-\bar{\mathbf{X}})+(1-\theta)(\mathbf{X}_j-\bar{\mathbf{X}});\\
+\epsilon_i = (\theta-\bar{\theta})(\mathbf{y}_i-\bar{\mathbf{y}})+(1-\theta)(\mathbf{y}_j-\bar{\mathbf{y}})
+$$
+
+
+容易得到
+$$
+\mathbb{E}_{\theta,j}\delta_i\delta_i^T=\text{Var}(\theta)(\mathbf{X}_i-\bar{\mathbf{X}})(\mathbf{X}_i-\bar{\mathbf{X}})^T+\mathbb{E}_{\theta}(1-\theta)^2\Sigma_{\mathbf{X}\mathbf{X}};\\
+\mathbb{E}_{\theta,j}\epsilon_i\epsilon_i^T=\text{Var}(\theta)(\mathbf{y}_i-\bar{\mathbf{y}})(\mathbf{y}_i-\bar{\mathbf{y}})^T+\mathbb{E}_{\theta}(1-\theta)^2\Sigma_{\mathbf{y}\mathbf{y}};\\
+\mathbb{E}_{\theta,j}\epsilon_i\delta_i^T=\text{Var}(\theta)(\mathbf{X}_i-\bar{\mathbf{X}})(\mathbf{y}_i-\bar{\mathbf{y}})^T+\mathbb{E}_{\theta}(1-\theta)^2\Sigma_{\mathbf{X}\mathbf{y}}
+$$
+此外，注意到
+$$
+\begin{cases}
+\tilde{\mathbf{X}}_i=\bar{\mathbf{X}}+\bar{\theta}(\mathbf{X}_i-\bar{\mathbf{X}});\\
+\tilde{\mathbf{y_i}}=\bar{\mathbf{y}}+\bar{\theta}(\mathbf{y}_i-\bar{\mathbf{y}})
+\end{cases}
+$$
+因此，我们可以利用这个关系，将$$(\mathbf{X},\mathbf{y})$$映射到$$(\tilde{\mathbf{X}},\tilde{\mathbf{y}})$$，此时有$$\Sigma_{\tilde{\mathbf{X}}\tilde{\mathbf{y}}}=\bar{\theta}^2\Sigma_{\mathbf{X}\mathbf{y}}$$，其他情况也可以依次类推，可以得到如下关系：
+
+![cov](../../images/mixup/covariance.png)
+
+其中，$$\sigma^2=\text{Var}(\theta),\gamma^2=\sigma^2+(1-\bar{\theta})^2$$。
+
+利用上述关系，**On Mixup Regularization**[4]给出了如下的定理二用以解释**Mixup**方法的影响
+
+<img src="../../images/mixup/theorem2.png" alt="theorem2" style="zoom:100%;" />
+
+注意，$$R_1(f)$$表示基于*Jacobian*正则化的约束。联系Dropout等价于惩罚$$\nabla f$$在训练点的二范数，**Mixup**方法通过对模型梯度与*Jacobian*矩阵的距离进行惩罚来增加模型的泛化性，而这种惩罚并不是直接赋予的，而是通过令模型模仿在输入和标注空间中的线性关系，从而间接施加约束。此外，我们也注意到，**Mixup**的正则化效果也与输出和输出之间的相关性有关，这也解释了单独对输入或者标签进行**Mixup**的效果比起标准的**Mixup**弱很多。
+
+对于交叉熵损失$$l(\mathbf{y},\mathbf{h})=\log{\sum_{i=1}^{C}\exp(\mathbf{h}_i)}-\mathbf{y}^T\mathbf{h}$$，我们记$$S(\mathbf{h})_i=\exp(\mathbf{h}_i)/\sum_{j=1}^{C}\exp(\mathbf{h}_j)$$，并令
+$$
+H(\mathbf{h})=\text{diag}(S(\mathbf{h}))-S(\mathbf{h})S(\mathbf{h})^T\in \mathbb{R}^{C\times C}
+$$
+此时在交叉熵损失下的二阶泰勒展开为
+$$
+\xi^{\text{mixup}}_{Q}(f)=\frac{1}{N}\sum_{i=1}^{N}l^{\text{CE}}(\tilde{\mathbf{y_i}},f(\tilde{\mathbf{X}}_i))+R_1^{\text{CE}}(f)+R_2^{\text{CE}}(f)+R_3^{\text{CE}}(f)
+$$
+其中
+
+![taylor-ce](../../images/mixup/taylor-CE.png)
+
+注意到，如果预测概率$$S(\mathbf{h})_i$$过大，如最大的概率接近于1，最小的概率接近于0，那么$$H(\mathbf{h})$$中所有的项都会趋向于0，那么正则化效果就会消失，因此对于标签空间也进行**Mixup**可以防止预测过于自信，从而确保正则化有用，这就解释了为什么只对输入进行**Mixup**效果差，这是因为没有类似于*label-smoothing*的作用，**Mixup**的正则化效果消失了。
 
 ## 现有Work的Mixup方法
 
