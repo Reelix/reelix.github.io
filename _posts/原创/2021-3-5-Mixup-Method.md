@@ -23,14 +23,16 @@ mathjax: true
 
 **Mixup**是一种数据增广策略，通过对模型输入与标签构建具有“凸”性质的运算，构造新的训练样本与对应的标签，提高模型的泛化能力。对于具有层次特征的深度学习模型$$\mathbf{h}=f_{m}\circ \cdots \circ f_{1}\circ f_{0}(\mathbf{X})$$，广义的**Mixup**[1,2]策略将任意层的特征以及对应的标签进行混合，并构造损失函数如下：
 
-**Definition 1.** 对于任意两组输入-标签对$$(\mathbf{X}_0,\mathbf{y}_0)$$以及$$(\mathbf{X}_1,\mathbf{y}_1)$$，令$$\mathbf{h}^{k}_0,\mathbf{h}^{k}_1$$为$$\mathbf{X}_0,\mathbf{X}_1$$所对应的第$k$层输入特征（注意到第0层输入特征是原始输入，即$$\mathbf{h}_0=\mathbf{X}$$），则**Mixup**方法可以描述为 
-
+**Definition 1.** 对于任意两组输入-标签对$$(\mathbf{X}_i,\mathbf{y}_i)$$以及$$(\mathbf{X}_j,\mathbf{y}_j)$$，令$$\mathbf{h}^{k}_i,\mathbf{h}^{k}_j$$为$$\mathbf{X}_i,\mathbf{X}_j$$所对应的第$k$层输入特征（注意到第0层输入特征是原始输入，即$$\mathbf{h}^0=\mathbf{X}$$），则**Mixup**方法可以描述为 
 $$
-\tilde{\mathbf{h}}^{k} = (1-\lambda)*\mathbf{h}^{k}_0+\lambda*\mathbf{h}^{k}_1
+\begin{cases}
+\tilde{\mathbf{h}}^{k}(\lambda) = \lambda*\mathbf{h}^{k}_i+(1-\lambda)*\mathbf{h}^{k}_j
 \\
-\tilde{\mathbf{y}}= (1-\lambda)*\mathbf{y}_0+\lambda*\mathbf{y}_1
+\tilde{\mathbf{y}}(\lambda)= \lambda*\mathbf{y}_i+(1-\lambda)*\mathbf{y}_j
 \\
-\text{L}_{mixup}(f_m\circ\cdots\circ f_{k},\mathbf{X}_0,\mathbf{y}_0,\mathbf{X}_1,\mathbf{y}_1)=\text{dist}(f_m\circ\cdots\circ f_{k}(\tilde{\mathbf{h}}^{k}),\tilde{\mathbf{y}})
+\text{L}_{mixup}(f_m\circ\cdots\circ f_{k},\mathbf{X}_i,\mathbf{y}_i,\mathbf{X}_j,\mathbf{y}_j)=\text{dist}(f_m\circ\cdots\circ f_{k}(\tilde{\mathbf{h}}^{k}(\lambda)),\tilde{\mathbf{y}}(\lambda)) 
+\end{cases}
+\tag{0}
 $$
 
 其中，$$\text{dist}$$函数可以用多种距离计算，如**norm-2**距离$$\Vert\cdot\Vert_2^2$$以及KL散度，而模型$$f_m\circ\cdots\circ f_{k}$$通过损失函数$$\text{L}_{mixup}$$计算梯度，通过梯度下降法进行更新。
@@ -41,10 +43,11 @@ $$
 
 正则化（Regularization）是深度学习中模型训练成功的关键。现有的正则化方法分为两种，一种是直接对模型施加显式的正则化约束，或者是利用数据增广的方法，通过数据层面对模型施加隐式正则化约束。显式的正则化约束包括：（1）对于参数施加惩罚，比如$$L_1,L_2$$正则化项，这往往在程序中采用*weight decay*的方法进行实现。（2）对于神经网络的表示空间（representation space）或是输出施加扰动或噪声，比如随机dropout，或分块dropout。（3）对于输出进行正则化，比如batch normalization，residual learning，或者是label smoothing（可以增加精度）。隐式正则化约束包括：（1）模型参数的共用（比如从全连接到CNN，出现了filter模块）。（2）优化算法的选择（比如SGD，Adam）。（3）数据增广方法。一般而言，显式的正则化帮助模型在鲁棒性与预测精度上取得优势，而隐式的正则化则增加模型的泛化性。一般而言，隐式正则化与显式正则化方法具有某种等效性，比如对数据施加噪声等价于岭回归$$(\mathbf{X}^T\mathbf{X}+\lambda \mathbf{I})^{-1}$$。此外，Dropout方法也与$$L_2$$正则化具有等价性。大量实验表明，**Mixup**方法可以提高模型对于对抗攻击的鲁棒性，同样可以提高模型的泛化能力和预测精度（ECE损失），但是它的原理却较难理解。一个很自然的想法是，**Mixup**能达成其他的正则化方法的优点，那么它们必然具有一定的等价性，将**Mixup**通过形式变换，如果能与其他正则化方法构建等价形式，就能够从理论上解释**Mixup**的作用。**On Mixup Regularization**[4]利用泰勒展开，将**Mixup**与*label-smoothing*，*Lipschitz*正则化，输入标准化（如$$\mathbf{X}-\bar{\mathbf{X}}$$)以及对输入的随机扰动(random perturbation)建立联系，对于**Mixup**进行理论分析。
 
+###  基于模型正则化的理论分析
+
 首先看**On Mixup Regularization**[4]的第一个定理。
 
 **Theorem 1. ** 对于**C**分类问题，记神经网络的输出为$$\mathbf{h}$$，标签为$$\mathbf{y}$$，基于*logsoftmax*的交叉熵损失为$$l(\mathbf{y},\mathbf{h})=\log{\sum_{i=1}^{C}\exp(\mathbf{h}_i)}-\mathbf{y}^T\mathbf{h}$$，对于有**N**个样本的训练集$$S=\{(\mathbf{X}_1,\mathbf{y}_1),\cdots,(\mathbf{X}_n,\mathbf{y}_n)\}$$，考虑随机变量$$\theta\sim\beta_{[\frac{1}{2},1]}(\alpha,\alpha),j\sim\text{Unif}([N])$$，基于**Mixup**方法的损失函数可以等价推导出如下形式：
-
 
 $$
 \xi^{\text{mixup}}(f)=\frac{1}{N}\sum_{i=1}^{N}\mathbb{E}_{\theta,j}l(\tilde{\mathbf{y_i}}+\epsilon_i,f(\tilde{\mathbf{X}}_i+\delta_i)) \tag{1}
@@ -218,6 +221,20 @@ $$
 
 注意到，如果预测概率$$S(\mathbf{h})_i$$过大，如最大的概率接近于1，最小的概率接近于0，那么$$H(\mathbf{h})$$中所有的项都会趋向于0，那么正则化效果就会消失，因此对于标签空间也进行**Mixup**可以防止预测过于自信，从而确保正则化有用，这就解释了为什么只对输入进行**Mixup**效果差，这是因为没有类似于*label-smoothing*的作用，**Mixup**的正则化效果消失了。
 
+### 基于流形学习的理论分析
+
+**Manifold Mixup**[2] 提出了上述公式$$(0)$$中所述的流形学习策略，相对应的，它将目标损失函数写成
+$$
+\xi^{\text{mixup}}(f)=\inf_{\mathbf{h}_0^k,\cdots,\mathbf{h}_{N}^{k}\in \mathcal{H}}\frac{1}{N(N-1)}\sum_{i,j=1;i\neq j}^{N}\inf_{f}\int_{0}^{1}\text{dist}(f_m\circ\cdots\circ f_{k}(\tilde{\mathbf{h}}^{k}(\lambda),\tilde{\mathbf{y}}(\lambda))d\lambda \tag{5}
+$$
+**Manifold Mixup**中的核心结论是，只要进行**mixup**的特征空间$$\mathcal{H}$$的维数大于$$C-1$$，那么我们就可以找到一个线性函数$$f_m\circ\cdots\circ f_{k}(\mathbf{h})=\mathbf{A}^T\mathbf{h}+\mathbf{b}$$，以及一个深度表征映射$$h=f_{k-1}\circ\cdots\circ f_{0}(\mathbf{X})$$，令目标损失函数为0。它的证明方法很简单，因为$$\text{dim}(\mathcal{H})\geq C-1$$，所以一定存在一个从$$\mathcal{H}$$到分类空间的映射，简单而言，存在$$\mathbf{A,H}\in\mathbb{R}^{\text{dim}(\mathcal{H}\times C)}$$，使得$$\mathbf{A}^T\mathbf{H}+\mathbf{b}\mathbf{1}_C^{T}=\mathbf{I}_{C\times C}$$。那么，我们只需要对于每一个属于第$$c$$类的样本$$\mathbf{X}_i$$，满足$$\mathbf{h}_i$$为矩阵$$\mathbf{H}$$的第$$c$$列就可以了，这样$$\mathbf{A}^T\mathbf{h}_i+\mathbf{b}\mathbf{1}_C^{T}=\mathbf{y}_i$$，此时目标损失函数$$\xi^{\text{mixup}}(f)=0$$。
+
+**Manifold Mixup**[2] 又指出，在这种条件下，所有数据点在表征空间（representation space）上都会落在一个维数为$$\text{dim}(\mathcal{H})-C+1$$的子流形上。这当然也很好理解，此时$$\mathbf{H}$$上的大部分表达都与$$C$$分类结果建立了联系，剩下的自由维数自然只有$$\text{dim}(\mathcal{H})-C+1$$维。然后**Manifold Mixup**[2] 得到了如下结论：首先，当**Mixup**损失函数$$\xi^{\text{mixup}}(f)$$最小为0时，所有数据的表征都在一个维数为$$\text{dim}(\mathcal{H})-C+1$$的子流形上，因此**Mixup**损失函数鼓励模型学习有效的分类表征。如果$$\text{dim}(\mathcal{H})=C-1$$，那么所有的数据都会映射到同一个点，这个点代表数据的分类。
+
+但是，笔者觉得**Manifold Mixup**的这一套说辞陷入了一个奇怪的逻辑循环。作者认为，当**Mixup**损失函数$$\xi^{\text{mixup}}(f)$$最小为0时，所有数据的表征都在一个维数为$$\text{dim}(\mathcal{H})-C+1$$的子流形上，因此证明了**Mixup**的正则化效果。但是上面的证明方式说明的是，如果我们能将所有的输入数据都按照它们对应的标签整齐地映射到$$\mathbf{H}$$中，此时**Mixup**损失函数为0，这并不能说明**Mixup**的正则化效果。实际上，对于任何一个分类问题，本质上都是学习一种**整齐的映射**。我们都希望神经网络能够学到将同一类数据映射到同一个表征上的能力，而表征和分类的对应关系学习则非常简单。因此，整个分类问题的关键应该是如何学到一个映射，能够将每一个属于第$$c$$类的样本$$\mathbf{X}_i$$，满足$$\mathbf{h}_i$$为某一固定矩阵$$\mathbf{H}$$的第$$c$$列，而由于输入是非常复杂的，这个映射是很难学到的，也是机器学习的基本问题。作者假设这个基本问题已经解决了，然后再进行一系列解释，这明显是一个循环论证。
+
+此外，笔者实现了**Manifold Mixup**[2]中的算法，见[我的Github](https://github.com/FengHZ/mixupfamily)，实践证明，相比于直接对输入进行**Mixup**，在特征空间进行**Mixup**需要消耗3倍的训练时间，此外，对于深层特征Mixup并不会增加最后的结果，一般对于输入和第一，第二个*maxpool*后的特征进行**Mixup**会取得较好的效果，而对于更深层的特征则不会有用。按照作者的推论，当$$\text{dim}(\mathcal{H})=C-1$$，**Mixup**的效果最好，这显然是不太对的。因此，我并不赞成本文的论证。但是**Manifold Mixup**[2]的实验做的还算完善，且在生成模型方面也做出了一些贡献。
+
 ## 现有Work的Mixup方法
 
 ### 模型正则化Mixup
@@ -225,6 +242,14 @@ $$
 ### 半监督学习Mixup
 
 ### 域迁移学习Mixup
+
+### 生成模型的Mixup
+
+**Manifold Mixup**[2]指出，可以用**Mixup**对**GAN**进行正则化。简单而言，对于**Fake Image** $$\mathbf{X}_f$$与**Real Image **$$\mathbf{X}_r$$，采用$$\tilde{\mathbf{X}}=\lambda \mathbf{X}_f+(1-\lambda)\mathbf{X}_r$$，标签为$$\tilde{\mathbf{y}}=(\lambda,1-\lambda)$$，我们可以用如下损失函数训练模型：
+$$
+\max_{G}\min_{D}\mathbb{E}_{\mathbf{X}}l(d(\mathbf{X}),1)+\mathbb{E}_{g(\mathbf{z})}l(d(g(\mathbf{z})),0)+\mathbb{E}_{\tilde{\mathbf{X}},\lambda}l(d(\tilde{\mathbf{X}}),\tilde{\mathbf{y}})
+$$
+注意，这个混合必须是跨域的，即对**Fake-to-Fake**与**Fake-to-Real**进行混合，而在**Real Image**这个域内，比如**Real-to-Real**的混合，进行**Mixup**反而会降低模型的生成效果，因为实际上**Real-to-Real**出的混合图像并不是**Real Image**，这也是值得研究的问题，但是总之这种混合对于生成模型的改善是有意义的。
 
 ## 参考文献
 
