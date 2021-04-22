@@ -224,9 +224,11 @@ $$
 ### 基于流形学习的理论分析
 
 **Manifold Mixup**[2] 提出了上述公式$$(0)$$中所述的流形学习策略，相对应的，它将目标损失函数写成
+
 $$
 \xi^{\text{mixup}}(f)=\inf_{\mathbf{h}_0^k,\cdots,\mathbf{h}_{N}^{k}\in \mathcal{H}}\frac{1}{N(N-1)}\sum_{i,j=1;i\neq j}^{N}\inf_{f}\int_{0}^{1}\text{dist}(f_m\circ\cdots\circ f_{k}(\tilde{\mathbf{h}}^{k}(\lambda),\tilde{\mathbf{y}}(\lambda))d\lambda \tag{5}
 $$
+
 **Manifold Mixup**中的核心结论是，只要进行**mixup**的特征空间$$\mathcal{H}$$的维数大于$$C-1$$，那么我们就可以找到一个线性函数$$f_m\circ\cdots\circ f_{k}(\mathbf{h})=\mathbf{A}^T\mathbf{h}+\mathbf{b}$$，以及一个深度表征映射$$h=f_{k-1}\circ\cdots\circ f_{0}(\mathbf{X})$$，令目标损失函数为0。它的证明方法很简单，因为$$\text{dim}(\mathcal{H})\geq C-1$$，所以一定存在一个从$$\mathcal{H}$$到分类空间的映射，简单而言，存在$$\mathbf{A,H}\in\mathbb{R}^{\text{dim}(\mathcal{H}\times C)}$$，使得$$\mathbf{A}^T\mathbf{H}+\mathbf{b}\mathbf{1}_C^{T}=\mathbf{I}_{C\times C}$$。那么，我们只需要对于每一个属于第$$c$$类的样本$$\mathbf{X}_i$$，满足$$\mathbf{h}_i$$为矩阵$$\mathbf{H}$$的第$$c$$列就可以了，这样$$\mathbf{A}^T\mathbf{h}_i+\mathbf{b}\mathbf{1}_C^{T}=\mathbf{y}_i$$，此时目标损失函数$$\xi^{\text{mixup}}(f)=0$$。
 
 **Manifold Mixup**[2] 又指出，在这种条件下，所有数据点在表征空间（representation space）上都会落在一个维数为$$\text{dim}(\mathcal{H})-C+1$$的子流形上。这当然也很好理解，此时$$\mathbf{H}$$上的大部分表达都与$$C$$分类结果建立了联系，剩下的自由维数自然只有$$\text{dim}(\mathcal{H})-C+1$$维。然后**Manifold Mixup**[2] 得到了如下结论：首先，当**Mixup**损失函数$$\xi^{\text{mixup}}(f)$$最小为0时，所有数据的表征都在一个维数为$$\text{dim}(\mathcal{H})-C+1$$的子流形上，因此**Mixup**损失函数鼓励模型学习有效的分类表征。如果$$\text{dim}(\mathcal{H})=C-1$$，那么所有的数据都会映射到同一个点，这个点代表数据的分类。
@@ -237,7 +239,19 @@ $$
 
 ## 现有Work的Mixup方法
 
+接下来，我们对现在比较常用的**Mixup**方法按它们的四个应用动机，即模型正则化、半监督学习、域迁移以及生成模型进行分类，并对已有工作进行综述，看看它们是怎么work（灌水）的。
+
 ### 模型正则化Mixup
+
+**AdaMixup**指出了一个现象，即进行**Mixup**的时候，可能混合样本与数据点会相撞，如下图所示：
+
+![AdaMixup](../../images/mixup/adamixup-1.png)
+
+经过**Mixup**后的图像会与数字8相撞，但是它们的标签则不是数字8，这会让模型的效果变糟。作者同样做了*Cifar100*上的实验，发现随着$$\lambda$$停留在$$0.5$$附近，效果就会变差，作者得出这种现象会令**Mixup**带来负影响，因此我们训练的时候应该避免这种现象。（但是我觉得这个论据有点扯淡，自然图像的**Mixup**怎么会和已有的样本撞了呢？你用*MNIST*的数据应该用*MNIST*的实验啊，用*Cifar100*的实验算怎么回事。）怎么避免呢？作者提出新增一个分类器网络，判断输入是**Mixup**的样本还是原始样本：
+
+![Adamixup-2](../../images/mixup/adamixup-2.png)
+
+然后训练一个自适应的$$\alpha,\lambda=\Delta\epsilon+\alpha$$，这个$$\alpha$$能够尽量保证进行**Mixup**不会和原数据点相撞。作者证明这种自适应策略能提点。
 
 ### 半监督学习Mixup
 
@@ -246,9 +260,11 @@ $$
 ### 生成模型的Mixup
 
 **Manifold Mixup**[2]指出，可以用**Mixup**对**GAN**进行正则化。简单而言，对于**Fake Image** $$\mathbf{X}_f$$与**Real Image **$$\mathbf{X}_r$$，采用$$\tilde{\mathbf{X}}=\lambda \mathbf{X}_f+(1-\lambda)\mathbf{X}_r$$，标签为$$\tilde{\mathbf{y}}=(\lambda,1-\lambda)$$，我们可以用如下损失函数训练模型：
+
 $$
 \max_{G}\min_{D}\mathbb{E}_{\mathbf{X}}l(d(\mathbf{X}),1)+\mathbb{E}_{g(\mathbf{z})}l(d(g(\mathbf{z})),0)+\mathbb{E}_{\tilde{\mathbf{X}},\lambda}l(d(\tilde{\mathbf{X}}),\tilde{\mathbf{y}})
 $$
+
 注意，这个混合必须是跨域的，即对**Fake-to-Fake**与**Fake-to-Real**进行混合，而在**Real Image**这个域内，比如**Real-to-Real**的混合，进行**Mixup**反而会降低模型的生成效果，因为实际上**Real-to-Real**出的混合图像并不是**Real Image**，这也是值得研究的问题，但是总之这种混合对于生成模型的改善是有意义的。
 
 ## 参考文献
