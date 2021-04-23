@@ -215,6 +215,7 @@ $$
 $$
 \xi^{\text{mixup}}_{Q}(f)=\frac{1}{N}\sum_{i=1}^{N}l^{\text{CE}}(\tilde{\mathbf{y_i}},f(\tilde{\mathbf{X}}_i))+R_1^{\text{CE}}(f)+R_2^{\text{CE}}(f)+R_3^{\text{CE}}(f)
 $$
+
 其中
 
 ![taylor-ce](../../images/mixup/taylor-CE.png)
@@ -253,9 +254,51 @@ $$
 
 然后训练一个自适应的$$\alpha,\lambda=\Delta\epsilon+\alpha$$，这个$$\alpha$$能够尽量保证进行**Mixup**不会和原数据点相撞。作者证明这种自适应策略能提点。
 
+**CutMix**[6]指出，传统的**Mixup**操作可以看成是一种信息混合。比如我们通过混合**0.9猫+0.1狗**的时候，本质上是把两张图中0.9和0.1的信息进行混合了。但是，对于图像而言，信息往往是连续的，因此相比于直接相加，用一张图像的部分连续信息去代替另一张图像的连续信息是在视觉角度更加*make sense*。**CutMix**[6]就是基于这种动机提出的，它的想法是，先选取一个$$\lambda$$，然后选择图像中面积比例刚好为$$\lambda$$的一片区域，选择两个图像，将它们的对应区域进行互换，而标签则为两张图像标签的加权和，如下图所述。
+
+![cutmix](../../images/mixup/cutmix.png)
+
+但是，**CutMix**[6]有一些缺陷，比如，如果裁剪的是图像的背景部分，那么**CutMix**并没有改变标签，但是我们仍然会按**Mixup**的方法计算标签，这会提供错误的标签。此外，**CutMix**仅仅对输入进行了**Mixup**，没有用上更好的**Manifold Mixup**[2]。后面的工作基于这两个改进方向提出了一些新的**Mixup**策略。
+
+**PatchUp**将**CutMix**[6]泛化到了特征空间，分为两步：首先，选择一个输出特征层，并从特征层中剪切出一些*feature block*，然后，对这些*feature block*进行**Mixup**。相比于**CutMix**[6]的直接替换，作者提出了一种*SoftMixup*方法，就是将要替换的*feature block*先单独拿出来进行**Mixup**，再填补原来的空间，如下图所示。
+
+![patchup](../../images/mixup/patchup.png)
+
+**PuzzleMix**[7]针对**CutMix**可能会**Mixup**背景这一问题，提出先对输入图像采用传统方法计算显著性信息，然后将信息密度最高的地方进行**CutMix**，从而改善最后的结果。
+
+此外，在联邦学习成为热门话题的现在，如何分布式地进行**Mixup**也是一个重要的研究方向。基于之前对**Mixup**方法进行的一些泰勒展开和泛化研究，**FedMix**[8]提出了联邦**Mixup**方法。它同样假设$$(1-\lambda)\rightarrow 0$$,此时我们忽视扰动$$\delta_i,\epsilon_i$$，将损失函数写为
+
+$$
+\xi^{\text{mixup}}(f)=\frac{1}{N}\sum_{i=1}^{N}\mathbb{E}_{\lambda}l(\lambda\mathbf{y}_i+(1-\lambda)\bar{\mathbf{y}}_j,f(\lambda\mathbf{X}_i+(1-\lambda)\bar{\mathbf{X}}_j))
+$$
+
+作者称之为**Mean Augmented Federated Learning (MAFL)**。因此，作者提出，我们只需要获得每一个client的$$\bar{\mathbf{X}}_j,\bar{\mathbf{y}}_j$$的信息，就可以进行**Mixup**。但是，这种方法需要在每一个*Batch*都对均值进行通信，这会泄露隐私，并且还会令通信的花销增大。所以作者又莫名其妙提出了一种替代损失，通过假设$$(1-\lambda)\rightarrow 0$$，损失函数
+
+$$
+l(\lambda\mathbf{y_i}+(1-\lambda)\mathbf{y_j},f(\lambda\mathbf{X_i}+(1-\lambda)\mathbf{X_j}))
+$$
+
+可以泰勒展开，对$$\lambda\mathbf{X_i}$$进行求导得到一阶泰勒展开为
+
+$$
+l(\lambda\mathbf{y}_i+(1-\lambda)\bar{\mathbf{y}}_j,f(\lambda\mathbf{X}_i))+（1-\lambda)\frac{\partial l}{\partial \mathbf{X}}*\bar{\mathbf{X}}_j
+$$
+
+作者称这种减少了计算开销的近似损失为**FedMix**。在联邦学习的环境下，**MAFL**和**FedMix**通过获得不同client在每一个*Batch*上的$$\bar{\mathbf{X}}_j,\bar{\mathbf{y}}_j$$的信息进行分布式**Mixup**，伪代码如下：
+
+![fedmix](../../images/mixup/fedmix.png)
+
 ### 半监督学习Mixup
 
+**Mixup**可以为半监督学习产出质量较高的伪标签，通过混合有标注和无标注的图像，并混合有标注的真实标签与模型对无标注图像的预测标签，**Mixup**可以学到无标注图像的监督信息。**ICT**[9] 首次提出了利用一致性损失进行半监督学习，损失函数为
+
+![ICT](../../images/mixup/ICT.png)
+
+**SHOT-VAE**[10]通过最佳运输理论，将输入空间的**Mixup**与**VAE**模型的因子分布建立联系，从而得到了更好的半监督自动编码器模型，并打破了**Good ELBO, Bad Inference**的瓶颈。
+
 ### 域迁移学习Mixup
+
+**Domain Adaptation**可以看作是源域有标签，目标域无标签的跨域半监督学习。基于这个思路，**Mixup**可以为目标域提供高质量的伪标签。 现有将**Mixup**用于域迁移学习的文献较少，一般与传统的域迁移方法配套使用，使用方式包括：（1）对抗训练+域内样本**Mixup**，如**Dual Mixup**[11]，**Virtual Mixup**[13]，将**Mixup**简单看作是正则化方法，用于增强模型学到的特征多样性；（2）联合使用用域内**Mixup**以及域间**Mixup**[12]，在进行域间**Mixup**的时候，对于无标注的目标域，采用多种方法获得样本的伪标签，通过伪标签与真标签的**Mixup**获得模型的预测目标，伪标签的获得是这一类方法成功的关键，文献[12]采用多种数据增广方法构造不同的模型推断，然后对这些推断做平均以获得伪标签，文献[14]采用知识蒸馏的方法，令$$\hat{p}_i=\frac{p_i^{0.1}}{\sum p_j^{0.1}}$$得到*smooth*过的标签；（3）使用类似于*Teacher-Student*的协同训练(Co-Training)训练多个分类器，然后用互相提供的标签与具有真实标签的样本混合，提供**Mixup**的伪标签。这种方法现在应用于半监督（Semi-supervised）域迁移中[15]，通过半监督学习与无监督学习训练两个分类器，然后利用彼此的标签提供**Mixup**的混合素材，最后利用一致性损失进行训练。这里**Mixup**所扮演的功能主要是降低伪标签的噪声。
 
 ### 生成模型的Mixup
 
@@ -267,6 +310,24 @@ $$
 
 注意，这个混合必须是跨域的，即对**Fake-to-Fake**与**Fake-to-Real**进行混合，而在**Real Image**这个域内，比如**Real-to-Real**的混合，进行**Mixup**反而会降低模型的生成效果，因为实际上**Real-to-Real**出的混合图像并不是**Real Image**，这也是值得研究的问题，但是总之这种混合对于生成模型的改善是有意义的。
 
+此外，**Mixup**还可以用于**VAE**和**GAN**混合的生成模型训练[5]，如下图所示，整个生成模型由一个**autoencoder**和一个**discriminator**组成。其中，**autoencoder**将输入$$\mathbf{X}$$映射到特征$$\mathbf{h}$$，并将特征$$\mathbf{h}$$通过解码器映射回原空间$$\tilde{\mathbf{X}}$$，用经典的重构损失进行训练，要求$$\mathbf{X},\tilde{\mathbf{X}}$$之间的距离尽量接近。**discriminator**则尽量区分$$\mathbf{X},\tilde{\mathbf{X}}$$，用二分类损失训练。此外，还要求**autoencoder**的生成结果能够迷惑**discriminator**。因为**autoencoder**是一个一对一生成，为了尽量让**discriminator**能够利用尽可能多的样本，文献[5]提出，对于两个特征$$\mathbf{h}_1,\mathbf{h}_2$$，可以通过在特征空间融合，得到$$\tilde{\mathbf{h}}_{mixup}$$，这种$$\tilde{\mathbf{h}}_{mixup}$$可以通过两种方式得到，一种是基于**Manifold Mixup**[2]，即
+
+$$
+\tilde{\mathbf{h}}_{mixup}=\lambda*\mathbf{h}_1+(1-\lambda)*\mathbf{h}_2
+$$
+
+另一种是基于**CutMix**[6],即先选一个$$\lambda$$，然后用$$\lambda$$构造一个伯努利分布$$\text{Bernoulli}(\lambda)$$，然后采样一个与$$\mathbf{h}$$相同维度的mask $$\mathbf{m}$$，得到
+
+$$
+\tilde{\mathbf{h}}_{mixup}=\mathbf{m}*\mathbf{h}_1+(1-\mathbf{m})*\mathbf{h}_2
+$$
+
+根据$$\tilde{\mathbf{h}}_{mixup}$$可以得到$$\tilde{\mathbf{X}}_{mixup}$$，利用$$\tilde{\mathbf{X}}_{mixup}$$可以训练**discriminator**与**autoencoder**。训练**discriminator**时，要求它能够将$$\tilde{\mathbf{X}}_{mixup}$$识别为*Fake*，而训练**autoencoder**时，要求尽量能够骗过**discriminator**，将$$\tilde{\mathbf{X}}_{mixup}$$识别为*Real*。
+
+![mixup-gan](../../images/mixup/mixup-gan-1.png)
+
+
+
 ## 参考文献
 
 [1] Zhang H, Cisse M, Dauphin Y N, et al. mixup: Beyond empirical risk minimization[J]. arXiv preprint arXiv:1710.09412, 2017.
@@ -276,3 +337,25 @@ $$
 [3] Guo H, Mao Y, Zhang R. Mixup as locally linear out-of-manifold regularization[C]//Proceedings of the AAAI Conference on Artificial Intelligence. 2019, 33(01): 3714-3722.
 
 [4] Carratino L, Cissé M, Jenatton R, et al. On mixup regularization[J]. arXiv preprint arXiv:2006.06049, 2020.
+
+[5] Beckham C, Honari S, Verma V, et al. On adversarial mixup resynthesis[J]. arXiv preprint arXiv:1903.02709, 2019.
+
+[6] Yun S, Han D, Oh S J, et al. Cutmix: Regularization strategy to train strong classifiers with localizable features[C]//Proceedings of the IEEE/CVF International Conference on Computer Vision. 2019: 6023-6032.
+
+[7] Kim J H, Choo W, Song H O. Puzzle mix: Exploiting saliency and local statistics for optimal mixup[C]//International Conference on Machine Learning. PMLR, 2020: 5275-5285.
+
+[8] Yoon T, Shin S, Hwang S J, et al. FEDMIX: APPROXIMATION OF MIXUP UNDER MEAN AUGMENTED FEDERATED LEARNING[J].
+
+[9] Verma V, Kawaguchi K, Lamb A, et al. Interpolation consistency training for semi-supervised learning[J]. arXiv preprint arXiv:1903.03825, 2019.
+
+[10] Feng H Z, Kong K, Chen M, et al. SHOT-VAE: Semi-supervised Deep Generative Models With Label-aware ELBO Approximations[J]. arXiv preprint arXiv:2011.10684, 2020.
+
+[11] Wu Y, Inkpen D, El-Roby A. Dual mixup regularized learning for adversarial domain adaptation[C]//European Conference on Computer Vision. Springer, Cham, 2020: 540-555.
+
+[12] Yan S, Song H, Li N, et al. Improve unsupervised domain adaptation with mixup training[J]. arXiv preprint arXiv:2001.00677, 2020.
+
+[13] Mao X, Ma Y, Yang Z, et al. Virtual mixup training for unsupervised domain adaptation[J]. arXiv preprint arXiv:1905.04215, 2019.
+
+[14] Sahoo A, Panda R, Feris R, et al. Select, Label, and Mix: Learning Discriminative Invariant Feature Representations for Partial Domain Adaptation[J]. arXiv preprint arXiv:2012.03358, 2020.
+
+[15] Deep Co-Training with Task Decomposition for Semi-Supervised Domain Adaptation.
