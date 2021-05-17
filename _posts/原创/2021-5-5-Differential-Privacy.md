@@ -42,25 +42,85 @@ $$
 
 基于这种方案，差分隐私要求对于任何查询，其输出都是概率的。在给出差分隐私的精确定义前，我们需要对随机算法进行一些定义。
 
-**定义1. （概率单纯形）** 给定一个数目有限的离散集$$B$$，我们可以将$$B$$看作是有限数量的互斥事件，定义$$B$$上的概率单纯形为$$\Delta(B)$$，满足
+**定义1. （概率单纯形）** 给定一个数目有限的离散集$$\mathcal{O}$$，我们可以将看$$\mathcal{O}$$作是有限数量的互斥事件，定义$$\mathcal{O}$$上的概率单纯形为$$\Delta(\mathcal{O})$$，满足
+$$
+\Delta(\mathcal{O})=\{\mathbf{x}\in\mathbb{R}^{\vert \mathcal{O}\vert}:x_i\geq0 \text{ and }\sum_{i=1}^{\vert \mathcal{O}\vert}x_i=1\}
+$$
+
+概率单纯形其实就是在事件集$$\mathcal{O}$$上所有可能的概率分布的集合，而每一个元素$$\mathbf{x}\in \Delta(\mathcal{O})$$就是一种可能的概率分布。基于**概率单纯形**，我们可以对随机算法进行如下的形式化定义：
+
+**定义2.（随机算法）** 记数据库中所有条目的集合为$$\mathcal{X}$$，则所有可能的子数据库构成的空间为$$\mathbb{N}^{\vert \mathcal{X}\vert}$$。随机算法$$\mathcal{M}$$将一个子数据库$$D\in \mathbb{N}^{\vert \mathcal{X}\vert}$$映射到离散集合$$\mathcal{O}$$的概率单纯形的一个可能分布上，即
 
 $$
-\Delta(B)=\{\mathbf{x}\in\mathbb{R}^{\vert B\vert}:x_i\geq0 \text{ and }\sum_{i=1}^{\vert B\vert}x_i=1\}
+\mathcal{M}:\mathbb{N}^{\vert \mathcal{X}\vert}\rightarrow \Delta(\mathcal{O})
 $$
 
-概率单纯形其实就是在$$B$$上所有可能的概率分布的集合，而每一个元素$$\mathbf{x}\in \Delta(B)$$就是一种可能的概率分布。基于**概率单纯形**，我们可以对随机算法进行如下的形式化定义：
+我们也称$$\mathcal{O}$$为随机算法$$\mathcal{M}$$的 **Range**，即$$\text{Range}(\mathcal{M})=\mathcal{O}$$。其中对于每一个可能作为算法输入的数据库$$D$$，随机算法$$\mathcal{M}$$先将其映射到一个概率分布，即对于任意$$D\in \mathbb{N}^{\vert \mathcal{X}\vert}$$，以及任意的$$o\in \mathcal{O}$$，随机算法$$\mathcal{M}(D)$$以$$(\mathcal{M}(D))_{o}$$的概率输出结果为$$o$$。
 
-**定义2.（随机算法）** 一个随机算法$$\mathcal{M}$$将一个**Database** $$D$$ 映射到一个离散集合$$B$$的概率分布上，即$$ \mathcal{M}:D\rightarrow \Delta(B)$$，我们也称$$B$$为随机算法$$\mathcal{M}$$的**Range**，即$$\text{Range}(\mathcal{M})=B$$。其中对于**Database** $$D$$提供的每一个算法输入$$d$$，随机算法$$\mathcal{M}$$先将其映射到一个概率分布，即对于任意$$b\in B$$，$$\mathcal{M}(d)$$以$$(\mathcal{M}(d))_{b}$$的概率输出结果为b。
+如何直观地理解**随机算法**呢？在数据分析过程中，**$$\mathcal{M}$$可以是某种模糊查询方法**。比如查询一群人的平均工资范围（如$$1k-2k,2k-3k,>3k$$），直接查询方法对输入的数据进行加和求均值，然后输出该均值对应的范围，而随机算法则是对均值再加一个噪声，然后输出加噪后结果对应的范围，这样如果工资均值是*1900*,噪声服从$$N(100,10)$$的正态分布，那么其回答将会大概以$$49.3\%$$的概率回答$$1k-2k$$，以$$50.7\%$$的概率回答剩下的选项。**$$\mathcal{M}$$还可以是从原始数据库到合成数据库的映射**，然后输出合成数据库中的查询结果，比如对原始数据库中的工资水平构建分布模型，然后从分布中采样生成相同大小的新数据库，并输出新数据库中的结果；**$$\mathcal{M}$$也可以是一系列输出为概率分布的机器学习算法**，以机器学习中的图像分类问题为例，此时$$\mathcal{M}$$通过带标注的图像数据库$$D$$进行训练，并对未知的图像进行预测，预测结果为分类概率。
 
-如何直观地理解**随机算法**呢？在数据分析过程中，$$\mathcal{M}$$可以是某种模糊查询方法，比如查询一群人的工资时，输出加一个噪声；可以是从原始数据库到合成数据库的映射，然后输出合成数据库中的查询结果；也可以是一系列输出为概率分布的机器学习算法，以机器学习中的图像分类问题为例，此时类别集合构成了$$B$$，分类概率的分布构成了$$\Delta(B)$$，对于每一个输入图像$$d$$，分类器$$\mathcal{M}$$输出$$d$$的分类概率。
+有了随机算法，我们还需要定义数据库之间的距离。一般用$$l_1\text{-norm}$$表示数据库之间的距离。对于两个数据库 $$D,D'\in \mathbb{N}^{\vert \mathcal{X}\vert}$$，我们定义它们的$$l_1$$距离$$\Vert D-D'\Vert _1$$为两个**Database**中不同的记录的个数。如果$$\Vert D-D'\Vert _1=1$$，我们就称$$D,D'$$为相邻数据集（**Neighboring Datasets**），此时$$D,D'$$只相差一个记录。差分隐私可以直观理解为，对于两个相似的**Database**，要求随机算法$$\mathcal{M}$$在两个**Database**上的表现也相似，它的形式化定义如下：
 
-有了随机算法，我们还需要定义数据集之间的距离。一般用$$l_1-\text{norm}$$表示**Database**之间的距离。对于两个**Database** $$D,D'$$，我们定义它们的$$l_1$$距离$$\Vert D-D'\Vert _1$$为两个**Database**中不同的记录的个数。如果$$\Vert D-D'\Vert _1=1$$，我们就称$$D,D'$$为相邻数据集（**Neighboring Datasets**），此时$$D,D'$$只相差一个记录。差分隐私可以直观理解为，对于两个相似的**Database**，要求随机算法$$\mathcal{M}$$在两个**Database**上的表现也相似，它的形式化定义如下：
+**定义3.（差分隐私）** 我们称$$\mathbb{N}^{\vert \mathcal{X}\vert}$$上的随机算法$$\mathcal{M}$$满足$$(\epsilon,\delta)\text{-differentially private}$$，如果对于所有的随机事件$$\mathcal{S}\subset \mathcal{O}$$，以及对于所有的相邻数据库$$D,D'\in \mathbb{N}^{\vert \mathcal{X}\vert}$$，满足
+
+$$
+\text{Pr}[\mathcal{M}(D)\in \mathcal{S}]\leq \exp(\epsilon)\text{Pr}[\mathcal{M}(D')\in \mathcal{S}]+\delta \tag{1}
+$$
+
+其中，如果$$\delta=0$$，我们就称随机算法$$\mathcal{M}$$满足$$\epsilon\text{-differentially private}$$。
+
+### 差分隐私的直观理解：假设检验与效用函数
+
+如何直观理解差分隐私呢？我们沿用文献[2,3]的思路，从假设检验与效用函数两个角度对差分隐私的定义进行分析。从式$$(1)$$中我们可以有一种印象，差分隐私要求每一条个人记录在所有的查询情况下，对于查询结果的影响都不能太大。换句话说，我们要求随机算法$$\mathcal{M}$$对于任意相邻数据集，都不能根据输出结果明确区分出这两个数据集，而这就是假设检验的方法。
+
+对于随机算法$$\mathcal{M}$$的任意输出$$Y$$，选择数据库$$D$$为原假设，选择$$D'$$为备择假设，我们可以将其进行形式化如下：
+
+$$
+H_0:Y \text{ came from D, i.e. }Y=\mathcal{M}(D)\\
+H_1:Y \text{ came from D', i.e. }Y=\mathcal{M}(D')
+$$
+
+将随机事件$$\mathcal{S}\subset \mathcal{O}$$看成是拒绝域，那么假设检验的第一类错误，即本应接受原假设但是拒绝的拒真错误（false alarm），其发生概率为$$P_{\text{FA}}(D,D',\mathcal{M},\mathcal{S})=\text{Pr}[\mathcal{M}(D)\in \mathcal{S}]$$，而假设检验的第二类错误，即本应拒绝原假设但是接受的存伪错误（missed detection)，其发生概率为$$P_{\text{MD}}(D,D',\mathcal{M},\mathcal{S})=\text{Pr}[\mathcal{M}(D’)\in \mathcal{O}-\mathcal{S}]$$（即如果拒绝原假设，那么实际上$$Y=\mathcal{M}(D')$$，而因为接受了原假设，说明该概率落在接受域$$\mathcal{O}-\mathcal{S}$$中）。利用第一类错误与第二类错误，我们可以得到如下差分隐私的等价假设检验形式：
+
+**定理1.（差分隐私的假设检验等价）** $$\forall \epsilon\geq 0,\delta\in[0,1]$$,随机算法$$\mathcal{M}$$满足$$(\epsilon,\delta)\text{-differentially private}$$当且仅当对于所有相邻数据库$$D,D'\in \mathbb{N}^{\vert \mathcal{X}\vert}$$，以及任意拒绝域$$\mathcal{S}\subset \mathcal{O}$$，满足
+
+$$
+P_{\text{FA}}(D,D',\mathcal{M},\mathcal{S})+\exp(\epsilon)P_{\text{MD}}(D,D',\mathcal{M},\mathcal{S})\geq1-\delta\\
+\exp(\epsilon)P_{\text{FA}}(D,D',\mathcal{M},\mathcal{S})+P_{\text{MD}}(D,D',\mathcal{M},\mathcal{S})\geq1-\delta
+$$
+
+证明：
+
+用差分隐私的基本性质，写出下面四条等式即可。
+
+$$
+\text{Pr}[\mathcal{M}(D)\in \mathcal{O}-\mathcal{S}]\leq e^{\epsilon}\text{Pr}[\mathcal{M}(D')\in \mathcal{O}-\mathcal{S}]+\delta\\
+\text{Pr}[\mathcal{M}(D')\in \mathcal{S}]\leq e^{\epsilon}\text{Pr}[\mathcal{M}(D)\in \mathcal{S}]+\delta\\
+\text{Pr}[\mathcal{M}(D)\in \mathcal{O}-\mathcal{S}]=1-P_{\text{FA}}(D,D',\mathcal{M},\mathcal{S})\\
+\text{Pr}[\mathcal{M}(D')\in \mathcal{S}]=1-P_{\text{MD}}(D,D',\mathcal{M},\mathcal{S})
+$$
+
+利用该等价形式，我们可以分别以$$P_{\text{FA}}$$，$$P_{\text{MD}}$$为坐标轴，画出差分隐私的可行隐私域
+
+$$
+\mathcal{R}(\epsilon,\delta)=\{(P_{\text{FA}},P_{\text{MD}})\vert P_{\text{FA}}(D,D',\mathcal{M},\mathcal{S})+e^{\epsilon}P_{\text{MD}}(D,D',\mathcal{M},\mathcal{S})\geq 1-\delta,\\e^{\epsilon}P_{\text{FA}}(D,D',\mathcal{M},\mathcal{S})+P_{\text{MD}}(D,D',\mathcal{M},\mathcal{S})\geq 1-\delta\}
+$$
+
+如下图所示。
+
+![dp-1](../../images/dp/dp-1.png)
 
 
 
+（加效用函数，局限性）
 
+### 差分隐私的基本性质：传递性与群体隐私
+
+### 差分隐私的性质总结
 
 ## References
 [1] Konečný J, McMahan B, Ramage D. Federated optimization: Distributed optimization beyond the datacenter[J]. arXiv preprint arXiv:1511.03575, 2015.
 
 [2] Dwork C, Roth A. The algorithmic foundations of differential privacy[J]. Foundations and Trends in Theoretical Computer Science, 2014, 9(3-4): 211-407.
+
+[3] Kairouz P, Oh S, Viswanath P. The composition theorem for differential privacy[C]//International conference on machine learning. PMLR, 2015: 1376-1385.
