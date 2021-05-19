@@ -83,7 +83,6 @@ $$
 将随机事件$$\mathcal{S}\subset \mathcal{O}$$看成是拒绝域，那么假设检验的第一类错误，即本应接受原假设但是拒绝的拒真错误（false alarm），其发生概率为$$P_{\text{FA}}(D,D',\mathcal{M},\mathcal{S})=\text{Pr}[\mathcal{M}(D)\in \mathcal{S}]$$，而假设检验的第二类错误，即本应拒绝原假设但是接受的存伪错误（missed detection)，其发生概率为$$P_{\text{MD}}(D,D',\mathcal{M},\mathcal{S})=\text{Pr}[\mathcal{M}(D’)\in \mathcal{O}-\mathcal{S}]$$（即如果拒绝原假设，那么实际上$$Y=\mathcal{M}(D')$$，而因为接受了原假设，说明该概率落在接受域$$\mathcal{O}-\mathcal{S}$$中）。利用第一类错误与第二类错误，我们可以得到如下差分隐私的等价假设检验形式：
 
 **定理1.（差分隐私的假设检验等价）** $$\forall \epsilon\geq 0,\delta\in[0,1]$$,随机算法$$\mathcal{M}$$满足$$(\epsilon,\delta)\text{-differentially private}$$当且仅当对于所有相邻数据库$$D,D'\in \mathbb{N}^{\vert \mathcal{X}\vert}$$，以及任意拒绝域$$\mathcal{S}\subset \mathcal{O}$$，满足
-
 $$
 P_{\text{FA}}(D,D',\mathcal{M},\mathcal{S})+\exp(\epsilon)P_{\text{MD}}(D,D',\mathcal{M},\mathcal{S})\geq1-\delta\\
 \exp(\epsilon)P_{\text{FA}}(D,D',\mathcal{M},\mathcal{S})+P_{\text{MD}}(D,D',\mathcal{M},\mathcal{S})\geq1-\delta
@@ -110,13 +109,65 @@ $$
 
 ![dp-1](../../images/dp/dp-1.png)
 
+通过以上等价形式的推导，我们从假设检验的角度对差分隐私进行了解释，得到了一个基本的直觉：差分隐私就是要求对于任意的相邻数据库，数据分析者无法仅通过输出结果对它们进行显著的区分。那么，这种“无法区分”的性质会带来什么好处呢？我们可以从效用函数的角度对该问题进行探讨。
 
+考虑数据库$$D$$中的某个个体$$i$$，我们记他在未来所有可能经历的事件集合为$$\Omega$$（譬如考研是否成功，就业是否顺利等），对于每一个事件，我们都可以认为该事件对于个体个体$$i$$具有某种可以量化的影响，也就是效用函数。我们记所有可能事件的效用函数为
 
-（加效用函数，局限性）
+$$
+u_i:\Omega\rightarrow \mathbb{R}_{\geq 0}
+$$
+
+对于满足$$(\epsilon,0)\text{-differentially private}$$的随机算法$$\mathcal{M}$$，数据分析者可以用它进行一次分析行为，记为$$\mathcal{M}(D)$$，如果这种分析行为会影响到个体的信息，也就是泄露了隐私，那么就会对未来的事件产生影响。例如，如果某个犯罪记录数据库泄露了，那么对该数据库的查询就可能会影响个体事业，我们记由于随机算法的查询$$\mathcal{M}(D)$$所导致的事件分布为$$f(\mathcal{M}(D))$$，所对应的概率分布为$$\text{Pr}_{f(\mathcal{M}(D))}[\omega],\omega\in \Omega$$，此时个体$$i$$的期望效用为
+
+$$
+\mathbb{E}_{\omega\sim f(\mathcal{M}(D))}[u_i(\omega)]=\sum_{\omega\in\Omega}u_i(\omega)\cdot\text{Pr}_{f(\mathcal{M}(D))}[\omega]
+$$
+
+此外，我们记除去个体$$i$$后所得数据库为$$D'$$，在这种情况下，由于个体并未参加数据分析的过程，因此个人隐私并未泄露，我们可以以此时的效用函数作为零隐私泄露的基准。通过同样的方法，我们计算通过相邻数据库$$D'$$的分析对于个体$$i$$的期望效用如下
+
+$$
+\mathbb{E}_{\omega\sim f(\mathcal{M}(D'))}[u_i(\omega)]==\sum_{\omega\in\Omega}u_i(\omega)\cdot\text{Pr}_{f(\mathcal{M}(D'))}[\omega]
+$$
+
+利用差分隐私性质，我们有
+
+$$
+\text{Pr}_{f(\mathcal{M}(D))}[\omega]\leq e^{\epsilon}\cdot\text{Pr}_{f(\mathcal{M}(D'))}[\omega]\\\text{Pr}_{f(\mathcal{M}(D'))}[\omega]\leq e^{\epsilon}\cdot\text{Pr}_{f(\mathcal{M}(D))}[\omega]
+$$
+
+因此可以得到
+
+$$
+e^{-\epsilon}\cdot \mathbb{E}_{\omega\sim f(\mathcal{M}(D'))}[u_i(\omega)] \leq\mathbb{E}_{\omega\sim f(\mathcal{M}(D))}[u_i(\omega)]\leq e^{\epsilon}\cdot \mathbb{E}_{\omega\sim f(\mathcal{M}(D'))}[u_i(\omega)]
+$$
+
+当$$\epsilon\rightarrow 0$$，我们利用极限$$e^\epsilon\approx (1+\epsilon)$$，可以得到当个体$$i$$参与数据分析过程与从未参数数据分析过程的效用函数在差分隐私约束下的关系：
+
+$$
+(1-\epsilon)\cdot \mathbb{E}_{\omega\sim f(\mathcal{M}(D'))}[u_i(\omega)] \leq\mathbb{E}_{\omega\sim f(\mathcal{M}(D))}[u_i(\omega)]\leq (1+\epsilon)\cdot \mathbb{E}_{\omega\sim f(\mathcal{M}(D'))}[u_i(\omega)] \tag{2}
+$$
+
+通过$$(2)$$式，我们可以从效用函数的角度理解差分隐私：虽然贡献自己的数据可能确实会导致自己面临一些伤害，但差分隐私保证了这种伤害的后果是可控的，个人的效用函数不会因他们的数据参与分析而显著增加。这种性质是非常实用的，因为数据的提供者往往无法控制数据库的其他内容，如果我们对隐私保护不加限制，那么个人对于自己的数据信息对自己可能造成的结果是未知的。而有了差分隐私，任何数据分析师都可以保证，对于任意的效用函数，个体预期的未来效用不会受到超过$$\epsilon$$水平的损害。当个人决定是否贡献自己的数据用于数据分析时，他们可以根据$$\epsilon$$的值来量化可能的损失，通过比较分享数据获得的激励，可以决定是否共享数据。
 
 ### 差分隐私的基本性质：传递性与群体隐私
 
-### 差分隐私的性质总结
+差分隐私是一个强大的隐私保护工具，但是要实现强差分隐私约束（即$$\epsilon,\delta\rightarrow 0$$）往往需要增加大量噪声。一般而言，数据的分析包括多个环节，如果在每个环节上都满足差分隐私约束，势必会令数据分析结果失真。差分隐私的传递性给出了一个强有力的断言：只要在数据分析的任何一个环节，随机算法$$\mathcal{M}$$满足$$(\epsilon,0)\text{-differentially private}$$，那么在仅用该环节的结果作为输入的任意之后的数据处理过程都满足$$(\epsilon,0)\text{-differentially private}$$，这就是差分隐私的传递性（Post-Processing）。
+
+**引理1.（差分隐私的传递性）**令$$\mathcal{M}:\mathbb{N}^{\vert \mathcal{X}\vert}\rightarrow \Delta(\mathcal{O})$$是一个满足$$(\epsilon,\delta)\text{-differentially private}$$ 的随机算法，令$$f:\Delta(\mathcal{O})\rightarrow \Delta(\mathcal{A})$$是一个任意的随机映射，那么随机算法$$f\circ \mathcal{M}:\mathbb{N}^{\vert \mathcal{X}\vert}\rightarrow \Delta(\mathcal{A})$$也满足$$(\epsilon,\delta)\text{-differentially private}$$。
+
+证明过程很简单，选择一个子集$$\mathcal{P}\subset \mathcal{A}$$，令$$\mathcal{T}=\{\mathcal{o}\in\mathcal{O}:f(\mathcal{o})\in P\}$$是映射到该子集的所有事件，那么
+$$
+\text{Pr}[f(\mathcal{M(D)})\in \mathcal{P}]=\text{Pr}[\mathcal{M(D)}\in \mathcal{T}]\\
+\leq e^{\epsilon}\cdot \text{Pr}[\mathcal{M(D')}\in \mathcal{T}]+\delta\\
+=e^{\epsilon}\cdot \text{Pr}[f(\mathcal{M(D')})\in \mathcal{P}]+\delta
+$$
+此外，注意到在之前的差分隐私都要求相邻数据库，即数据库$$D,D'$$之间往往只相差一个条目。但是，实践过程中数据往往是呈团、簇结构，也就是具有*Data Group*的性质。此时，我们有以下定理：
+
+**定理2.（群差分隐私）**令$$\mathcal{M}:\mathbb{N}^{\vert \mathcal{X}\vert}\rightarrow \Delta(\mathcal{O})$$是一个满足$$(\epsilon,0)\text{-differentially private}$$ 的随机算法，令数据库$$D,D'$$仅仅相差$$k$$个条目，即$$\Vert D-D'\Vert_1=k$$，那么，对于这种$$k$$-相邻数据库，随机算法$$\mathcal{M}$$满足$$(k\epsilon,0)\text{-differentially private}$$。
+
+该定理的证明过程是显然的，特别地，对于$$(\epsilon,0)\text{-differentially private}$$，对于$$k$$-相邻数据库满足$$(k\epsilon,ke^{(k-1)\epsilon}\delta)\text{-differentially private}$$。
+
+### 差分隐私的优势与局限性
 
 ## References
 [1] Konečný J, McMahan B, Ramage D. Federated optimization: Distributed optimization beyond the datacenter[J]. arXiv preprint arXiv:1511.03575, 2015.
