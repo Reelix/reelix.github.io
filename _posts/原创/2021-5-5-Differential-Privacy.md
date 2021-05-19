@@ -156,11 +156,13 @@ $$
 **引理1.（差分隐私的传递性）**令$$\mathcal{M}:\mathbb{N}^{\vert \mathcal{X}\vert}\rightarrow \Delta(\mathcal{O})$$是一个满足$$(\epsilon,\delta)\text{-differentially private}$$ 的随机算法，令$$f:\Delta(\mathcal{O})\rightarrow \Delta(\mathcal{A})$$是一个任意的随机映射，那么随机算法$$f\circ \mathcal{M}:\mathbb{N}^{\vert \mathcal{X}\vert}\rightarrow \Delta(\mathcal{A})$$也满足$$(\epsilon,\delta)\text{-differentially private}$$。
 
 证明过程很简单，选择一个子集$$\mathcal{P}\subset \mathcal{A}$$，令$$\mathcal{T}=\{\mathcal{o}\in\mathcal{O}:f(\mathcal{o})\in P\}$$是映射到该子集的所有事件，那么
+
 $$
 \text{Pr}[f(\mathcal{M(D)})\in \mathcal{P}]=\text{Pr}[\mathcal{M(D)}\in \mathcal{T}]\\
 \leq e^{\epsilon}\cdot \text{Pr}[\mathcal{M(D')}\in \mathcal{T}]+\delta\\
 =e^{\epsilon}\cdot \text{Pr}[f(\mathcal{M(D')})\in \mathcal{P}]+\delta
 $$
+
 此外，注意到在之前的差分隐私都要求相邻数据库，即数据库$$D,D'$$之间往往只相差一个条目。但是，实践过程中数据往往是呈团、簇结构，也就是具有*Data Group*的性质。此时，我们有以下定理：
 
 **定理2.（群差分隐私）**令$$\mathcal{M}:\mathbb{N}^{\vert \mathcal{X}\vert}\rightarrow \Delta(\mathcal{O})$$是一个满足$$(\epsilon,0)\text{-differentially private}$$ 的随机算法，令数据库$$D,D'$$仅仅相差$$k$$个条目，即$$\Vert D-D'\Vert_1=k$$，那么，对于这种$$k$$-相邻数据库，随机算法$$\mathcal{M}$$满足$$(k\epsilon,0)\text{-differentially private}$$。
@@ -168,6 +170,17 @@ $$
 该定理的证明过程是显然的，特别地，对于$$(\epsilon,0)\text{-differentially private}$$，对于$$k$$-相邻数据库满足$$(k\epsilon,ke^{(k-1)\epsilon}\delta)\text{-differentially private}$$。
 
 ### 差分隐私的优势与局限性
+
+正如我们在“吸烟引起癌症”示例中看到的，
+隐私是一个极其有力的保证，它不能保证无条件不受伤害。它也不会在以前不存在的地方创建隐私。更普遍地讲，差异性隐私并不能保证人们认为属于自己的秘密将保持秘密。它只是确保不会透露自己对调查的参与，也不会导致参与者参与调查的任何细节的披露。从调查中得出的结论很有可能反映出有关个人的统计信息。旨在发现特定疾病早期指标的健康调查可能会产生强有力甚至结论性的结果；这些结论适用于给定的个人，并不表示存在不同的隐私权侵害；个人甚至可能没有参加过调查（再次，差异隐私确保无论个人是否参加调查，都将以非常相似的概率获得这些结论性结果）。特别是，如果调查告诉我们特定的私有属性与公开可观察的属性密切相关，则这并不违反差异性隐私，因为这种相同的相关性将以几乎相同的概率独立于任何被调查者的存在或不存在而被观察到。
+
+防范任意风险，超越了针对重新识别的保护。
+
+自动消除链接攻击，包括尝试使用所有过去，现在和将来的数据集以及其他形式和辅助信息源进行的所有攻击。
+
+量化隐私损失。差异隐私不是二元概念，它具有一定程度的隐私损失。这允许在不同技术之间进行比较：对于固定的隐私丢失范围，哪种技术可以提供更好的准确性？为了达到固定的精度，哪种技术可以提供更好的保密性？
+
+作品。也许最关键的是，损失的量化还允许对多个计算中的累积隐私损失进行分析和控制。了解组成下的差分专用机制的行为，可以从较简单的差分专用构建块设计和分析复杂的差分专用算法。
 
 ## References
 [1] Konečný J, McMahan B, Ramage D. Federated optimization: Distributed optimization beyond the datacenter[J]. arXiv preprint arXiv:1511.03575, 2015.
