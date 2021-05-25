@@ -83,6 +83,7 @@ $$
 将随机事件$$\mathcal{S}\subset \mathcal{O}$$看成是拒绝域，那么假设检验的第一类错误，即本应接受原假设但是拒绝的拒真错误（false alarm），其发生概率为$$P_{\text{FA}}(D,D',\mathcal{M},\mathcal{S})=\text{Pr}[\mathcal{M}(D)\in \mathcal{S}]$$，而假设检验的第二类错误，即本应拒绝原假设但是接受的存伪错误（missed detection)，其发生概率为$$P_{\text{MD}}(D,D',\mathcal{M},\mathcal{S})=\text{Pr}[\mathcal{M}(D’)\in \mathcal{O}-\mathcal{S}]$$（即如果拒绝原假设，那么实际上$$Y=\mathcal{M}(D')$$，而因为接受了原假设，说明该概率落在接受域$$\mathcal{O}-\mathcal{S}$$中）。利用第一类错误与第二类错误，我们可以得到如下差分隐私的等价假设检验形式：
 
 **定理1.（差分隐私的假设检验等价）** $$\forall \epsilon\geq 0,\delta\in[0,1]$$,随机算法$$\mathcal{M}$$满足$$(\epsilon,\delta)\text{-differentially private}$$当且仅当对于所有相邻数据库$$D,D'\in \mathbb{N}^{\vert \mathcal{X}\vert}$$，以及任意拒绝域$$\mathcal{S}\subset \mathcal{O}$$，满足
+
 $$
 P_{\text{FA}}(D,D',\mathcal{M},\mathcal{S})+\exp(\epsilon)P_{\text{MD}}(D,D',\mathcal{M},\mathcal{S})\geq1-\delta\\
 \exp(\epsilon)P_{\text{FA}}(D,D',\mathcal{M},\mathcal{S})+P_{\text{MD}}(D,D',\mathcal{M},\mathcal{S})\geq1-\delta
