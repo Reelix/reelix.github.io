@@ -49,7 +49,9 @@ I am studying for a Ph.D. in the State Key Lab of CAD&CG at Zhejiang University.
 
 [2]. Feng HZ, Kong K, Chen M, et al. SHOT-VAE: Semi-supervised Deep Generative Models With Label-aware ELBO Approximations[J]. arXiv preprint arXiv:2011.10684, 2020. **Accepted for presentation at AAAI 2021.**
 
-[3] Feng H Z, You Z, Chen M, et al. KD3A: Unsupervised Multi-Source Decentralized Domain Adaptation via Knowledge Distillation[J]. arXiv preprint arXiv:2011.09757, 2020. **Accepted for presentation at ICML 2021.**
+[3] Feng HZ, You Z, Chen M, et al. KD3A: Unsupervised Multi-Source Decentralized Domain Adaptation via Knowledge Distillation[J]. arXiv preprint arXiv:2011.09757, 2020. **Accepted for presentation at ICML 2021.**
+
+[4] Zhang T\*,Feng HZ*, et al. ChartNavigator: An Interactive Pattern Identification and Annotation Framework for Charts[J]. **First co-author, accepted at IEEE TKDE (CCF-A Journal).**
 
 ****
 ### Contact Me
