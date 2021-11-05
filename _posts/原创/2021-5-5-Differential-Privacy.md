@@ -1,6 +1,6 @@
 ---
 layout: post
-title: An Introduction to the Differential Privacy on Deep Learning
+title: An Introduction to the Differential Privacy
 date: 2021-5-5 10:49:00
 categories: 机器学习
 tags: Differential Privacy, Deep Learning, Privacy
