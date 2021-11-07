@@ -118,7 +118,7 @@ $$
 c(\theta_{1:K},\mathcal{M}_{1:K},\theta_{0}:\theta_{K-1},d,d')=\log\Pi_{t=1}^{K}\frac{\mathcal{M}_t(\theta_{t-1},d)(\theta_t)}{\mathcal{M}_t(\theta_{t-1},d')(\theta_t)}=\sum_{t=1}^{K}c(\theta,\mathcal{M}_t)\tag{2}
 $$
 
-那么，如何利用隐私随机变量$$c(\theta,\mathcal{M}_t,\theta_{t-1},d,d')$$来刻画隐私损失呢？如何将其联系到差分隐私呢？如果在$$d,d'$$相邻数据集上训练机制的输出参数分布完全一致，那么对于任意的相邻数据集，$$c(\theta,\mathcal{M}_t,\theta_{t-1},d,d')$$的估计都应当趋向于0，也就是说随机变量$$c$$的一阶矩（$$\mathbb{E}_{\theta\sim \mathcal{M}_t(\theta_{t-1},d)}c(\theta,\mathcal{M}_t)$$），二阶矩（$$\mathbb{E}_{\theta\sim \mathcal{M}_t(\theta_{t-1},d)}c^2(\theta,\mathcal{M}_t)$$）以至n阶矩都应当在0附近。因此，考虑$$c(\theta,\mathcal{M}_t)$$的对数矩生成函数（Moment Generating Functions，基本介绍见附录）:
+那么，如何利用隐私随机变量$$c(\theta,\mathcal{M}_t,\theta_{t-1},d,d')$$来刻画隐私损失呢？如何将其联系到差分隐私呢？如果在$$d,d'$$相邻数据集上训练机制的输出参数分布完全一致，那么对于任意的相邻数据集，$$c(\theta,\mathcal{M}_t,\theta_{t-1},d,d')$$的估计都应当趋向于0，也就是说随机变量$$c$$的一阶矩（$$\mathbb{E}_{\theta\sim \mathcal{M}_t(\theta_{t-1},d)}c(\theta,\mathcal{M}_t)$$），二阶矩（$$\mathbb{E}_{\theta\sim \mathcal{M}_t(\theta_{t-1},d)}c^2(\theta,\mathcal{M}_t)$$）以至n阶矩都应当在0附近，因此我们可以用随机变量$$c$$的矩的大小来衡量隐私损失。考虑$$c(\theta,\mathcal{M}_t)$$的对数矩生成函数（Moment Generating Functions，基本介绍见附录）:
 
 $$
 K_{\mathcal{M}_t}^{d,d'}(\alpha):=\log\mathbb{E}_{\theta\sim \mathcal{M}_t(\theta_{t-1},d)}[\exp(\alpha c(\theta,\mathcal{M}_t,\theta_{t-1},d,d'))]\\
@@ -144,14 +144,53 @@ $$
 K_{\mathcal{M}_t}^{d,d'}(\alpha)=\alpha D_{\alpha+1}(\mathcal{M}_t(\theta_{t-1},d)\Vert \mathcal{M}_t(\theta_{t-1},d'))
 $$
 
-因此，$$K_{\mathcal{M}_t}(\alpha)$$可以与RDP进行直接联系，我们有：
+因此，$$K_{\mathcal{M}_t}(\alpha)$$可以与RDP进行直接联系，进而可以扩展到$$(\epsilon,\delta)-$$DP，我们有：
 
 **(Proposition 2 Moments Accountant and RDP)** 对于任意的$$\alpha\geq 0$$，在$$t$$时刻具有随机性的训练机制$$\mathcal{M}_t$$满足$$(\alpha+1,K_{\mathcal{M}_t}(\alpha)/\alpha)-$$RDP，而整个训练系统$$\mathcal{M}$$则至少具有$$(\alpha,\sum_{t=1}^K K_{\mathcal{M}_t}(\alpha)/\alpha)$$-RDP。
 
 **(Proposition 3 From Moments Accountant to $$(\epsilon,\delta)$$-DP)**
+利用**Proposition 1**中从RDP到DP的转换，以及**Proposition 2**中从Moments Accountant到 RDP的转换，我们有如下结论：
+1. 在$$t$$时刻具有随机性的训练机制$$\mathcal{M}_t$$满足$$(\frac{K_{\mathcal{M}_t}(\alpha)+\log(\frac{1}{\delta})}{\alpha},\delta)-$$DP
+2. 给定$$\delta$$，则最佳的$$\epsilon$$取值为： 
+    $$
+    \epsilon(\delta)=\min_{\alpha}\frac{K_{\mathcal{M}_t}(\alpha)+\log(\frac{1}{\delta})}{\alpha}
+    $$
+3. 给定$$\epsilon$$，则最佳的$$\delta$$取值为
+   $$
+   \delta = \min_{\alpha}\exp(K_{\mathcal{M}_t}(\alpha)-\alpha\epsilon)
+   $$
 
-**(Proposition 4 Calculations of Moments Accountant with Gaussian Mechanism)**
+在上文中，我们讨论了整个训练系统的差分隐私损失计算，并介绍了Moments Accountant这一具备很多良好性质的武器。但是，$$K_{\mathcal{M}_t}(\alpha)$$的计算需要遍历整个数据集，这种计算成本是不可接受的。此外，采样率在隐私计算中起到了隐私增幅，减小隐私损失的作用，这也需要在Moments Accountant的计算中得到广泛考虑。对于高斯噪声，文献[2]提出了一种广泛使用的计算Moments Accountant的方法，如下所述：
+**(Proposition 4. Calculations of Moments Accountant with Gaussian Mechanism)** 考虑具有随机Subsample的高斯机制，其中高斯机制的噪声乘子(*noise multiplier*)为$$z$$，梯度范围为$$C$$，因此高斯机制的方差为$$\sigma=z*C$$。记采样率为$$q$$，令$$\mu_0$$为分布$$\mathcal{N}(0,\sigma^2)$$的概率密度函数，$$\mu_1$$为分布$$\mathcal{N}(1,\sigma^2)$$的概率密度函数，令$$\mu=(1-q)\mu_0+q\mu_1$$，那么结合文献[2,5]的结论，我们有
 
+$$
+K_{\mathcal{M}_t}(\alpha)=\log \mathbb{E}_{z\sim \mu_0}[\mu(z)/\mu_0(z)]^\alpha\tag{3}
+$$
+
+注意到此时$$K_{\mathcal{M}_t}(\alpha)$$对于给定的采样率$$q$$以及噪声方差$$\sigma$$是一个固定的数值，这也就是说，对于任何的神经网络模型与任何数据集，采用基于Subsample的高斯机制的隐私损失的上界都是一样的。对于整数$$\alpha$$，$$(3)$$式可以写成
+
+$$
+\mathbb{E}_{z\sim \mu_0}[\mu(z)/\mu_0(z)]^\alpha=\mathbb{E}_{z\sim \mu_0}[(1-q)+q\frac{\mu_1(z)}{\mu_0(z)}]^\alpha\\
+=\sum_{k=0}^{\alpha}\tbinom{\alpha}{k}(1-q)^{\alpha-k}q^k[\frac{\mu_1(z)}{\mu_0(z)}]^k
+$$
+
+此时，对于任意正整数$$k$$，$$\mathbb{E}_{z\sim \mu_0}[\frac{\mu_1(z)}{\mu_0(z)}]^k$$具有解析解为
+
+$$
+\mathbb{E}_{z\sim \mu_0}[\frac{\mu_1(z)}{\mu_0(z)}]^k=\exp(\frac{k^2-k}{2\sigma^2})
+$$
+
+将其代入则可得到$$(3)$$的数值解。此外，文献[2]还给了一个近似上界，即
+
+$$
+K_{\mathcal{M}_t}(\alpha)\leq q^2\alpha(\alpha+1)/[(1-q)\sigma^2]+\mathcal{O}(q^3/\sigma^3)
+$$
+
+综上所述，对于一个使用高斯机制的深度学习训练系统，计算隐私损失大概可以分为三步：
+
+1. 确定给定的噪声乘子$$z$$，梯度裁剪系数$$C$$以及采样率$$q$$。
+2. 对某个范围的$$\alpha$$计算$$(3)$$式。一般而言，我们对所有的整数$$\alpha\in [2,32]$$，计算$$K_{\mathcal{M}_t}(\alpha)$$，并列表记录。
+3. 确定$$\delta$$的数值，一般为0.01，然后使用**Proposition 3**，对表中所有的$$(\alpha,K_{\mathcal{M}_t}(\alpha))$$对计算最佳的$$\epsilon$$，然后得出整个训练系统的隐私损失。
 
 ## Opacus库：基于Pytorch框架的隐私保护库
 
