@@ -47,7 +47,7 @@ $$
 **(Proposition 1. From RDP to DP)** RDP和DP可以进行直接转换，如果训练机制$$\mathcal{M}$$服从$$(\alpha,\epsilon)-$$RDP，那么对于所有的$$\delta,0<\delta<1$$，$$\mathcal{M}$$服从$$(\epsilon+\log(1/\delta)/\alpha-1,\delta)-$$DP。
 
 
-在深度学习的训练中，模型参数采用梯度下降法进行更新，即$$\theta_{t+1}\leftarrow \theta_{t}-\frac{\eta_t}{N}\sum_{i=1}^{N}\nabla_{\theta_t}\text{loss}(x_i,\theta_t)$$，并且$$\theta_0$$是随机初始化参数。梯度是利用输入数据直接进行计算的结果，也是模型参数进行更新的主要运算，因此在梯度上施加差分噪声是自然的事情。为了控制个体数据的影响，文献[1]利用高斯机制对梯度施加差分隐私。高斯机制的定义如下：
+在深度学习的训练中，模型参数采用梯度下降法进行更新，即$$\theta_{t}\leftarrow \theta_{t-1}-\frac{\eta_t}{N}\sum_{i=1}^{N}\nabla_{\theta_t}\text{loss}(x_i,\theta_{t-1})$$，并且$$\theta_0$$是随机初始化参数。梯度是利用输入数据直接进行计算的结果，也是模型参数进行更新的主要运算，因此在梯度上施加差分噪声是自然的事情。为了控制个体数据的影响，文献[1]利用高斯机制对梯度施加差分隐私。高斯机制的定义如下：
 
 **(Definition 3. Gaussian Mechanism)** 假设存在一个确定函数$$f:\mathcal{D}\rightarrow\mathcal{T}$$，敏感度为$$\Delta_2(f)=\max_{d,d'\in \mathcal{D}}\Vert f(d)-f(d')\Vert_2$$，那么对于任意的$$\delta\in(0,1)$$，给定随机噪声服从正态分布$$\mathcal{N}(0,\sigma^2)$$，那么随机算法$$\mathcal{M}(d)=f(d)+\mathcal{N}(0,\sigma^2)$$服从$$(\epsilon,\delta)-$$DP，其中
 
@@ -94,8 +94,63 @@ $$
 
 一般而言我们取$$\delta'=\delta$$。结合Subsample定理，当$$\epsilon\rightarrow 0$$时，Strong Composition给出了$$(\mathcal{O}(q\epsilon\sqrt{T\ln(1/\delta)},q(T+1)\delta)$$的隐私损失。但是这个隐私损失与$$\delta$$相关，当$$\delta$$很小时，该损失变得非常大。因此，文献[2]提出了一个在深度学习的训练过程中计算总隐私损失的有效方法，即矩会计方法（Moments Accountant），它将Composition的隐私损失界降低到了$$(q\epsilon\sqrt{T},\delta)$$，是广泛采用的隐私损失界。该隐私损失界的基本思想是将每一轮训练的隐私损失看成随机变量，而将总隐私损失看成是各轮随机变量的加和分布，通过计算随机变量的矩生成函数（moment generating function），得到更精准的隐私界。该方法最终可以归结为RDP的计算，并且在高斯机制下具有解析解，我们对其进行详细的介绍。
 
-### The Moments Accountant and RDP
+对于$$t$$时刻的训练机制$$\mathcal{M}_t$$，差分隐私的目标是令其在相邻数据库上得到的参数$$\theta_t$$的分布尽量相似，即对于所有的相邻训练集$$d,d'\in\mathcal{D}$$，要求
 
+$$
+\sup_{\theta\in\mathcal{T},d,d'}\vert\log\frac{\mathcal{M}_t(d)(\theta)}{\mathcal{M}_t(d')(\theta)}\vert \leq \epsilon
+$$
+
+因此，我们对$$\log\frac{\mathcal{M}_t(d)(\theta)}{\mathcal{M}_t(d')(\theta)}$$的性质展开研究。依据文献[2]的思路，$$t$$时刻的训练机制接收$$t-1$$时刻的参数$$\theta_{t-1}$$，采用随机梯度下降法在训练集上进行训练，因此我们如下定义随机变量$$c(\theta,\mathcal{M}_t,d,\theta_{t-1},d')$$为
+
+$$
+c(\theta,\mathcal{M}_t,\theta_{t-1},d,d')=\log\frac{\mathcal{M}_t(\theta_{t-1},d)(\theta)}{\mathcal{M}_t(\theta_{t-1},d')(\theta)},\theta\sim \mathcal{M}_t(\theta_{t-1},d)
+$$
+
+简写为$$c(\theta,\mathcal{M}_t)$$此时，对于由$$\mathcal{M}_1,\cdots,\mathcal{M}_{K}$$这K个训练机制所组成的训练系统$$\mathcal{M}_{1:K}$$。注意到训练机制在不同时刻间的输出参数分布独立：
+
+$$
+\Pr[\mathcal{M}_{t}(\theta_{t-1},d)=\theta_t\vert \mathcal{M}_{t-1}(\theta_{t-2},d)=\theta_{t-1}]=\Pr[\mathcal{M}_{t}(\theta_{t-1},d)=\theta_t]
+$$
+
+因此，训练系统$$\mathcal{M}_{1:K}$$的隐私随机变量可以由多个时刻的隐私随机变量的加和Composition来进行表示：
+
+$$
+c(\theta_{1:K},\mathcal{M}_{1:K},\theta_{0}:\theta_{K-1},d,d')=\log\Pi_{t=1}^{K}\frac{\mathcal{M}_t(\theta_{t-1},d)(\theta_t)}{\mathcal{M}_t(\theta_{t-1},d')(\theta_t)}=\sum_{t=1}^{K}c(\theta,\mathcal{M}_t)\tag{2}
+$$
+
+那么，如何利用隐私随机变量$$c(\theta,\mathcal{M}_t,\theta_{t-1},d,d')$$来刻画隐私损失呢？如何将其联系到差分隐私呢？如果在$$d,d'$$相邻数据集上训练机制的输出参数分布完全一致，那么对于任意的相邻数据集，$$c(\theta,\mathcal{M}_t,\theta_{t-1},d,d')$$的估计都应当趋向于0，也就是说随机变量$$c$$的一阶矩（$$\mathbb{E}_{\theta\sim \mathcal{M}_t(\theta_{t-1},d)}c(\theta,\mathcal{M}_t)$$），二阶矩（$$\mathbb{E}_{\theta\sim \mathcal{M}_t(\theta_{t-1},d)}c^2(\theta,\mathcal{M}_t)$$）以至n阶矩都应当在0附近。因此，考虑$$c(\theta,\mathcal{M}_t)$$的对数矩生成函数（Moment Generating Functions，基本介绍见附录）:
+
+$$
+K_{\mathcal{M}_t}^{d,d'}(\alpha):=\log\mathbb{E}_{\theta\sim \mathcal{M}_t(\theta_{t-1},d)}[\exp(\alpha c(\theta,\mathcal{M}_t,\theta_{t-1},d,d'))]\\
+=\log\mathbb{E}_{\theta\sim \mathcal{M}_t(\theta_{t-1},d)}[\frac{\mathcal{M}_t(\theta_{t-1},d)(\theta)}{\mathcal{M}_t(\theta_{t-1},d')(\theta)}]^\alpha\\
+=\log \mathbb{E}_{\theta\sim \mathcal{M}_t(\theta_{t-1},d')}[\frac{\mathcal{M}_t(\theta_{t-1},d)(\theta)}{\mathcal{M}_t(\theta_{t-1},d')(\theta)}]^{\alpha+1}
+$$
+
+此外，利用$$(2)$$式的独立性，当对由$$K$$个训练轮次构成的训练系统$$\mathcal{M}$$而言，它的对数矩生成函数也具有求和性质，即
+
+$$
+K_{\mathcal{M}}^{d,d'}(\alpha)=\sum_{t=0}^{K}K_{\mathcal{M}_t}^{d,d'}(\alpha)
+$$
+
+因为差分隐私界需要遍历所有的相邻数据集$$d,d'\in \mathcal{D}$$，因此我们记
+
+$$
+K_{\mathcal{M}_t}(\alpha)=\sup_{d,d'\in \mathcal{D}}K_{\mathcal{M}_t}^{d,d'}(\alpha)
+$$
+
+利用最大值的性质，我们有$$K_{\mathcal{M}}(\alpha)\leq \sum_{t=0}^{K}K_{\mathcal{M}_t}(\alpha)$$。此外，注意到
+
+$$
+K_{\mathcal{M}_t}^{d,d'}(\alpha)=\alpha D_{\alpha+1}(\mathcal{M}_t(\theta_{t-1},d)\Vert \mathcal{M}_t(\theta_{t-1},d'))
+$$
+
+因此，$$K_{\mathcal{M}_t}(\alpha)$$可以与RDP进行直接联系，我们有：
+
+**(Proposition 2 Moments Accountant and RDP)** 对于任意的$$\alpha\geq 0$$，在$$t$$时刻具有随机性的训练机制$$\mathcal{M}_t$$满足$$(\alpha+1,K_{\mathcal{M}_t}(\alpha)/\alpha)-$$RDP，而整个训练系统$$\mathcal{M}$$则至少具有$$(\alpha,\sum_{t=1}^K K_{\mathcal{M}_t}(\alpha)/\alpha)$$-RDP。
+
+**(Proposition 3 From Moments Accountant to $$(\epsilon,\delta)$$-DP)**
+
+**(Proposition 4 Calculations of Moments Accountant with Gaussian Mechanism)**
 
 
 ## Opacus库：基于Pytorch框架的隐私保护库
@@ -156,7 +211,30 @@ $$
 4. 在相同的隐私损失下，RDP能够添加更小的噪声，使得查询更加准确。
 
 
+## Appendix：Moment Generating Functions
+一个随机变量$$X$$的矩生成函数$$K_X(\alpha)$$定义为
 
+$$
+K_X(\alpha)=\mathbb{E}[e^{\alpha X}]
+$$
 
+注意到
 
+$$
+e^{\alpha X}=\sum_{k=0}^{\infty}\frac{(\alpha X)^k}{k!}
+$$
 
+因此
+
+$$
+K_X(\alpha)=\sum_{k=0}^{\infty}\mathbb{E}[X^k]\frac{\alpha^k}{k!};\\
+\mathbb{E}[X^k]=\frac{d^k}{d \alpha^k}K_X(\alpha)\vert_{\alpha=0}
+$$
+
+如果$$\mathbb{E}[X^k]\rightarrow 0$$，那么$$K_X(\alpha)$$对于所有足够大的$$\alpha$$都趋向于0。
+
+矩生成函数一般用于计算多个独立随机变量的和的分布，如果$$Y=\sum_{t=0}^{K}X_t$$，那么$$K_{Y}(\alpha)=\Pi_{t=0}^{K}K_{X_t}(\alpha)$$，即有
+
+$$
+\log K_{Y}(\alpha)=\sum_{t=0}^{K}\log K_{X_t}(\alpha)
+$$
