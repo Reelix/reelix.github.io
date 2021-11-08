@@ -203,8 +203,8 @@ $$
 
 文献[2]在MNIST和Cifar上都进行了实验，比较基于Moments Accountant的方法与Strong Composition定理在隐私界上的扩展，以及各个参数对模型性能的影响，如下所述：
 
-![4](../../images/differential_privacy_dl/4.PNG)
-![5](../../images/differential_privacy_dl/5.PNG)
+![4](../../images/differential_privacy_dl/4.png)
+![5](../../images/differential_privacy_dl/5.png)
 
 ## Opacus库：基于Pytorch框架的隐私保护库
 Opacus是一个高性能，高速的用于训练具有差分隐私的PyTorch模型的函数库。Opacus库提供了主要类函数`PrivacyEngine`，作用于**Pytorch**中提供的优化器`optimizer`上，主要代码如下所示：
@@ -292,7 +292,7 @@ TBD。
 
 在这两种场景中，Bad Case的RDP总是接近Lowerbound，而Good Case的RDP则比上界要低很多很多，这告诉我们，对于具体的数据集，它的实际隐私损失要大大小于计算出的上界。因此，如何做modle specific，data specific的隐私保护是一个值得研究的问题。实际上，[PATE（Private Aggregation of Teacher Ensembles](https://arxiv.org/abs/1802.08908)等框架利用一部分有标签数据与大量无标签数据进行半监督学习，在多个模型上进行知识蒸馏，可以大大减小隐私损失。**在下一期隐私保护+深度学习的专题研讨中，我们将对这些Data Specific, Model Specific的先进隐私保护方法进行介绍。**
 
-![6](../../images/differential_privacy_dl/6.PNG)
+![6](../../images/differential_privacy_dl/6.png)
 
 ## Appendix：Rényi 散度的基本性质与RDP的比较优势
 **(Rényi Divergence).** 给定两个满足离散分布的随机变量$$\mathbf{X}$$和$$\mathbf{Y}$$，它们具有 $$n$$ 个可能的值，每个值分别具有正概率 $$p_i$$ 和$$ q_i$$，随机变量$$\mathbf{X}$$和$$\mathbf{Y}$$的 Rényi 散度定义为
