@@ -207,10 +207,76 @@ $$
 ![5](../../images/differential_privacy_dl/5.PNG)
 
 ## Opacus库：基于Pytorch框架的隐私保护库
-Opacus是一个高性能，高速的用于训练具有差分隐私的PyTorch模型的函数库。
+Opacus是一个高性能，高速的用于训练具有差分隐私的PyTorch模型的函数库。Opacus库提供了主要类函数`PrivacyEngine`，作用于**Pytorch**中提供的优化器`optimizer`上，主要代码如下所示：
+```
 
+model = Net()
+optimizer = torch.optim.SGD(model.parameters(), lr=0.05)
+privacy_engine = PrivacyEngine(
+   model,
+   batch_size=32,
+   sample_size=len(train_loader.dataset),
+   alphas=range(2,32),
+   noise_multiplier=1.3,
+   max_grad_norm=1.0,
+)
+privacy_engine.attach(optimizer)
+```
+其中，`PrivacyEngine`以`torch.Module`作为模型输入，设置`batch size`与`sample size`，其中`batch size`是记录梯度的最小训练数据数目，而`sample size`是模型更新的最小数据数目。alpha是RDP中所使用的$$\alpha$$，也是计算Moments Accountant所用的$$\alpha$$范围，如上文中所述，主要取$$\alpha\in [2,32]$$；noise_multiplier是高斯机制中的$$\frac{\sigma}{C}$$；max_grad_norm是梯度裁剪范围$$C$$。
+
+此外，为了计算隐私开销，Opacus提供了`get_privacy_spent`函数，它在给定$$\delta$$后，利用Moments Accountant遍历$$\alpha$$，计算最佳的$$\epsilon$$，并给出此时$$\alpha$$的取值：
+```
+epsilon, best_alpha = optimizer.privacy_engine.get_privacy_spent(delta) 
+```
+训练过程主要采用高斯噪声对梯度进行加噪，噪声方差为$$\text{noise-multiplier}*\text{max-grad-norm}$$，生成函数如下所示：
+```
+def _generate_noise(
+    engine, max_grad_norm: float, grad: torch.Tensor
+) -> torch.Tensor:
+    if engine.noise_multiplier > 0 and max_grad_norm > 0:
+        return torch.normal(
+            0,
+            engine.noise_multiplier * max_grad_norm,
+            grad.shape,
+            device=engine.device,
+            generator=engine.random_number_generator,
+        )
+    return torch.zeros(grad.shape, device=engine.device)
+```
+在每次梯度计算中，对计算后的梯度进行裁剪并增加高斯噪声，函数如下：
+```
+def step(self, is_empty: bool = False):
+    """
+    Takes a step for the privacy engine.
+    Args:
+        is_empty: Whether the step is taken on an empty batch
+            In this case, we do not call clip_and_accumulate since there are no
+            per sample gradients.
+    Notes:
+        You should not call this method directly. Rather, by attaching your
+        ``PrivacyEngine`` to the optimizer, the ``PrivacyEngine`` would have
+        the optimizer call this method for you.
+    """
+    self.steps += 1
+    params = (p for p in self.module.parameters() if p.requires_grad)
+    for p, clip_value in zip(params, clip_values):
+        if self.rank == 0:
+            # Noise only gets added on first worker
+            # This is easy to reason about for loss_reduction=sum
+            # For loss_reduction=mean, noise will get further divided by
+            # world_size as gradients are averaged.
+            noise = self._generate_noise(clip_value, p.grad)
+            if self.loss_reduction == "mean":
+                noise /= batch_size
+            p.grad += noise
+
+        # For poisson, we are not supposed to know the batch size
+        # We have to divide by avg_batch_size instead of batch_size
+        if self.poisson and self.loss_reduction == "mean":
+            p.grad *= batch_size / self.avg_batch_size
+```
 ## PySyft + Opacus：结合差分隐私与联邦学习
-
+TBD。
 ## 我们能做的开放性问题
 
 在本节中，我们主要介绍了以高斯机制作为噪声来源，以Moments Accountant作为隐私损失估计的差分隐私深度学习训练系统。但是，这套方法所给出的隐私损失与具体的数据集或是模型都无关，可以看作是任意数据集与任意模型上的一个隐私损失上界。而在实际的应用场景中，考虑特定的数据与特定的模型，我们往往可以设计隐私损失更小的训练方法。文献[4]为基于RDP的差分隐私损失设计了一个上界和一个下界，并巧妙设计了两个数据集场景：
