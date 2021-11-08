@@ -21,7 +21,7 @@ mathjax: true
 4. [Subsampled Rényi Differential Privacy and Analytical Moments Accountant](https://arxiv.org/abs/1808.00087)
 5. [Rényi Differential Privacy of the Sampled Gaussian Mechanism](https://arxiv.org/abs/1908.10530)
 6. [The Composition Theorem for Differential Privacy](http://proceedings.mlr.press/v37/kairouz15.html)
-   
+7. [Introducing Opacus: A high-speed library for training PyTorch models with differential privacy](https://ai.facebook.com/blog/introducing-opacus-a-high-speed-library-for-training-pytorch-models-with-differential-privacy/)
 
 
 ## 差分隐私深度学习系统的基本框架
@@ -63,7 +63,7 @@ $$
 
 完整算法如下图所述：
 
-![1](/images/differential_privacy_dl/1.PNG)
+![1](../../images/differential_privacy_dl/1.PNG)
 
 模型一共进行了$$T$$轮训练，在每轮训练中，对训练集的每一个样本计算梯度，进行裁剪加噪，最后用满足差分隐私的梯度$$\tilde{\mathbf{g}}_t$$进行参数更新。当$$z$$满足$$(1)$$中所述的条件时，对于第$$t$$轮所选择的训练集，所得的参数$$\theta_{t+1}$$满足$$(\epsilon,\delta)-$$DP。注意到该算法引入了一个新的过程，子采样(subsample)，即在每一轮的训练集是整个训练集的一个子集，通过概率为$$q=L/N$$的不放回采样进行选取。一个普遍的结论是，随着采样率的增加，训练时长变为$$1/q$$倍，但是隐私界与$$q^2$$成正比，因此subsample操作可以用采样率对差分隐私进行amplify，从而降低隐私损失。此外，由于模型要进行$$T$$轮训练，如何计算$$T$$轮训练的总和隐私损失也是一个关键问题。我们就Subsample与Composition两个问题进行描述。
 
@@ -78,9 +78,9 @@ $$
 
 对于**Rényi Differential Privacy**，文献[3,4,5]都对高斯机制的Subsample进行了研究，提出了更紧的基于Subsample的隐私损失，如下所述：
 
-![2](/images/differential_privacy_dl/2.PNG)
+![2](../../images/differential_privacy_dl/2.PNG)
 
-![3](/images/differential_privacy_dl/3.PNG)
+![3](../../images/differential_privacy_dl/3.PNG)
 
 在这些Bound中，某些情况下$$\epsilon'$$会成为$$q^2\epsilon$$的小阶，这大大减少了隐私损失。
 
@@ -160,6 +160,15 @@ $$
    \delta = \min_{\alpha}\exp(K_{\mathcal{M}_t}(\alpha)-\alpha\epsilon)
    $$
 
+利用**Proposition 3**，我们可以从概率角度对差分隐私进行新的理解：给定相邻数据集$$d,d'$$，记$$c(\theta,\mathcal{M}_t)$$为关联隐私损失的随机变量，则整个训练过程的差分损失随机变量为$$c(\theta,\mathcal{M})=\sum_{t=1}^{K}c(\theta,\mathcal{M}_t)$$，此时对于满足**Proposition 3**要求的$$(\epsilon,\delta)$$，我们有
+
+$$
+\Pr[c(\theta,\mathcal{M})>\epsilon]=\Pr[\exp(\alpha c(\theta,\mathcal{M}))>\exp(\alpha\epsilon)]\\
+\leq(\text{Markov不等式})\frac{\mathbb{E}[\exp(\alpha c(\theta,\mathcal{M}))]}{\exp(\alpha\epsilon)}=\delta
+$$
+
+也就是说，此时$$(\epsilon,\delta)-$$DP可以理解为，整个训练过程的差分损失随机变量为$$c(\theta,\mathcal{M})$$大于$$\epsilon$$的概率小于$$\delta$$。
+
 在上文中，我们讨论了整个训练系统的差分隐私损失计算，并介绍了Moments Accountant这一具备很多良好性质的武器。但是，$$K_{\mathcal{M}_t}(\alpha)$$的计算需要遍历整个数据集，这种计算成本是不可接受的。此外，采样率在隐私计算中起到了隐私增幅，减小隐私损失的作用，这也需要在Moments Accountant的计算中得到广泛考虑。对于高斯噪声，文献[2]提出了一种广泛使用的计算Moments Accountant的方法，如下所述：
 **(Proposition 4. Calculations of Moments Accountant with Gaussian Mechanism)** 考虑具有随机Subsample的高斯机制，其中高斯机制的噪声乘子(*noise multiplier*)为$$z$$，梯度范围为$$C$$，因此高斯机制的方差为$$\sigma=z*C$$。记采样率为$$q$$，令$$\mu_0$$为分布$$\mathcal{N}(0,\sigma^2)$$的概率密度函数，$$\mu_1$$为分布$$\mathcal{N}(1,\sigma^2)$$的概率密度函数，令$$\mu=(1-q)\mu_0+q\mu_1$$，那么结合文献[2,5]的结论，我们有
 
@@ -186,29 +195,54 @@ $$
 K_{\mathcal{M}_t}(\alpha)\leq q^2\alpha(\alpha+1)/[(1-q)\sigma^2]+\mathcal{O}(q^3/\sigma^3)
 $$
 
-综上所述，对于一个使用高斯机制的深度学习训练系统，计算隐私损失大概可以分为三步：
+综上所述，对于一个使用高斯机制的深度学习训练系统，计算隐私损失大概可以分为三步（这也是Tensorflow的Moments Accountant官方库中的计算方法）：
 
 1. 确定给定的噪声乘子$$z$$，梯度裁剪系数$$C$$以及采样率$$q$$。
 2. 对某个范围的$$\alpha$$计算$$(3)$$式。一般而言，我们对所有的整数$$\alpha\in [2,32]$$，计算$$K_{\mathcal{M}_t}(\alpha)$$，并列表记录。
 3. 确定$$\delta$$的数值，一般为0.01，然后使用**Proposition 3**，对表中所有的$$(\alpha,K_{\mathcal{M}_t}(\alpha))$$对计算最佳的$$\epsilon$$，然后得出整个训练系统的隐私损失。
 
+文献[2]在MNIST和Cifar上都进行了实验，比较基于Moments Accountant的方法与Strong Composition定理在隐私界上的扩展，以及各个参数对模型性能的影响，如下所述：
+
+![4](../../images/differential_privacy_dl/4.PNG)
+![5](../../images/differential_privacy_dl/5.PNG)
+
 ## Opacus库：基于Pytorch框架的隐私保护库
+Opacus是一个高性能，高速的用于训练具有差分隐私的PyTorch模型的函数库。
 
 ## PySyft + Opacus：结合差分隐私与联邦学习
 
 ## 我们能做的开放性问题
 
+在本节中，我们主要介绍了以高斯机制作为噪声来源，以Moments Accountant作为隐私损失估计的差分隐私深度学习训练系统。但是，这套方法所给出的隐私损失与具体的数据集或是模型都无关，可以看作是任意数据集与任意模型上的一个隐私损失上界。而在实际的应用场景中，考虑特定的数据与特定的模型，我们往往可以设计隐私损失更小的训练方法。文献[4]为基于RDP的差分隐私损失设计了一个上界和一个下界，并巧妙设计了两个数据集场景：
 
-现在的隐私保护都与数据，模型独立。如何做modle specific，data specific的隐私保护呢？
+1. Bad Case，在这种场景中，总是存在两个相邻数据集 $$d,d'$$，在$$d$$中，对n个数据的查询结果都是$$-\frac{1}{2}$$，在$$d'$$中，对前n-1个数据的查询结果是$$-\frac{1}{2}$$，而对$$n$$的查询是$$\frac{1}{2}$$，此时我们有
+
+    $$
+    \mathcal{M}(d')\sim \mathcal{N}(-\frac{1}{2}+\frac{1}{n},\frac{n-1}{n^2 \vert J\vert}+\frac{\sigma^2}{\vert J\vert^2})\\
+    \mathcal{M}(d)\sim \mathcal{N}(-\frac{1}{2},\frac{\sigma^2}{\vert J\vert^2})\\
+    $$
+
+    因此当$$\alpha$$较大时，这两个差分隐私数据集的Rényi 散度是无穷。
+2. Good Case，在这种场景中，前一半数据的查询结果总是$$-\frac{1}{2}$$，后一半总是$$\frac{1}{2}$$，此时Rényi 散度较小。
+
+在这两种场景中，Bad Case的RDP总是接近Lowerbound，而Good Case的RDP则比上界要低很多很多，这告诉我们，对于具体的数据集，它的实际隐私损失要大大小于计算出的上界。因此，如何做modle specific，data specific的隐私保护是一个值得研究的问题。实际上，[PATE（Private Aggregation of Teacher Ensembles](https://arxiv.org/abs/1802.08908)等框架利用一部分有标签数据与大量无标签数据进行半监督学习，在多个模型上进行知识蒸馏，可以大大减小隐私损失。**在下一期隐私保护+深度学习的专题研讨中，我们将对这些Data Specific, Model Specific的先进隐私保护方法进行介绍。**
+
+![6](../../images/differential_privacy_dl/6.PNG)
 
 ## Appendix：Rényi 散度的基本性质与RDP的比较优势
 **(Rényi Divergence).** 给定两个满足离散分布的随机变量$$\mathbf{X}$$和$$\mathbf{Y}$$，它们具有 $$n$$ 个可能的值，每个值分别具有正概率 $$p_i$$ 和$$ q_i$$，随机变量$$\mathbf{X}$$和$$\mathbf{Y}$$的 Rényi 散度定义为
-
 $$
 D_{\alpha}(\mathbf{X}\Vert \mathbf{Y})=\frac{1}{\alpha-1} \log \left(\sum_{i=1}^{n} \frac{p_{i}^{\alpha}}{q_{i}^{\alpha-1}}\right)
 $$
 
 其中$$\alpha > 0$$并且$$\alpha \neq 1$$。
+
+扩展到两个离散分布$$p(\mathbf{X}),q(\mathbf{X})$$，其Rényi 散度定义为
+
+$$
+D_{\alpha}(p(\mathbf{X})\Vert q(\mathbf{X}))=\frac{1}{\alpha-1} \log \mathbb{E}_{\mathbf{X}\sim p(\mathbf{X})}\left[\frac{p(\mathbf{X})}{q(\mathbf{X})}\right]^{\alpha-1}=\frac{1}{\alpha-1} \log \mathbb{E}_{\mathbf{X}\sim q(\mathbf{X})}\left[\frac{p(\mathbf{X})}{q(\mathbf{X})}\right]^{\alpha}
+$$
+
 
 对于Rényi散度已经有很多研究，推荐阅读[Rényi散度与KL散度的关系](https://arxiv.org/pdf/1206.2459.pdf)。Rényi散度有如下几个性质：
 
