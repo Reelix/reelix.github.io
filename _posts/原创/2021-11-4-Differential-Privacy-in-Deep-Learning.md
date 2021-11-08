@@ -209,7 +209,6 @@ $$
 ## Opacus库：基于Pytorch框架的隐私保护库
 Opacus是一个高性能，高速的用于训练具有差分隐私的PyTorch模型的函数库。Opacus库提供了主要类函数`PrivacyEngine`，作用于**Pytorch**中提供的优化器`optimizer`上，主要代码如下所示：
 ```
-
 model = Net()
 optimizer = torch.optim.SGD(model.parameters(), lr=0.05)
 privacy_engine = PrivacyEngine(
