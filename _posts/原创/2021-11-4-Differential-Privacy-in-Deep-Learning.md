@@ -22,7 +22,7 @@ mathjax: true
 5. [Rényi Differential Privacy of the Sampled Gaussian Mechanism](https://arxiv.org/abs/1908.10530)
 6. [The Composition Theorem for Differential Privacy](http://proceedings.mlr.press/v37/kairouz15.html)
 7. [Introducing Opacus: A high-speed library for training PyTorch models with differential privacy](https://ai.facebook.com/blog/introducing-opacus-a-high-speed-library-for-training-pytorch-models-with-differential-privacy/)
-
+8. [A general approach to adding differential privacy to iterative training procedures](https://arxiv.org/abs/1812.06210)
 
 ## 差分隐私深度学习系统的基本框架
 
@@ -179,13 +179,13 @@ $$
 
 在上文中，我们讨论了整个训练系统的差分隐私损失计算，并介绍了Moments Accountant这一具备很多良好性质的武器。但是，$$K_{\mathcal{M}_t}(\alpha)$$的计算需要遍历整个数据集，这种计算成本是不可接受的。此外，采样率在隐私计算中起到了隐私增幅，减小隐私损失的作用，这也需要在Moments Accountant的计算中得到广泛考虑。对于高斯噪声，文献[2]提出了一种广泛使用的计算Moments Accountant的方法，如下所述：
 
-**(Proposition 4. Calculations of Moments Accountant with Gaussian Mechanism)** 考虑具有随机Subsample的高斯机制，其中高斯机制的噪声乘子(*noise multiplier*)为$$z$$，梯度范围为$$C$$，因此高斯机制的方差为$$\sigma=z*C$$。记采样率为$$q$$，令$$\mu_0$$为分布$$\mathcal{N}(0,\sigma^2)$$的概率密度函数，$$\mu_1$$为分布$$\mathcal{N}(1,\sigma^2)$$的概率密度函数，令$$\mu=(1-q)\mu_0+q\mu_1$$，那么结合文献[2,5]的结论，我们有
+**(Proposition 4. Calculations of Moments Accountant with Gaussian Mechanism)** 考虑具有随机Subsample的高斯机制，其中高斯机制的噪声乘子(*noise multiplier*)为方差$$\sigma$$与梯度范围$$C$$的比值$$z=\frac{\sigma}{C}$$。记采样率为$$q$$，令$$\mu_0$$为分布$$\mathcal{N}(0,z^2)$$的概率密度函数，$$\mu_1$$为分布$$\mathcal{N}(1,z^2)$$的概率密度函数，令$$\mu=(1-q)\mu_0+q\mu_1$$，那么结合文献[2,5]的结论，我们有
 
 $$
 K_{\mathcal{M}_t}(\alpha)=\log \mathbb{E}_{z\sim \mu_0}[\mu(z)/\mu_0(z)]^\alpha\tag{3}
 $$
 
-注意到此时$$K_{\mathcal{M}_t}(\alpha)$$对于给定的采样率$$q$$以及噪声方差$$\sigma$$是一个固定的数值，这也就是说，对于任何的神经网络模型与任何数据集，采用基于Subsample的高斯机制的隐私损失的上界都是一样的。对于整数$$\alpha$$，$$(3)$$式可以写成
+注意到此时$$K_{\mathcal{M}_t}(\alpha)$$对于给定的采样率$$q$$以及噪声乘子$$z$$是一个固定的数值，这也就是说，对于任何的神经网络模型与任何数据集，采用基于Subsample的高斯机制的隐私损失的上界都是一样的。对于整数$$\alpha$$，$$(3)$$式可以写成
 
 $$
 \mathbb{E}_{z\sim \mu_0}[\mu(z)/\mu_0(z)]^\alpha=\mathbb{E}_{z\sim \mu_0}[(1-q)+q\frac{\mu_1(z)}{\mu_0(z)}]^\alpha\\
@@ -195,13 +195,13 @@ $$
 此时，对于任意正整数$$k$$，$$\mathbb{E}_{z\sim \mu_0}[\frac{\mu_1(z)}{\mu_0(z)}]^k$$具有解析解为
 
 $$
-\mathbb{E}_{z\sim \mu_0}[\frac{\mu_1(z)}{\mu_0(z)}]^k=\exp(\frac{k^2-k}{2\sigma^2})
+\mathbb{E}_{z\sim \mu_0}[\frac{\mu_1(z)}{\mu_0(z)}]^k=\exp(\frac{k^2-k}{2z^2})
 $$
 
 将其代入则可得到$$(3)$$的数值解。此外，文献[2]还给了一个近似上界，即
 
 $$
-K_{\mathcal{M}_t}(\alpha)\leq q^2\alpha(\alpha+1)/[(1-q)\sigma^2]+\mathcal{O}(q^3/\sigma^3)
+K_{\mathcal{M}_t}(\alpha)\leq q^2\alpha(\alpha+1)/[(1-q)z^2]+\mathcal{O}(q^3/z^3)
 $$
 
 综上所述，对于一个使用高斯机制的深度学习训练系统，计算隐私损失大概可以分为三步（这也是Tensorflow的Moments Accountant官方库中的计算方法）：
@@ -230,7 +230,7 @@ privacy_engine = PrivacyEngine(
 )
 privacy_engine.attach(optimizer)
 ```
-其中，`PrivacyEngine`以`torch.Module`作为模型输入，设置`batch size`与`sample size`，其中`batch size`是记录梯度的最小训练数据数目，而`sample size`是模型更新的最小数据数目。alpha是RDP中所使用的$$\alpha$$，也是计算Moments Accountant所用的$$\alpha$$范围，如上文中所述，主要取$$\alpha\in [2,32]$$；noise_multiplier是高斯机制中的$$\frac{\sigma}{C}$$；max_grad_norm是梯度裁剪范围$$C$$。
+其中，`PrivacyEngine`以`torch.Module`作为模型输入，设置`batch size`与`sample size`，其中`batch size`是记录梯度的最小训练数据数目，而`sample size`是模型更新的最小数据数目。alpha是RDP中所使用的$$\alpha$$，也是计算Moments Accountant所用的$$\alpha$$范围，如上文中所述，主要取$$\alpha\in [2,32]$$；noise_multiplier是高斯机制中的$$z=\frac{\sigma}{C}$$；max_grad_norm是梯度裁剪范围$$C$$。
 
 此外，为了计算隐私开销，Opacus提供了`get_privacy_spent`函数，它在给定$$\delta$$后，利用Moments Accountant遍历$$\alpha$$，计算最佳的$$\epsilon$$，并给出此时$$\alpha$$的取值：
 ```
@@ -251,7 +251,11 @@ def _generate_noise(
         )
     return torch.zeros(grad.shape, device=engine.device)
 ```
-在每次梯度计算中，对计算后的梯度进行裁剪并增加高斯噪声，函数如下：
+### 对模型参数进行分组裁剪与加噪
+
+在每次梯度计算中，对计算后的梯度进行裁剪并增加高斯噪声。注意实际计算过程中采用分组计算的模式：在算法1中，要对模型所有参数的梯度进行*concat*，然后对*concat*后的梯度统一进行裁剪加噪。但是对于多层神经网络而言，由于不同层特征的尺度不一样，将不同层的参数梯度*concat*在一起然后裁剪会导致多尺度的特征混合在一起，极大降低模型的性能。一个思路是将模型进行分组，在每一个组内进行梯度裁剪与加噪，
+
+其中梯度裁剪采用算法1中的步骤。计算一个梯度缩放factor$$\min(1,\frac{C}{\Vert\mathbf{g}_t\Vert_2})$$，然后再将函数如下：
 ```
 def step(self, is_empty: bool = False):
     """
@@ -283,6 +287,8 @@ def step(self, is_empty: bool = False):
         if self.poisson and self.loss_reduction == "mean":
             p.grad *= batch_size / self.avg_batch_size
 ```
+### 训练过程中的Subsample与MiniBatch
+
 ## PySyft + Opacus：结合差分隐私与联邦学习
 TBD。
 ## 我们能做的开放性问题
