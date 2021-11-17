@@ -224,13 +224,14 @@ privacy_engine = PrivacyEngine(
    model,
    batch_size=32,
    sample_size=len(train_loader.dataset),
+   sample_rate = 0.01,
    alphas=range(2,32),
    noise_multiplier=1.3,
    max_grad_norm=1.0,
 )
 privacy_engine.attach(optimizer)
 ```
-其中，`PrivacyEngine`以`torch.Module`作为模型输入，设置`batch size`与`sample size`，其中`batch size`是记录梯度的最小训练数据数目，而`sample size`是模型更新的最小数据数目。alpha是RDP中所使用的$$\alpha$$，也是计算Moments Accountant所用的$$\alpha$$范围，如上文中所述，主要取$$\alpha\in [2,32]$$；noise_multiplier是高斯机制中的$$z=\frac{\sigma}{C}$$；max_grad_norm是梯度裁剪范围$$C$$。
+其中，`PrivacyEngine`以`torch.Module`作为模型输入，`alpha`是RDP中所使用的$$\alpha$$，也是计算Moments Accountant所用的$$\alpha$$范围，如上文中所述，主要取$$\alpha\in [2,32]$$；`noise_multiplier`是高斯机制中的$$z=\frac{\sigma}{C}$$；`max_grad_norm`是梯度裁剪范围$$C$$；`sample_size`确定了数据总量$$N$$；而`batch size`与`sample_rate`用于计算采样率$$q$$以及更新的最小数据量$$L$$。其中，模型每次采样一个`batch_size`大小的数据，在上面计算梯度，最后将多个`batch`汇总成一个`Lots`进行梯度加噪与参数更新，即`L = sample_size*sample_rate`，此时`q=sample_rate`。注意`sample rate`是一个可选参数，如果不给定`sample rate`，那么模型就会令`Lots=batch_size`，此时模型每次计算完一个Batch就进行梯度更新，采样率`q=batch_size/sample_size`。
 
 此外，为了计算隐私开销，Opacus提供了`get_privacy_spent`函数，它在给定$$\delta$$后，利用Moments Accountant遍历$$\alpha$$，计算最佳的$$\epsilon$$，并给出此时$$\alpha$$的取值：
 ```
@@ -250,6 +251,24 @@ def _generate_noise(
             generator=engine.random_number_generator,
         )
     return torch.zeros(grad.shape, device=engine.device)
+```
+### 训练过程中的Subsample与MiniBatch
+在**DP-SGD**的实现算法中，模型参数更新以`Lots`为单位，即在所有的训练集中按比率$$q$$选取一个`Lots`，然后对于`Lots`中的每个样本计算梯度，然后汇总梯度依次进行`gradient clip`、`noise adding`以及`SGD`。但是，在常见训练过程中，我们往往以`batch`为单位计算梯度并进行模型更新。虽然我们确实可以将`Lots`的大小设置为与`batch size`等同，此时`q`无限趋向于0（当然这其实也没有什么大问题，也是一个常见的设置），但是在某些场景下，`q`并不是越小越好，而我们往往会将`Lots`的大小设置为`batch size`的若干倍。为了在这种场景下进行更新，`Opacus`引进了`virtual_step`函数，它只会对当前`batch`的梯度进行`gradient clip`，并将裁剪后的梯度向量放入一个容器，在汇总k个`batch`后，对于整个`Lots`的数据再调用`step`函数进行更新，它将存储在容器中的梯度依据`k*batch_size`计算平均值并调用`SGD`。基本代码如下所示：
+```
+Example:
+Imagine you want to train a model with batch size of 2048, but you can only
+fit batch size of 128 in your GPU. Then, you can do the following:
+>>> for i, (X, y) in enumerate(dataloader):
+>>>     logits = model(X)
+>>>     loss = criterion(logits, y)
+>>>     loss.backward()
+>>>     if i % 16 == 15:
+>>>         # accumulate the gradients of a lot and perform SGD.
+>>>         optimizer.step()    
+>>>         optimizer.zero_grad()
+>>>     else:
+>>>         # store the gradients into a gradient accumulator
+>>>         optimizer.virtual_step()   # this will call privacy engine's virtual_step()
 ```
 ### 对模型参数进行分组裁剪与加噪
 
@@ -287,7 +306,7 @@ def step(self, is_empty: bool = False):
         if self.poisson and self.loss_reduction == "mean":
             p.grad *= batch_size / self.avg_batch_size
 ```
-### 训练过程中的Subsample与MiniBatch
+
 
 ## PySyft + Opacus：结合差分隐私与联邦学习
 TBD。
