@@ -272,17 +272,60 @@ fit batch size of 128 in your GPU. Then, you can do the following:
 ```
 ### 对模型参数进行分组裁剪与加噪
 
-在每次梯度计算中，对计算后的梯度进行裁剪并增加高斯噪声。注意实际计算过程中采用分组计算的模式：在算法1中，要对模型所有参数的梯度进行*concat*，然后对*concat*后的梯度统一进行裁剪加噪。但是对于多层神经网络而言，由于不同层特征的尺度不一样，将不同层的参数梯度*concat*在一起然后裁剪会导致多尺度的特征混合在一起，极大降低模型的性能。一个思路是将模型进行分组，在每一个组内进行梯度裁剪与加噪，
+差分隐私模块需要对计算后的参数梯度进行裁剪并增加高斯噪声。但是，深度模型的参数所提取的特征与层数有关，不同层对应不同尺度的特征，也对应不同尺度的梯度和方差（如深度卷积网络的浅层提取纹理特征，深层提取语义特征）。因此，对于参数进行分组，对每一个组的梯度单独采用一组$$(C_g,z_g)$$添加噪声，然后进行梯度下降法是一个直观且符合逻辑的想法。那么，如何进行分组加噪，以及分组加噪后的模型满足什么样的差分隐私界呢？文献[8]对这一问题进行了具体的研究，并提出了一个在各个差分隐私框架下广泛使用的加噪方法。
 
-其中梯度裁剪采用算法1中的步骤。计算一个梯度缩放factor$$\min(1,\frac{C}{\Vert\mathbf{g}_t\Vert_2})$$，然后再将函数如下：
+首先，我们将模型参数$$\mathbf{W}$$分为$$M$$组，则在训练过程中对应的参数梯度记为$$\mathbf{G}=(\mathbf{g}_1,\cdots,\mathbf{g}_M)$$。我们表示裁剪范围为$$C$$的裁剪函数为$$\pi_{C}(\mathbf{g})=\mathbf{g}\cdot \min(1,\frac{C}{\Vert\mathbf{g}_t\Vert_2})$$。对于一个`Lots`的L个训练数据，我们记第$$i,1\leq i\leq L$$个数据的训练梯度为$$\mathbf{G^i}=(\mathbf{g^i}_1,\cdots,\mathbf{g^i}_M)$$，考虑对所有梯度$$\mathbf{G}$$采用$$(C,z)$$作为参数的DP-SGD过程：
+
+$$
+\tilde{\mathbf{G}}=\frac{1}{L}\sum_{i=1}^{L}[\pi_{C}(\mathbf{G^i})+\mathcal{N}(0;z^2C^2I)]\\
+=[\frac{1}{L}\sum_{i=1}^{L}\pi_{C}(\mathbf{G^i})]+\mathcal{N}(0;\frac{z^2C^2}{L}I)\\
+=\frac{1}{L}[\sum_{i=1}^{L}\pi_{C}(\mathbf{G^i})+\mathcal{N}(0; L\cdot z^2C^2I)]\tag{4}
+$$
+
+我们说该过程满足$$(\epsilon,\delta)-$$DP，计算方法如**Proposition 4**所述。首先，从公式$$(4)$$中我们发现，差分机制不必对每一个梯度加噪，我们只需要对最后汇总的梯度进行加和，然后增加方差为$$\sigma=zC\sqrt{L}$$的正态噪声，最后对得到的梯度进行平均，就可以获得满足差分隐私要求的梯度$$\tilde{G}$$，从而大大减少计算量。
+
+此外，我们可以将$$(4)$$写成分组的形式，即对每一个$$\mathbf{g}_m$$，采用独立的$$(C_m,z_m)$$作为差分隐私的参数，如下所示：
+
+$$
+\tilde{\mathbf{g}}_m=\frac{1}{L}\sum_{i=1}^{L}[\pi_{C_m}(\mathbf{g^i}_m)+\mathcal{N}(0;z_m^2C_m^2I)]\\
+=[\frac{1}{L}\sum_{i=1}^{L}\pi_{C_m}(\mathbf{g^i}_m)]+\mathcal{N}(0;\frac{z_m^2C_m^2}{L}I)\\
+=\frac{1}{L}[\sum_{i=1}^{L}\pi_{C_m}(\mathbf{g^i}_m)+\mathcal{N}(0; L\cdot z_m^2C_m^2I)]\tag{5}
+$$
+
+此时要求$$\sum_{m=1}^{M}C_m^2=C^2$$，因此$$\Vert\mathbf{G}\Vert_2\leq C$$，满足差分隐私的梯度裁剪要求。记$$\sigma_m=z_mC_m\sqrt{L}$$，因为此时对不同的层添加了不同的噪声，如何计算这种场景下的隐私界呢？我们对$$(5)$$进行如下形式的变体：
+
+$$
+\tilde{\mathbf{g}}_m=\frac{\sigma_m}{L}[\sum_{i=1}^{L}\pi_{C_m}(\mathbf{g^i}_m)/\sigma_m+\mathcal{N}(0; I)]
+$$
+
+利用梯度函数的性质
+
+$$
+\pi_{C_m}(\mathbf{g}_m)/\sigma_m=\pi_{C_m/\sigma_m}(\mathbf{g}_m/\sigma_m)
+$$
+
+我们可以先将输入的向量进行放缩为$$\mathbf{G}^*=(\mathbf{g}_1/\sigma_1,\cdots,\mathbf{g}_M/\sigma_m)$$，此时的差分隐私机制相当于对放缩后的梯度向量$$\mathbf{G}^*$$添加标准高斯噪声，即
+
+$$
+\tilde{\mathbf{g}}_m=\sigma_m\cdot \frac{1}{L}[\sum_{i=1}^{L}\pi_{C_m/\sigma_m}(\mathbf{g^i}_m/\sigma_m)+\mathcal{N}(0; I)]\tag{6}
+$$
+
+由于后处理不改变差分隐私界，因此$$(6)$$式的差分隐私界与$$\mathbf{G}^*$$的差分隐私界相同，它们分组施加截距参数为$$C_m^*=C_m/\sigma_m,C^*=\sqrt{\sum_{m=1}^{M}(C_m^{*})^2}$$的差分隐私，而总的噪声乘子$$z^*$$的计算公式为
+
+$$
+z^*=\frac{1}{C^*\sqrt{L}}=\frac{1}{\sqrt{\frac{1}{z_1^2}+\cdots+\frac{1}{z_M^2}}}
+$$
+
+将噪声乘子$$z^*$$代入**Proposition. 4**，就可以得到这种混合差分隐私的隐私损失了。此外，我们可以将$$z^*$$看成是各层隐私噪声乘子$$z_m$$的一个二次调和平均数。
+
+在**Opacus**中，通过对原有的`nn.optimizer.step`函数进行加噪实现差分隐私，对应的代码实现如下：
 ```
 def step(self, is_empty: bool = False):
     """
     Takes a step for the privacy engine.
     Args:
         is_empty: Whether the step is taken on an empty batch
-            In this case, we do not call clip_and_accumulate since there are no
-            per sample gradients.
+            In this case, we do not call clip_and_accumulate since there are no per sample gradients.
     Notes:
         You should not call this method directly. Rather, by attaching your
         ``PrivacyEngine`` to the optimizer, the ``PrivacyEngine`` would have
@@ -292,21 +335,24 @@ def step(self, is_empty: bool = False):
     params = (p for p in self.module.parameters() if p.requires_grad)
     for p, clip_value in zip(params, clip_values):
         if self.rank == 0:
-            # Noise only gets added on first worker
-            # This is easy to reason about for loss_reduction=sum
-            # For loss_reduction=mean, noise will get further divided by
-            # world_size as gradients are averaged.
+            # 噪声只添加一次，并由第一个线程添加
             noise = self._generate_noise(clip_value, p.grad)
+            # 如果用均值损失，那么噪声也要对应除以均值
             if self.loss_reduction == "mean":
                 noise /= batch_size
             p.grad += noise
-
-        # For poisson, we are not supposed to know the batch size
-        # We have to divide by avg_batch_size instead of batch_size
-        if self.poisson and self.loss_reduction == "mean":
-            p.grad *= batch_size / self.avg_batch_size
 ```
+此外，在Tensorflow中，通过采用`NestedQuery`类，可以实现分组的加噪与隐私计算。
+#### 超参数选择与采样策略
+**(超参数选择)** 对于一个差分隐私训练过程，如何选取合适的$$(C,z)$$超参数呢？我们知道，隐私损失仅与$$z$$的设置有关，因此一般我们选取$$z=1$$。对于分组的情况，我们也选取$$(z_1,\cdots,z_m)$$使得$$z^*=1$$。对于梯度裁剪参数$$C$$以及$$C^*$$的选择需要费一番功夫。太大的$$C$$会导致更大的梯度噪声方差，降低模型表现，而太小的$$C$$会影响模型更新的幅度，导致收敛变慢。因此，一般采用三种取值策略：
 
+1. 使用一个先验的全局尺度$$C$$，然后分组选择$$C_m$$，比如采用组平均法令$$C_m=C/\sqrt{M}$$，或者采用维数平均法，令$$C_m=C/\sqrt{d_m/D}$$，其中$$d_m=\text{dim}(\mathbf{g}_m)$$，而$$D=\frac{1}{\frac{1}{d_1}+\cdots+\frac{1}{d_M}}$$为每一个向量维数的调和平均数。
+
+2. 统计数据集中对每一个梯度向量的大小，从小到大选取$$1-k%$$分位数作为$$C_m$$，此时保证只裁剪大概$$k%$$的数据。此时该分位数的统计也应当加入高斯噪声保证差分隐私，并汇报该参数带来的隐私损失。
+
+3. 采用超参数选择法，微调$$C_m$$使得相同隐私损失下的模型效果最好。如果该方法用到了隐私数据，也应当计算隐私损失。
+
+**(采样策略)** 在初始的DP-SGD算法中，要求``Lots``的选取是i.i.d的，在这种分布下，训练过程可以通过`Moments Accountant`计算隐私损失。这种采样策略可以通过无放回采样从训练集中采样一个固定大小的子集完成。但是，在实际使用的过程中，``Lots``往往由若干个``Batch``组成，而各个``Batch``大小相同，彼此没有交集，本质上是一种随机划分。在这种场景下，我们往往也沿用`Moments Accountant`的隐私计算，但是`Moments Accountant`并不是该采样策略的确界，而关于确界的研究仍然未知。
 
 ## PySyft + Opacus：结合差分隐私与联邦学习
 TBD。
