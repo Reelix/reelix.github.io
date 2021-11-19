@@ -198,7 +198,13 @@ $$
 \mathbb{E}_{z\sim \mu_0}[\frac{\mu_1(z)}{\mu_0(z)}]^k=\exp(\frac{k^2-k}{2z^2})
 $$
 
-将其代入则可得到$$(3)$$的数值解。此外，文献[2]还给了一个近似上界，即
+将其代入则可得到$$(3)$$的数值解。对于非整数的$$\alpha$$，文献[4]提出了一个基于插值的估计方法，利用$$\alpha$$的向下取整$$\lfloor\alpha \rfloor$$与向上取整$$\lceil\alpha \rceil$$构造估计值，即
+
+$$
+K_{\mathcal{M}_t}(\alpha)\leq (1-\alpha+\lfloor\alpha \rfloor)K_{\mathcal{M}_t}(\lfloor\alpha \rfloor)+(\alpha-\lfloor\alpha \rfloor)K_{\mathcal{M}_t}(\lceil\alpha \rceil)
+$$
+
+此外，文献[2]还给了一个近似上界，即
 
 $$
 K_{\mathcal{M}_t}(\alpha)\leq q^2\alpha(\alpha+1)/[(1-q)z^2]+\mathcal{O}(q^3/z^3)
@@ -253,7 +259,8 @@ def _generate_noise(
     return torch.zeros(grad.shape, device=engine.device)
 ```
 ### 训练过程中的Subsample与MiniBatch
-在**DP-SGD**的实现算法中，模型参数更新以`Lots`为单位，即在所有的训练集中按比率$$q$$选取一个`Lots`，然后对于`Lots`中的每个样本计算梯度，然后汇总梯度依次进行`gradient clip`、`noise adding`以及`SGD`。但是，在常见训练过程中，我们往往以`batch`为单位计算梯度并进行模型更新。虽然我们确实可以将`Lots`的大小设置为与`batch size`等同，此时`q`无限趋向于0（当然这其实也没有什么大问题，也是一个常见的设置），但是在某些场景下，`q`并不是越小越好，而我们往往会将`Lots`的大小设置为`batch size`的若干倍。为了在这种场景下进行更新，`Opacus`引进了`virtual_step`函数，它只会对当前`batch`的梯度进行`gradient clip`，并将裁剪后的梯度向量放入一个容器，在汇总k个`batch`后，对于整个`Lots`的数据再调用`step`函数进行更新，它将存储在容器中的梯度依据`k*batch_size`计算平均值并调用`SGD`。基本代码如下所示：
+
+在**DP-SGD**的实现算法中，模型参数更新以`Lots`为单位，即在所有的训练集中按比率$$q$$选取一个`Lots`，然后对于`Lots`中的每个样本计算梯度，然后汇总梯度依次进行`gradient clip`、`noise adding`以及`SGD`。但是，在常见训练过程中，我们往往以`batch`为单位计算梯度并进行模型更新。虽然我们确实可以将`Lots`的大小设置为与`batch size`等同，此时`q`无限趋向于0（当然这其实也没有什么大问题，也是一个常见的设置），但是在某些场景下，`q`并不是越小越好。比如，提前依据下文中公式$$(4)$$的情景，当$$q$$太小时，对每一个`Lots`所增加的噪声方差都会很大，因此我们往往会将`Lots`的大小设置为`batch size`的若干倍。为了在这种场景下进行更新，`Opacus`引进了`virtual_step`函数，它只会对当前`batch`的梯度进行`gradient clip`，并将裁剪后的梯度向量放入一个容器，在汇总k个`batch`后，对于整个`Lots`的数据再调用`step`函数进行更新，它将存储在容器中的梯度依据`k*batch_size`计算平均值并调用`SGD`。基本代码如下所示：
 ```
 Example:
 Imagine you want to train a model with batch size of 2048, but you can only
