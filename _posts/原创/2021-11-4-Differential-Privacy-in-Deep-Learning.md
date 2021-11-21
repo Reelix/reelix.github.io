@@ -198,7 +198,7 @@ $$
 \mathbb{E}_{z\sim \mu_0}[\frac{\mu_1(z)}{\mu_0(z)}]^k=\exp(\frac{k^2-k}{2z^2})
 $$
 
-将其代入则可得到$$(3)$$的数值解。对于非整数的$$\alpha$$，文献[4]提出了一个基于插值的估计方法，利用$$\alpha$$的向下取整$$\lfloor\alpha \rfloor$$与向上取整$$\lceil\alpha \rceil$$构造估计值，即
+将其代入则可得到$$(3)$$的数值解。对于非整数的$$\alpha$$，我们可以直接进行数值积分，或者采用基于插值的估计方法。文献[4]提出了一个利用$$\alpha$$的向下取整$$\lfloor\alpha \rfloor$$与向上取整$$\lceil\alpha \rceil$$构造估计值，即
 
 $$
 K_{\mathcal{M}_t}(\alpha)\leq (1-\alpha+\lfloor\alpha \rfloor)K_{\mathcal{M}_t}(\lfloor\alpha \rfloor)+(\alpha-\lfloor\alpha \rfloor)K_{\mathcal{M}_t}(\lceil\alpha \rceil)
@@ -362,7 +362,51 @@ def step(self, is_empty: bool = False):
 **(采样策略)** 在初始的DP-SGD算法中，要求``Lots``的选取是i.i.d的，在这种分布下，训练过程可以通过`Moments Accountant`计算隐私损失。这种采样策略可以通过无放回采样从训练集中采样一个固定大小的子集完成。但是，在实际使用的过程中，``Lots``往往由若干个``Batch``组成，而各个``Batch``大小相同，彼此没有交集，本质上是一种随机划分。在这种场景下，我们往往也沿用`Moments Accountant`的隐私计算，但是`Moments Accountant`并不是该采样策略的确界，而关于确界的研究仍然未知。
 
 ## PySyft + Opacus：结合差分隐私与联邦学习
-TBD。
+``PySyft``是国际隐私保护开源社区[OpenMined](https://www.openmined.org/)所构建的基于联邦学习的多方加密计算方法。联邦学习是一种隐私保护的分布式机器学习流程，它允许多个本地客户端在一个中央服务器的调度下，在多个分布式存储的数据库上训练全局模型，同时保持数据的本地化。联邦学习一般由两个步骤组成，本地模型的训练与中央服务器的聚合。本地模型经过若干个`Epoch`的训练，上传模型的更新参数，然后中央服务器对来自各个客户端的参数更新采用多方安全计算（Secure Multi-Party Computation, MPC）进行同态加密（Homomorphic Encryption），在加密后的数据上进行联邦平均（Federated Average），得到全局模型，再将参数发还给本地。联邦学习可以确保用户的数据不出域，但是不能保证模型本身不泄露用户信息。因此，在分布式训练中采用联邦学习，然后在本地训练中采用差分隐私，可以令训练系统达到更高级别的隐私保护。
+
+``PySyft``就是利用这一思想，在本地计算时，对模型的训练过程采用DP-SGD算法加入差分隐私机制，然后在联邦学习过程采用多方安全计算，通过联邦平均得到全局模型。这种思想非常简单，几乎可以自己实现（注：在科研论文中，我们往往直接进行联邦平均而不考虑安全性，对于加法与乘法同态的MPC已经是成熟的技术，因此仅在工程中添加）。``PySyft``给出了一个简单的代码实现：
+
+```
+# 本地模型添加差分隐私
+models, dataloaders, optimizers, privacy_engines = [], [], [], []
+for worker in workers:
+    model = make_model()
+    optimizer = th.optim.SGD(model.parameters(), lr=0.1)
+    model.send(worker)
+    dataset = train_datasets[worker.id]
+    dataloader = th.utils.data.DataLoader(dataset, batch_size=128, shuffle=True, drop_last=True)
+    privacy_engine = PrivacyEngine(model,
+                                   batch_size=128, 
+                                   sample_size=len(dataset), 
+                                   alphas=range(2,32), 
+                                   noise_multiplier=1.2,
+                                   max_grad_norm=1.0)
+    privacy_engine.attach(optimizer)
+    
+    models.append(model)
+    dataloaders.append(dataloader)
+    optimizers.append(optimizer)
+    privacy_engines.append(privacy_engine)
+
+# 联邦学习
+def send_new_models(local_model, models):
+    with th.no_grad():
+        for remote_model in models:
+            for new_param, remote_param in zip(local_model.parameters(), remote_model.parameters()):
+                worker = remote_param.location
+                remote_value = new_param.send(worker)
+                remote_param.set_(remote_value)
+
+            
+def federated_aggregation(local_model, models):
+    with th.no_grad():
+        for local_param, *remote_params in zip(*([local_model.parameters()] + [model.parameters() for model in models])):
+            param_stack = th.zeros(*remote_params[0].shape)
+            for remote_param in remote_params:
+                param_stack += remote_param.copy().get()
+            param_stack /= len(remote_params)
+            local_param.set_(param_stack)
+```
 ## 我们能做的开放性问题
 
 在本节中，我们主要介绍了以高斯机制作为噪声来源，以Moments Accountant作为隐私损失估计的差分隐私深度学习训练系统。但是，这套方法所给出的隐私损失与具体的数据集或是模型都无关，可以看作是任意数据集与任意模型上的一个隐私损失上界。而在实际的应用场景中，考虑特定的数据与特定的模型，我们往往可以设计隐私损失更小的训练方法。文献[4]为基于RDP的差分隐私损失设计了一个上界和一个下界，并巧妙设计了两个数据集场景：
