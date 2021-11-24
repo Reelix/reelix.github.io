@@ -3,7 +3,7 @@ layout: post
 title: 企业级联邦学习——新算法、新范式与未来展望 [ICML2021 Talk]
 date: 2021-11-10 10:49:00
 categories: 深度学习
-tags: Deep Learning, Continual Learning
+tags: Deep Learning, Federated Learning, Privacy-preserving
 mathjax: true
 ---
 
