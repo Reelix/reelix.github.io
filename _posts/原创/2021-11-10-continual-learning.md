@@ -1,6 +1,6 @@
 ---
 layout: post
-title: [ICML2021 Talk解读]——深度神经网络中的持续学习
+title: ICML2021 Talk解读——深度神经网络中的持续学习
 date: 2021-11-10 10:49:00
 categories: 深度学习
 tags: Deep Learning, Continual Learning
