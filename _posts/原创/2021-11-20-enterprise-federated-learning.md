@@ -6,6 +6,10 @@ categories: 深度学习
 tags: Deep Learning, Continual Learning
 mathjax: true
 ---
+
+* content
+{:toc}
+
 联邦学习（Federated Learning）是一种**满足隐私保护的分布式机器学习训练方案**，它允许多个客户端（例如多个移动设备，多个数据供应商）能够在某个中央服务器的调度下协作训练模型，并从模型的联合训练中受益，同时保持训练数据的去中心化存储，尊重各方数据隐私。**IBM Research** 在联邦学习方面做出了广泛的努力，包括新颖的方法、模型和范式，并提供了一个可用于非商业的企业级联邦学习平台：IBM联邦学习社区版。此外，在2021年的ICML大会上，**IBM Research**发起了一个名为 ***Enterprise-Strength Federated Learning: New Algorithms, New Paradigms, and a Participant-Interactive Demonstration Session*** 的tutorial，该tutorial通过7场简短演讲概述联邦学习的前沿成果，涵盖以下五个话题：
 
 
