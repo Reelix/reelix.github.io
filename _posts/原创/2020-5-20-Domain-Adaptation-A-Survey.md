@@ -278,18 +278,24 @@ $$
 其中，假设空间$\mathcal{H}$一旦给定，$\lambda$就固定下来。那么，有没有办法让域之间的距离变得尽可能小呢？一个很自然的想法是通过特征空间过渡，如果我们设计两个映射，第一个映射将源域与目标域都映射到一个特征空间，在这个特征空间上，源域与目标域无法区分。然后我们再在特征空间上构造分类器，这样就能有效解决域适应问题。
 
 与上文一致，我们同样对这个"特征空间"给出严格的数学定义。特征映射$r$是一个从输入空间$\mathcal{X}$到特征空间$\mathcal{Z}$的函数，给定一个模型，所有特征映射所组成的集合我们记作$\mathcal{R}$。此时，对一个给定域$<\mathcal{D},f>$假设$h$是一个从特征空间$\mathcal{Z}$到标签$\{0,1\}$的映射，我们定义特征空间的标签函数$\tilde{f}$为
+
 $$
 \tilde{f}(\mathbf{z})=\mathbf{E}_{\mathbf{x}\sim\mathcal{D},r(\mathbf{x})=\mathbf{z}}[f(\mathbf{x})]
 $$
+
 简单而言，对于一个给定特征$\mathbf{z}$，它的标签函数可以如下计算。我们找出分布为$\mathcal{D}$的输入空间上，所有映射到特征$\mathbf{z}$的点$\mathbf{x}$，再计算这些点的标签函数$f(\mathbf{x})$的期望即可。同样，对一个给定域$<\mathcal{D},f>$，我们定义特征空间上的分布函数为
+
 $$
 \Pr_{\tilde{\mathcal{D}}}[B]=\Pr_{\mathcal{D}}[r^{-1}(B)],\forall B \subset \mathcal{Z}
 $$
+
 通过以上两个定义，我们就可以得到域适应的基本表示形式
+
 $$
 \epsilon_{S}(h)=\mathbf{E}_{\mathbf{z}\sim \tilde{D}_{S}}\vert \tilde{f}(\mathbf{z})-h(\mathbf{z}) \vert;\\
 d_{\mathcal{H}}(\tilde{D}_{S},\tilde{D}_{T})=2\sup_{h\in \mathcal{H}}\vert \Pr_{\tilde{D}_S}[I(h)] -  \Pr_{\tilde{D}_T}[I(h)]\vert 
 $$
+
 有了数学表达就给了我们用于水文章的很好理由，那么，具体实践过程中怎么用呢？一个最著名的方法是[对抗域迁移模型](https://arxiv.org/abs/1505.07818)，它的模型可以用一张图来解释
 
 
