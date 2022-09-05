@@ -79,7 +79,7 @@ $$
 ### Subsample：用采样率对隐私进行Amplify，降低差分隐私损失
 在深度学习的训练过程中，由于数据量比较大，我们往往采用基于随机采样的梯度下降法，即每次选取一个Batch，在该Batch上计算平均梯度，采用它们的平均梯度进行梯度下降。那么，这种基于采样的方法对隐私损失会有什么样的影响呢？我们先不加证明地给出一个结论，即采样会增强隐私保护的力度，降低隐私损失。首先对Subsample给出如下的定义：
 
-**(Definition 4. Subsample)** 给定一个含有$$N$$个样本的数据集$$X=\{x_1,\cdots,x_N\}$$，**Subsample**操作对于$$X$$的所有大小为$$L$$的子集以等概率进行一次无放回采样，记$$q = \frac{L}{N}$$为采样率。
+**(Definition 4. Subsample)** 给定一个含有$$N$$个样本的数据集$$X=\{x_1,\cdots,x_N\}$$，**Subsample**操作对于$$X$$的所有大小为$$L$$的子集以等概率进行一次采样，记$$q = \frac{L}{N}$$为采样率。
 
 考虑先对数据集$$X$$进行Subsample，然后在子集上用具有差分隐私性质的训练机制$$\mathcal{M}$$进行训练，文献[4]指出了如下结论：如果训练机制$$\mathcal{M}$$在训练集上满足$$(\epsilon,\delta)-$$DP，那么$$\mathcal{M'}=\mathcal{M}\circ\text{Subsample}$$对于整个数据集$$X$$满足$$(\epsilon',\delta')-$$DP，其中$$\epsilon'=\log(1+q(e^{\epsilon}-1)),\delta'=q\delta$$。
 
@@ -287,22 +287,18 @@ fit batch size of 128 in your GPU. Then, you can do the following:
 首先，我们将模型参数$$\mathbf{W}$$分为$$M$$组，则在训练过程中对应的参数梯度记为$$\mathbf{G}=(\mathbf{g}_1,\cdots,\mathbf{g}_M)$$。我们表示裁剪范围为$$C$$的裁剪函数为$$\pi_{C}(\mathbf{g})=\mathbf{g}\cdot \min(1,\frac{C}{\Vert\mathbf{g}_t\Vert_2})$$。对于一个`Lots`的L个训练数据，我们记第$$i,1\leq i\leq L$$个数据的训练梯度为$$\mathbf{G^i}=(\mathbf{g^i}_1,\cdots,\mathbf{g^i}_M)$$，考虑对所有梯度$$\mathbf{G}$$采用$$(C,z)$$作为参数的DP-SGD过程：
 
 $$
-\tilde{\mathbf{G}}=\frac{1}{L}\sum_{i=1}^{L}[\pi_{C}(\mathbf{G^i})+\mathcal{N}(0;z^2C^2I)]\\
-=[\frac{1}{L}\sum_{i=1}^{L}\pi_{C}(\mathbf{G^i})]+\mathcal{N}(0;\frac{z^2C^2}{L}I)\\
-=\frac{1}{L}[\sum_{i=1}^{L}\pi_{C}(\mathbf{G^i})+\mathcal{N}(0; L\cdot z^2C^2I)]\tag{4}
+\tilde{\mathbf{G}}=\frac{1}{L}[\sum_{i=1}^{L}\pi_{C}(\mathbf{G^i})+\mathcal{N}(0;z^2C^2I)]\\
+=[\frac{1}{L}\sum_{i=1}^{L}\pi_{C}(\mathbf{G^i})]+\mathcal{N}(0;\frac{z^2C^2}{L^2}I)\tag{4}
 $$
 
-我们说该过程满足$$(\epsilon,\delta)-$$DP，计算方法如**Proposition 4**所述。首先，从公式$$(4)$$中我们发现，差分机制不必对每一个梯度加噪，我们只需要对最后汇总的梯度进行加和，然后增加方差为$$\sigma=zC\sqrt{L}$$的正态噪声，最后对得到的梯度进行平均，就可以获得满足差分隐私要求的梯度$$\tilde{G}$$，从而大大减少计算量。
-
-此外，我们可以将$$(4)$$写成分组的形式，即对每一个$$\mathbf{g}_m$$，采用独立的$$(C_m,z_m)$$作为差分隐私的参数，如下所示：
+我们说该过程满足$$(\epsilon,\delta)-$$DP，计算方法如**Proposition 4**所述。首先，从公式$$(4)$$中我们发现，差分机制对最后汇总的梯度进行加和，然后增加方差为$$\sigma=zC$$的正态噪声，最后对得到的梯度进行平均，就可以获得满足差分隐私要求的梯度$$\tilde{G}$$。我们可以将$$(4)$$写成分组的形式，即对每一个$$\mathbf{g}_m$$，采用独立的$$(C_m,z_m)$$作为差分隐私的参数，如下所示：
 
 $$
-\tilde{\mathbf{g}}_m=\frac{1}{L}\sum_{i=1}^{L}[\pi_{C_m}(\mathbf{g^i}_m)+\mathcal{N}(0;z_m^2C_m^2I)]\\
-=[\frac{1}{L}\sum_{i=1}^{L}\pi_{C_m}(\mathbf{g^i}_m)]+\mathcal{N}(0;\frac{z_m^2C_m^2}{L}I)\\
-=\frac{1}{L}[\sum_{i=1}^{L}\pi_{C_m}(\mathbf{g^i}_m)+\mathcal{N}(0; L\cdot z_m^2C_m^2I)]\tag{5}
+\tilde{\mathbf{g}}_m=\frac{1}{L}[\sum_{i=1}^{L}\pi_{C_m}(\mathbf{g^i}_m)+\mathcal{N}(0;z_m^2C_m^2I)]\\
+=[\frac{1}{L}\sum_{i=1}^{L}\pi_{C_m}(\mathbf{g^i}_m)]+\mathcal{N}(0;\frac{z_m^2C_m^2}{L^2}I)\tag{5}
 $$
 
-此时要求$$\sum_{m=1}^{M}C_m^2=C^2$$，因此$$\Vert\mathbf{G}\Vert_2\leq C$$，满足差分隐私的梯度裁剪要求。记$$\sigma_m=z_mC_m\sqrt{L}$$，因为此时对不同的层添加了不同的噪声，如何计算这种场景下的隐私界呢？我们对$$(5)$$进行如下形式的变体：
+此时要求$$\sum_{m=1}^{M}C_m^2=C^2$$，因此$$\Vert\mathbf{G}\Vert_2\leq C$$，满足差分隐私的梯度裁剪要求。记$$\sigma_m=z_mC_m$$，因为此时对不同的层添加了不同的噪声，如何计算这种场景下的隐私界呢？我们对$$(5)$$进行如下形式的变体：
 
 $$
 \tilde{\mathbf{g}}_m=\frac{\sigma_m}{L}[\sum_{i=1}^{L}\pi_{C_m}(\mathbf{g^i}_m)/\sigma_m+\mathcal{N}(0; I)]
