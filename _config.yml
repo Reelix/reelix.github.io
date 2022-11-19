@@ -1,43 +1,27 @@
-# Welcome to Jekyll!
-#
-# This config file is meant for settings that affect your whole blog, values
-# which you are expected to set up once and rarely need to edit after that.
-# For technical reasons, this file is *NOT* reloaded automatically when you use
-# 'jekyll serve'. If you change this file, please restart the server process.
-
 # Site settings
-title: FengHZ's Blog
-brief-intro: Summer is for falling in love.
+title: Reelix's Blog
+brief-intro: Reelix's new github blog.
 baseurl: "" # the subpath of your site, e.g. /blog
-url: "https://FengHZ.github.io" # the base hostname & protocol for your site
+url: "https://reelix.github.io" # the base hostname & protocol for your site
 
 permalink: /:title/
 
 # other links
 twitter_username: 
 facebook_username: 
-github_username: FengHZ
-email: fenghaozhe1996@gmail.com
-weibo_username: 
-zhihu_username: 小透明
-linkedIn_username: 
-dribbble_username:
+github_username: Reelix
+email: reelix@gmail.com
 
-description_footer: Love is a touch but not yet a touch.
+description_footer: Footer Description Here
 
 # comments
 # two ways to comment, only choose one, and use your own short name
-# 两种评论插件，选一个就好了，使用自己的 short_name
 duoshuo_shortname: 
 disqus_shortname: 
 gitment_id: 0d51978e1cee4500c33a
 gitment_secret: 6ae07ccb4bcc78c7f8ed06242a7da2fc2d2254e8
 
-# statistic analysis 统计代码
-# 百度统计 id，将统计代码替换为自己的百度统计id，即
-# hm.src = "//hm.baidu.com/hm.js?xxxxxxxxxxxx";
-# xxxxx字符串
-baidu_tongji_id: aa69443a53026e0d12bcaef17f285a4b
+# statistic analysis
 google_analytics_id: UA-117579925-1 # google 分析追踪id
 
 # Build settings
