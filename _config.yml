@@ -3,7 +3,6 @@ title: Reelix's Blog
 brief-intro: Reelix's new github blog.
 baseurl: "" # the subpath of your site, e.g. /blog
 url: "https://reelix.github.io" # the base hostname & protocol for your site
-remote_theme: pages-themes/midnight@v0.2.0
 
 permalink: /:title/
 
