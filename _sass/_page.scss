@@ -18,7 +18,7 @@
         padding: 20px 30px;
         line-height: 1.6;
         font-size: 16px;
-        background-color: #f8f8fd;
+        background-color: #141414;
         box-shadow: 0 1px 2px rgba(0,0,0,0.4),0 0 30px rgba(10,10,0,0.1) inset;
         >h1 {
             margin-bottom: -10px;
@@ -59,9 +59,6 @@
                         background-color: #9e9d9d;
                         font-size: 90%;
                         transition: 0.3s ease;
-                        &:hover {
-                            background-color: #b6b6b9;
-                        }
                     }
                 }
                 .pageTag {
@@ -72,13 +69,9 @@
 
                         // border: 1px solid #aaa;
                         padding: 0 5px;
-                        background-color: #c6cbe9;
                         border-radius: 4px;
                         font-size: 90%;
                         transition: 0.3s ease;
-                        &:hover {
-                            background-color: #c0ddc7;
-                        }
                     }
                 }
             }
@@ -102,7 +95,7 @@
         }
         .side {
             box-sizing: border-box;
-            background-color: #f8f8fd;
+            background-color: #141414;
             box-shadow: 0 1px 3px 1px rgba(0, 0, 0, 0.3), 0 0 30px rgba(10, 10, 0, 0.1) inset;
             padding-bottom: 1px;
             -ms-word-break: break-all;
