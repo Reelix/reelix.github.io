@@ -22,7 +22,7 @@ gitment_id: 0d51978e1cee4500c33a
 gitment_secret: 6ae07ccb4bcc78c7f8ed06242a7da2fc2d2254e8
 
 # statistic analysis
-google_analytics_id: UA-117579925-1 # google 分析追踪id
+google_analytics_id: 
 
 # Build settings
 markdown: kramdown
